@@ -19,7 +19,7 @@
 					<div class="text-xs text-gray-500">
 						Offer Amount
 					</div>
-					<div class="mt-1 text-lg font-bold text-brand-700">
+					<div class="mt-1 text-lg font-bold text-primary-700">
 						{{ offer.amount }}
 					</div>
 				</div>

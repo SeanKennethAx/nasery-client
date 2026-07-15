@@ -48,7 +48,7 @@
 							</div>
 						</div>
 						<button type="button"
-							class="flex shrink-0 items-center gap-1 text-sm font-semibold text-gray-700 hover:text-brand-700">
+							class="flex shrink-0 items-center gap-1 text-sm font-semibold text-gray-700 hover:text-primary-700">
 							{{ item.action }}
 							<IconBase name="arrow-right" class="h-4 w-4" />
 						</button>
@@ -98,7 +98,7 @@
 				Common tasks to help you get started</p>
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 				<button v-for="action in quickActions" :key="action.label" type="button"
-					class="rounded-xl border border-gray-200 p-5 text-left hover:border-brand-300 hover:bg-brand-50/40">
+					class="rounded-xl border border-gray-200 p-5 text-left hover:border-primary-300 hover:bg-primary-50/40">
 					<IconBase :name="action.icon" class="mb-3 h-5 w-5 text-gray-700" />
 					<div class="text-sm font-semibold text-gray-900">
 						{{ action.label }}

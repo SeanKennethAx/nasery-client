@@ -1,7 +1,7 @@
 <template>
 	<div>
-		<div class="mb-6 flex items-start gap-3 rounded-xl bg-brand-50 p-4 text-sm text-gray-700">
-			<IconBase name="bell" class="mt-0.5 h-5 w-5 shrink-0 text-brand-700" />
+		<div class="mb-6 flex items-start gap-3 rounded-xl bg-primary-50 p-4 text-sm text-gray-700">
+			<IconBase name="bell" class="mt-0.5 h-5 w-5 shrink-0 text-primary-700" />
 			<p>You only see inquiries that match your <strong>service tags</strong> and <strong>operation area</strong>.
 				Submit detailed offers to win events.</p>
 		</div>
@@ -34,7 +34,7 @@
 				<p class="mt-3 text-sm text-gray-600">
 					{{ inquiry.description }}
 				</p>
-				<p class="mt-1 text-sm font-medium text-brand-700">
+				<p class="mt-1 text-sm font-medium text-primary-700">
 					Matches: {{ inquiry.matches }}
 				</p>
 
@@ -90,7 +90,7 @@
 
 				<div class="mt-5 flex gap-3">
 					<button type="button"
-						class="flex items-center gap-2 rounded-xl bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-900"
+						class="flex items-center gap-2 rounded-xl bg-primary-700 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-900"
 						@click="openOfferForm(inquiry)">
 						<IconBase name="send" class="h-4 w-4" />
 						Submit Offer
@@ -114,7 +114,7 @@
 				<div class="flex shrink-0 items-start justify-between border-b border-gray-200 px-6 py-5">
 					<div class="flex items-start gap-3">
 						<div
-							class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-700 text-white">
+							class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-700 text-white">
 							<IconBase name="file-text" class="h-5 w-5" />
 						</div>
 						<div>
@@ -140,21 +140,21 @@
 						Event / Inquiry Title *
 					</label>
 					<input v-model="offerForm.title" type="text"
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+						class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 
 					<div class="mt-4 grid grid-cols-2 gap-3">
 						<div>
 							<label class="mb-1.5 block text-sm font-semibold text-gray-700">
 								Event Type *</label>
 							<select v-model="offerForm.eventType"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15">
+								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15">
 								<option v-for="type in eventTypes" :key="type" :value="type">{{ type }}</option>
 							</select>
 						</div>
 						<div>
 							<label class="mb-1.5 block text-sm font-semibold text-gray-700">Event Date *</label>
 							<input v-model="offerForm.eventDate" type="date"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 						</div>
 					</div>
 
@@ -167,7 +167,7 @@
 								<IconBase name="map-pin"
 									class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
 								<input v-model="offerForm.location" type="text" placeholder="e.g. Davao City"
-									class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+									class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 							</div>
 						</div>
 						<div>
@@ -178,7 +178,7 @@
 								<IconBase name="users"
 									class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
 								<input v-model="offerForm.guests" type="number" placeholder="e.g. 250"
-									class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+									class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 							</div>
 						</div>
 					</div>
@@ -190,7 +190,7 @@
 						<IconBase name="cash"
 							class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
 						<input v-model="offerForm.budget" type="text" placeholder="e.g. ₱150,000 – ₱250,000"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+							class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 					</div>
 
 					<div class="mb-2 mt-6 flex items-center gap-2 text-xs font-semibold tracking-wide text-gray-400">
@@ -205,7 +205,7 @@
 							class="flex w-full items-center justify-between rounded-xl border border-gray-200 px-3.5 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50"
 							@click="applyTemplate(template)">
 							{{ template }}
-							<span class="text-xs font-semibold text-brand-700">
+							<span class="text-xs font-semibold text-primary-700">
 								Apply &rarr;
 							</span>
 						</button>
@@ -216,7 +216,7 @@
 					</label>
 					<input v-model="offerForm.packageName" type="text"
 						placeholder="e.g. Full Coordination Premium Package"
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+						class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 
 					<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">
 						Timeline / Lead Time
@@ -226,7 +226,7 @@
 							class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
 						<input v-model="offerForm.timeline" type="text"
 							placeholder="e.g. Full coordination · 3 months lead time"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+							class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 					</div>
 
 					<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">
@@ -235,9 +235,9 @@
 					<div class="space-y-2">
 						<input v-for="(inclusion, i) in offerForm.inclusions" :key="i" v-model="offerForm.inclusions[i]"
 							type="text" :placeholder="`Inclusion ${i + 1}`"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 					</div>
-					<button type="button" class="mt-2 flex items-center gap-1 text-sm font-semibold text-brand-700"
+					<button type="button" class="mt-2 flex items-center gap-1 text-sm font-semibold text-primary-700"
 						@click="addInclusion">
 						<IconBase name="plus" class="h-3.5 w-3.5" />
 						Add Inclusion
@@ -250,12 +250,12 @@
 					<div class="space-y-2">
 						<div v-for="(line, i) in offerForm.costBreakdown" :key="i" class="flex gap-2">
 							<input v-model="line.label" type="text" placeholder="e.g. Venue rental"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 							<input v-model="line.amount" type="text" placeholder="₱0"
-								class="w-32 shrink-0 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+								class="w-32 shrink-0 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 						</div>
 					</div>
-					<button type="button" class="mt-2 flex items-center gap-1 text-sm font-semibold text-brand-700"
+					<button type="button" class="mt-2 flex items-center gap-1 text-sm font-semibold text-primary-700"
 						@click="addLineItem">
 						<IconBase name="plus" class="h-3.5 w-3.5" />
 						Add Line Item
@@ -270,7 +270,7 @@
 					</label>
 					<textarea v-model="offerForm.pitch" rows="4"
 						placeholder="Introduce yourself and explain why you're the best fit for this event..."
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+						class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 				</div>
 
 				<div class="flex shrink-0 gap-3 border-t border-gray-200 px-6 py-4">
@@ -280,7 +280,7 @@
 						Cancel
 					</button>
 					<button type="button"
-						class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-900"
+						class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-900"
 						@click="submitOffer">
 						<IconBase name="send" class="h-4 w-4" />
 						Submit Inquiry

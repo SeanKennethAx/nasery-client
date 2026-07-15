@@ -13,19 +13,19 @@
 		<div class="mb-5 grid grid-cols-2 gap-3">
 			<button type="button"
 				class="flex items-center justify-center gap-2 rounded-xl border py-3 text-sm font-semibold"
-				:class="role === 'organizer' ? 'border-brand-600 bg-brand-50 text-brand-700' : 'border-gray-200 text-gray-500'"
+				:class="role === 'organizer' ? 'border-primary-600 bg-primary-50 text-primary-700' : 'border-gray-200 text-gray-500'"
 				@click="role = 'organizer'">
 				Organizer
 			</button>
 			<button type="button"
 				class="flex items-center justify-center gap-2 rounded-xl border py-3 text-sm font-semibold"
-				:class="role === 'client' ? 'border-brand-600 bg-brand-50 text-brand-700' : 'border-gray-200 text-gray-500'"
+				:class="role === 'client' ? 'border-primary-600 bg-primary-50 text-primary-700' : 'border-gray-200 text-gray-500'"
 				@click="role = 'client'">
 				Client
 			</button>
 		</div>
 
-		<AuthSocialButtons />
+		<AuthSocialButtons mode="register" @continue="handleSocialContinue" />
 		<AuthContactMethodToggle v-model="registerMethod" />
 
 		<form @submit.prevent="handleSubmit">
@@ -37,8 +37,8 @@
 					<path fill="currentColor"
 						d="M10 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5Z" />
 				</svg>
-				<input v-model="form.fullName" type="text" placeholder="Juan dela Cruz" required
-					class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-11 pr-4 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+				<input v-model="form.fullName" type="text" placeholder="Sean Kenneth H. Axalan" required
+					class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-11 pr-4 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 			</div>
 
 			<template v-if="registerMethod === 'email'">
@@ -52,7 +52,7 @@
 							d="M2.5 4.5A1.5 1.5 0 0 1 4 3h12a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 16 17H4a1.5 1.5 0 0 1-1.5-1.5v-11Zm1.7.3 5.34 4.27a.9.9 0 0 0 1.12 0L16 4.8a.3.3 0 0 0-.19-.3H4.19a.3.3 0 0 0-.19.3Z" />
 					</svg>
 					<input v-model="form.email" type="email" placeholder="you@example.com" required
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-11 pr-4 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+						class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-11 pr-4 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 				</div>
 			</template>
 			<template v-else>
@@ -64,8 +64,8 @@
 						<path fill="currentColor"
 							d="M4.4 2.6h2.9c.5 0 1 .3 1.1.8l.9 3a1.2 1.2 0 0 1-.3 1.2l-1.5 1.5a11.3 11.3 0 0 0 4.4 4.4l1.5-1.5a1.2 1.2 0 0 1 1.2-.3l3 .9c.5.1.8.6.8 1.1v2.9c0 .7-.6 1.3-1.3 1.2C9.9 17 3 10.1 2.6 2.7c0-.7.6-1.3 1.3-1.3Z" />
 					</svg>
-					<input v-model="form.phone" type="tel" placeholder="+1 (555) 000-0000" required
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-11 pr-4 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+					<input v-model="form.phone" type="tel" placeholder="+63 912 345 6789" required
+						class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-11 pr-4 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 				</div>
 			</template>
 
@@ -80,7 +80,7 @@
 				</svg>
 				<input v-model="form.password" :type="showPassword ? 'text' : 'password'"
 					placeholder="Create a strong password" required
-					class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-11 pr-11 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15" />
+					class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-11 pr-11 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
 				<button type="button" class="absolute right-3 top-1/2 flex -translate-y-1/2 text-gray-400"
 					@click="showPassword = !showPassword">
 					<svg v-if="showPassword" viewBox="0 0 20 20" class="h-[18px] w-[18px]">
@@ -96,12 +96,12 @@
 
 			<p class="mb-5 text-[13px] leading-relaxed text-gray-500">
 				By creating an account, you agree to our
-				<span class="cursor-pointer font-semibold text-brand-600">Terms of Service</span> and
-				<span class="cursor-pointer font-semibold text-brand-600">Privacy Policy</span>.
+				<span class="cursor-pointer font-semibold text-primary-600">Terms of Service</span> and
+				<span class="cursor-pointer font-semibold text-primary-600">Privacy Policy</span>.
 			</p>
 
 			<button type="submit"
-				class="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-700 py-4 text-[15px] font-bold text-white hover:bg-brand-900">
+				class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-700 py-4 text-[15px] font-bold text-white hover:bg-primary-900">
 				Create My Account
 				<svg viewBox="0 0 20 20" class="h-4 w-4">
 					<path fill="currentColor"
@@ -111,7 +111,7 @@
 		</form>
 
 		<p class="mt-5 text-center text-sm text-gray-500">
-			Already have an account? <NuxtLink to="/login" class="font-bold text-brand-600">Sign in</NuxtLink>
+			Already have an account? <NuxtLink to="/login" class="font-bold text-primary-600">Sign in</NuxtLink>
 		</p>
 	</div>
 </template>
@@ -131,6 +131,10 @@ const form = reactive({
 })
 
 function handleSubmit() {
-	navigateTo('/organizer/home')
+	navigateTo(role.value === 'client' ? '/client/my-events' : '/organizer/home')
+}
+
+function handleSocialContinue() {
+	navigateTo(role.value === 'client' ? '/client/my-events' : '/organizer/home')
 }
 </script>

@@ -8,7 +8,7 @@ const activeTab = computed(() => (route.path === '/register' ? 'register' : 'sig
 		<div class="fixed inset-x-0 top-0 z-50 h-1 bg-gray-900" />
 
 		<div
-			class="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-brand-600 to-brand-900 px-10 py-12 text-white lg:flex lg:w-1/2 lg:px-16 lg:py-14">
+			class="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-primary-600 to-primary-900 px-10 py-12 text-white lg:flex lg:w-1/2 lg:px-16 lg:py-14">
 			<div class="pointer-events-none absolute inset-0"
 				style="background-image: radial-gradient(rgba(255,255,255,0.12) 1.5px, transparent 1.5px); background-size: 22px 22px;" />
 
@@ -52,12 +52,12 @@ const activeTab = computed(() => (route.path === '/register' ? 'register' : 'sig
 				<div class="inline-flex rounded-full border border-gray-200 bg-white p-1">
 					<NuxtLink to="/login"
 						class="whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold sm:px-6"
-						:class="activeTab === 'signin' ? 'bg-brand-700 text-white' : 'text-gray-700'">
+						:class="activeTab === 'signin' ? 'bg-primary-700 text-white' : 'text-gray-700'">
 						Sign In
 					</NuxtLink>
 					<NuxtLink to="/register"
 						class="whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold sm:px-6"
-						:class="activeTab === 'register' ? 'bg-brand-700 text-white' : 'text-gray-700'">
+						:class="activeTab === 'register' ? 'bg-primary-700 text-white' : 'text-gray-700'">
 						Register
 					</NuxtLink>
 				</div>
