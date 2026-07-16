@@ -29,69 +29,60 @@
 		<AuthContactMethodToggle v-model="registerMethod" />
 
 		<form @submit.prevent="handleSubmit">
-			<label class="mb-2 block text-sm font-semibold text-gray-700">
-				Full Name</label>
-			<div class="relative mb-5">
-				<svg viewBox="0 0 20 20"
-					class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
-					<path fill="currentColor"
-						d="M10 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5Z" />
-				</svg>
-				<input v-model="form.fullName" type="text" placeholder="Sean Kenneth H. Axalan" required
-					class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-11 pr-4 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+			<div class="mb-5">
+				<FormsLabel text="Full Name" required />
+				<FormsTextField v-model="form.fullName" type="text" placeholder="Sean Kenneth H. Axalan" size="lg"
+					required>
+					<template #icon>
+						<svg viewBox="0 0 20 20"
+							class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
+							<path fill="currentColor"
+								d="M10 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5Z" />
+						</svg>
+					</template>
+				</FormsTextField>
 			</div>
 
 			<template v-if="registerMethod === 'email'">
-				<label class="mb-2 block text-sm font-semibold text-gray-700">
-					Email Address
-				</label>
-				<div class="relative mb-5">
-					<svg viewBox="0 0 20 20"
-						class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
-						<path fill="currentColor"
-							d="M2.5 4.5A1.5 1.5 0 0 1 4 3h12a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 16 17H4a1.5 1.5 0 0 1-1.5-1.5v-11Zm1.7.3 5.34 4.27a.9.9 0 0 0 1.12 0L16 4.8a.3.3 0 0 0-.19-.3H4.19a.3.3 0 0 0-.19.3Z" />
-					</svg>
-					<input v-model="form.email" type="email" placeholder="you@example.com" required
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-11 pr-4 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+				<div class="mb-5">
+					<FormsLabel text="Email Address" required />
+					<FormsTextField v-model="form.email" type="email" placeholder="you@example.com" size="lg" required>
+						<template #icon>
+							<svg viewBox="0 0 20 20"
+								class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
+								<path fill="currentColor"
+									d="M2.5 4.5A1.5 1.5 0 0 1 4 3h12a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 16 17H4a1.5 1.5 0 0 1-1.5-1.5v-11Zm1.7.3 5.34 4.27a.9.9 0 0 0 1.12 0L16 4.8a.3.3 0 0 0-.19-.3H4.19a.3.3 0 0 0-.19.3Z" />
+							</svg>
+						</template>
+					</FormsTextField>
 				</div>
 			</template>
 			<template v-else>
-				<label class="mb-2 block text-sm font-semibold text-gray-700">
-					Phone Number</label>
-				<div class="relative mb-5">
-					<svg viewBox="0 0 20 20"
-						class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
-						<path fill="currentColor"
-							d="M4.4 2.6h2.9c.5 0 1 .3 1.1.8l.9 3a1.2 1.2 0 0 1-.3 1.2l-1.5 1.5a11.3 11.3 0 0 0 4.4 4.4l1.5-1.5a1.2 1.2 0 0 1 1.2-.3l3 .9c.5.1.8.6.8 1.1v2.9c0 .7-.6 1.3-1.3 1.2C9.9 17 3 10.1 2.6 2.7c0-.7.6-1.3 1.3-1.3Z" />
-					</svg>
-					<input v-model="form.phone" type="tel" placeholder="+63 912 345 6789" required
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-11 pr-4 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+				<div class="mb-5">
+					<FormsLabel text="Phone Number" required />
+					<FormsTextField v-model="form.phone" type="tel" placeholder="+63 912 345 6789" size="lg" required>
+						<template #icon>
+							<svg viewBox="0 0 20 20"
+								class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
+								<path fill="currentColor"
+									d="M4.4 2.6h2.9c.5 0 1 .3 1.1.8l.9 3a1.2 1.2 0 0 1-.3 1.2l-1.5 1.5a11.3 11.3 0 0 0 4.4 4.4l1.5-1.5a1.2 1.2 0 0 1 1.2-.3l3 .9c.5.1.8.6.8 1.1v2.9c0 .7-.6 1.3-1.3 1.2C9.9 17 3 10.1 2.6 2.7c0-.7.6-1.3 1.3-1.3Z" />
+							</svg>
+						</template>
+					</FormsTextField>
 				</div>
 			</template>
 
-			<label class="mb-2 block text-sm font-semibold text-gray-700">
-				Password
-			</label>
-			<div class="relative mb-6">
-				<svg viewBox="0 0 20 20"
-					class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
-					<path fill="currentColor"
-						d="M5 8.5V6.8a5 5 0 0 1 10 0v1.7a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2Zm1.8 0h6.4V6.8a3.2 3.2 0 0 0-6.4 0v1.7Z" />
-				</svg>
-				<input v-model="form.password" :type="showPassword ? 'text' : 'password'"
-					placeholder="Create a strong password" required
-					class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-11 pr-11 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
-				<button type="button" class="absolute right-3 top-1/2 flex -translate-y-1/2 text-gray-400"
-					@click="showPassword = !showPassword">
-					<svg v-if="showPassword" viewBox="0 0 20 20" class="h-[18px] w-[18px]">
-						<path fill="currentColor"
-							d="M10 4C5.5 4 1.7 6.9.5 10c1.2 3.1 5 6 9.5 6s8.3-2.9 9.5-6c-1.2-3.1-5-6-9.5-6Zm0 10a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-1.6a2.4 2.4 0 1 0 0-4.8 2.4 2.4 0 0 0 0 4.8Z" />
-					</svg>
-					<svg v-else viewBox="0 0 20 20" class="h-[18px] w-[18px]">
-						<path fill="currentColor"
-							d="M2.7 1.6 1.6 2.7l2.3 2.3C2.3 6.1 1 7.9.5 10c1.2 3.1 5 6 9.5 6a10.4 10.4 0 0 0 4.3-.9l2.5 2.5 1.1-1.1L2.7 1.6ZM10 14a4 4 0 0 1-3.6-5.7l1.3 1.3a2.4 2.4 0 0 0 3 3l1.3 1.3A4 4 0 0 1 10 14Zm.4-8-1.6-1.6c.4-.1.8-.1 1.2-.1 4.5 0 8.3 2.9 9.5 6-.5 1.2-1.3 2.4-2.4 3.3l-1.4-1.4A6.4 6.4 0 0 0 17.8 10a8.6 8.6 0 0 0-7.4-4Z" />
-					</svg>
-				</button>
+			<div class="mb-6">
+				<FormsLabel text="Password" required />
+				<FormsPasswordField v-model="form.password" placeholder="Create a strong password" size="lg" required>
+					<template #icon>
+						<svg viewBox="0 0 20 20"
+							class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
+							<path fill="currentColor"
+								d="M5 8.5V6.8a5 5 0 0 1 10 0v1.7a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2Zm1.8 0h6.4V6.8a3.2 3.2 0 0 0-6.4 0v1.7Z" />
+						</svg>
+					</template>
+				</FormsPasswordField>
 			</div>
 
 			<p class="mb-5 text-[13px] leading-relaxed text-gray-500">
@@ -121,7 +112,6 @@ definePageMeta({ layout: 'auth' })
 
 const role = ref<'organizer' | 'client'>('organizer')
 const registerMethod = ref<'email' | 'phone'>('email')
-const showPassword = ref(false)
 
 const form = reactive({
 	fullName: '',

@@ -146,13 +146,13 @@
 						</div>
 					</div>
 
-					<label class="mb-1.5 block text-sm font-semibold text-gray-700">Full Name</label>
-					<input v-model="draftProfile.fullName" type="text"
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+					<FormsLabel text="Full Name" />
+					<FormsTextField v-model="draftProfile.fullName" />
 
-					<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Company / Brand Name</label>
-					<input v-model="draftProfile.company" type="text"
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+					<div class="mt-4">
+						<FormsLabel text="Company / Brand Name" />
+						<FormsTextField v-model="draftProfile.company" />
+					</div>
 
 					<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Years of Experience</label>
 					<select v-model="draftProfile.yearsExperience"
@@ -161,12 +161,9 @@
 						<option v-for="range in experienceRanges" :key="range" :value="range">{{ range }}</option>
 					</select>
 
-					<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Location / Service Area</label>
-					<div class="relative">
-						<IconBase name="map-pin"
-							class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-						<input v-model="draftProfile.location" type="text" placeholder="e.g. Metro Manila"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+					<div class="mt-4">
+						<FormsLabel text="Location / Service Area" />
+						<FormsTextField v-model="draftProfile.location" icon="map-pin" placeholder="e.g. Metro Manila" />
 					</div>
 				</div>
 
@@ -237,30 +234,29 @@
 						</div>
 					</div>
 
-					<label class="mb-1.5 block text-sm font-semibold text-gray-700">Email Address</label>
-					<input v-model="draftProfile.email" type="email"
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+					<FormsLabel text="Email Address" />
+					<FormsTextField v-model="draftProfile.email" type="email" />
 
-					<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Phone Number</label>
-					<input v-model="draftProfile.phone" type="text"
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+					<div class="mt-4">
+						<FormsLabel text="Phone Number" />
+						<FormsTextField v-model="draftProfile.phone" />
+					</div>
 
 					<div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
 						<div>
-							<label class="mb-1.5 block text-sm font-semibold text-gray-700">Website</label>
-							<input v-model="draftProfile.website" type="text" placeholder="e.g. www.yoursite.ph"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+							<FormsLabel text="Website" />
+							<FormsTextField v-model="draftProfile.website" placeholder="e.g. www.yoursite.ph" />
 						</div>
 						<div>
-							<label class="mb-1.5 block text-sm font-semibold text-gray-700">Facebook Page</label>
-							<input v-model="draftProfile.facebook" type="text" placeholder="e.g. facebook.com/yourpage"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+							<FormsLabel text="Facebook Page" />
+							<FormsTextField v-model="draftProfile.facebook" placeholder="e.g. facebook.com/yourpage" />
 						</div>
 					</div>
 
-					<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Instagram Handle</label>
-					<input v-model="draftProfile.instagram" type="text" placeholder="e.g. @yourhandle"
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+					<div class="mt-4">
+						<FormsLabel text="Instagram Handle" />
+						<FormsTextField v-model="draftProfile.instagram" placeholder="e.g. @yourhandle" />
+					</div>
 				</div>
 
 				<div v-else-if="activeProfileTab === 'Appearance'">
@@ -287,16 +283,12 @@
 			</div>
 
 			<div class="flex shrink-0 gap-3 border-t border-gray-200 px-6 py-4">
-				<button type="button"
-					class="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-					@click="closeProfilePanel">
+				<FormsButton variant="secondary" class="flex-1" @click="closeProfilePanel">
 					Cancel
-				</button>
-				<button type="button"
-					class="flex-1 rounded-xl bg-primary-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-900"
-					@click="saveProfile">
+				</FormsButton>
+				<FormsButton class="flex-1" @click="saveProfile">
 					Save Profile
-				</button>
+				</FormsButton>
 			</div>
 		</div>
 	</Transition>

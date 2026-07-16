@@ -11,11 +11,8 @@
 		</p>
 
 		<div class="mt-6 rounded-2xl border border-gray-200 bg-white p-6">
-			<label class="mb-1.5 block text-sm font-semibold text-gray-700">
-				Event Title <span class="font-normal text-gray-400">(optional)</span>
-			</label>
-			<input v-model="form.title" type="text" placeholder="e.g. Marlo & Rena Wedding"
-				class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+			<FormsLabel text="Event Title" hint="(optional)" />
+			<FormsTextField v-model="form.title" placeholder="e.g. Marlo & Rena Wedding" />
 
 			<label class="mb-2 mt-5 block text-sm font-semibold text-gray-700">
 				Event Type <span class="text-rose-500">*</span>
@@ -38,40 +35,20 @@
 
 			<div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
 				<div>
-					<label class="mb-1.5 block text-sm font-semibold text-gray-700">
-						Event Date <span class="text-rose-500">*</span>
-					</label>
-					<div class="relative">
-						<IconBase name="calendar"
-							class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-						<input v-model="form.date" type="date"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
-					</div>
+					<FormsLabel text="Event Date" required />
+					<FormsTextField v-model="form.date" type="date" icon="calendar" required />
 				</div>
 				<div>
-					<label class="mb-1.5 block text-sm font-semibold text-gray-700">
-						Location <span class="text-rose-500">*</span>
-					</label>
-					<div class="relative">
-						<IconBase name="map-pin"
-							class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-						<input v-model="form.location" type="text" placeholder="City / venue area"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
-					</div>
+					<FormsLabel text="Location" required />
+					<FormsTextField v-model="form.location" icon="map-pin" placeholder="City / venue area" required />
 				</div>
 			</div>
 
 			<div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
 				<div>
-					<label class="mb-1.5 block text-sm font-semibold text-gray-700">
-						Expected Guests <span class="text-rose-500">*</span>
-					</label>
-					<div class="relative">
-						<IconBase name="users"
-							class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-						<input v-model="form.guests" type="number" min="1" placeholder="e.g. 150"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
-					</div>
+					<FormsLabel text="Expected Guests" required />
+					<FormsTextField v-model="form.guests" type="number" min="1" icon="users" placeholder="e.g. 150"
+						required />
 				</div>
 				<div>
 					<label class="mb-1.5 block text-sm font-semibold text-gray-700">

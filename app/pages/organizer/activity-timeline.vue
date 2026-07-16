@@ -40,11 +40,8 @@
 
 			<div class="min-w-0 flex-1">
 				<div class="mb-4 flex items-center gap-3">
-					<div class="relative flex-1">
-						<IconBase name="search"
-							class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-						<input v-model="searchQuery" type="text" placeholder="Search activities..."
-							class="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+					<div class="flex-1">
+						<FormsTextField v-model="searchQuery" icon="search" placeholder="Search activities..." />
 					</div>
 					<IconBase name="filter" class="h-4 w-4 shrink-0 text-gray-400" />
 					<div class="flex shrink-0 gap-2">

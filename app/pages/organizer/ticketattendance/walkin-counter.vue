@@ -72,13 +72,8 @@
                 </div>
 
                 <div class="flex-1 overflow-y-auto px-6 py-5">
-                    <label class="mb-1.5 block text-sm font-semibold text-gray-700">Full Name *</label>
-                    <div class="relative">
-                        <IconBase name="user"
-                            class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                        <input v-model="walkInForm.name" type="text" placeholder="e.g. Robert Brown"
-                            class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
-                    </div>
+                    <FormsLabel text="Full Name" required />
+                    <FormsTextField v-model="walkInForm.name" icon="user" placeholder="e.g. Robert Brown" required />
 
                     <label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Ticket Type *</label>
                     <select v-model="walkInForm.ticketType"
@@ -89,14 +84,13 @@
 
                     <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div>
-                            <label class="mb-1.5 block text-sm font-semibold text-gray-700">Email Address</label>
-                            <input v-model="walkInForm.email" type="email" placeholder="e.g. robert@example.com"
-                                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+                            <FormsLabel text="Email Address" />
+                            <FormsTextField v-model="walkInForm.email" type="email"
+                                placeholder="e.g. robert@example.com" />
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-sm font-semibold text-gray-700">Phone Number</label>
-                            <input v-model="walkInForm.phone" type="text" placeholder="e.g. 0917 123 4567"
-                                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+                            <FormsLabel text="Phone Number" />
+                            <FormsTextField v-model="walkInForm.phone" placeholder="e.g. 0917 123 4567" />
                         </div>
                     </div>
 
@@ -108,17 +102,13 @@
                 </div>
 
                 <div class="flex shrink-0 gap-3 border-t border-gray-200 px-6 py-4">
-                    <button type="button"
-                        class="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                        @click="closeWalkInForm">
+                    <FormsButton variant="secondary" class="flex-1" @click="closeWalkInForm">
                         Cancel
-                    </button>
-                    <button type="button"
-                        class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800"
-                        :disabled="!walkInForm.name" @click="submitWalkIn">
+                    </FormsButton>
+                    <FormsButton class="flex-1" :disabled="!walkInForm.name" @click="submitWalkIn">
                         <IconBase name="user-plus" class="h-4 w-4" />
                         Add to Queue
-                    </button>
+                    </FormsButton>
                 </div>
             </div>
         </Transition>

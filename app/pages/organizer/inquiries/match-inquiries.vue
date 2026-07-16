@@ -136,11 +136,10 @@
 						EVENT INFORMATION
 					</div>
 
-					<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">
-						Event / Inquiry Title *
-					</label>
-					<input v-model="offerForm.title" type="text"
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+					<div class="mt-4">
+						<FormsLabel text="Event / Inquiry Title" required />
+						<FormsTextField v-model="offerForm.title" />
+					</div>
 
 					<div class="mt-4 grid grid-cols-2 gap-3">
 						<div>
@@ -152,45 +151,25 @@
 							</select>
 						</div>
 						<div>
-							<label class="mb-1.5 block text-sm font-semibold text-gray-700">Event Date *</label>
-							<input v-model="offerForm.eventDate" type="date"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+							<FormsLabel text="Event Date *" />
+							<FormsTextField v-model="offerForm.eventDate" type="date" />
 						</div>
 					</div>
 
 					<div class="mt-4 grid grid-cols-2 gap-3">
 						<div>
-							<label class="mb-1.5 block text-sm font-semibold text-gray-700">
-								Location / Area *
-							</label>
-							<div class="relative">
-								<IconBase name="map-pin"
-									class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-								<input v-model="offerForm.location" type="text" placeholder="e.g. Davao City"
-									class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
-							</div>
+							<FormsLabel text="Location / Area" required />
+							<FormsTextField v-model="offerForm.location" icon="map-pin" placeholder="e.g. Davao City" />
 						</div>
 						<div>
-							<label class="mb-1.5 block text-sm font-semibold text-gray-700">
-								Expected Guests
-							</label>
-							<div class="relative">
-								<IconBase name="users"
-									class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-								<input v-model="offerForm.guests" type="number" placeholder="e.g. 250"
-									class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
-							</div>
+							<FormsLabel text="Expected Guests" />
+							<FormsTextField v-model="offerForm.guests" type="number" icon="users" placeholder="e.g. 250" />
 						</div>
 					</div>
 
-					<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">
-						Your Quoted Budget / Price Range *
-					</label>
-					<div class="relative">
-						<IconBase name="cash"
-							class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-						<input v-model="offerForm.budget" type="text" placeholder="e.g. ₱150,000 – ₱250,000"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+					<div class="mt-4">
+						<FormsLabel text="Your Quoted Budget / Price Range" required />
+						<FormsTextField v-model="offerForm.budget" icon="cash" placeholder="e.g. ₱150,000 – ₱250,000" />
 					</div>
 
 					<div class="mb-2 mt-6 flex items-center gap-2 text-xs font-semibold tracking-wide text-gray-400">
@@ -211,31 +190,24 @@
 						</button>
 					</div>
 
-					<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">
-						Package / Offer Name
-					</label>
-					<input v-model="offerForm.packageName" type="text"
-						placeholder="e.g. Full Coordination Premium Package"
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+					<div class="mt-4">
+						<FormsLabel text="Package / Offer Name" />
+						<FormsTextField v-model="offerForm.packageName"
+							placeholder="e.g. Full Coordination Premium Package" />
+					</div>
 
-					<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">
-						Timeline / Lead Time
-					</label>
-					<div class="relative">
-						<IconBase name="clock"
-							class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-						<input v-model="offerForm.timeline" type="text"
-							placeholder="e.g. Full coordination · 3 months lead time"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+					<div class="mt-4">
+						<FormsLabel text="Timeline / Lead Time" />
+						<FormsTextField v-model="offerForm.timeline" icon="clock"
+							placeholder="e.g. Full coordination · 3 months lead time" />
 					</div>
 
 					<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">
 						Inclusions / Services
 					</label>
 					<div class="space-y-2">
-						<input v-for="(inclusion, i) in offerForm.inclusions" :key="i" v-model="offerForm.inclusions[i]"
-							type="text" :placeholder="`Inclusion ${i + 1}`"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+						<FormsTextField v-for="(inclusion, i) in offerForm.inclusions" :key="i"
+							v-model="offerForm.inclusions[i]" :placeholder="`Inclusion ${i + 1}`" />
 					</div>
 					<button type="button" class="mt-2 flex items-center gap-1 text-sm font-semibold text-primary-700"
 						@click="addInclusion">
@@ -249,10 +221,8 @@
 					</div>
 					<div class="space-y-2">
 						<div v-for="(line, i) in offerForm.costBreakdown" :key="i" class="flex gap-2">
-							<input v-model="line.label" type="text" placeholder="e.g. Venue rental"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
-							<input v-model="line.amount" type="text" placeholder="₱0"
-								class="w-32 shrink-0 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+							<FormsTextField v-model="line.label" placeholder="e.g. Venue rental" class="flex-1" />
+							<FormsTextField v-model="line.amount" placeholder="₱0" class="w-32 shrink-0" />
 						</div>
 					</div>
 					<button type="button" class="mt-2 flex items-center gap-1 text-sm font-semibold text-primary-700"
@@ -274,17 +244,13 @@
 				</div>
 
 				<div class="flex shrink-0 gap-3 border-t border-gray-200 px-6 py-4">
-					<button type="button"
-						class="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-						@click="closeOfferForm">
+					<FormsButton variant="secondary" class="flex-1" @click="closeOfferForm">
 						Cancel
-					</button>
-					<button type="button"
-						class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-900"
-						@click="submitOffer">
+					</FormsButton>
+					<FormsButton class="flex-1" @click="submitOffer">
 						<IconBase name="send" class="h-4 w-4" />
 						Submit Inquiry
-					</button>
+					</FormsButton>
 				</div>
 			</div>
 		</Transition>

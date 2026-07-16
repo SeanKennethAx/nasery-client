@@ -132,9 +132,8 @@
 							</div>
 						</div>
 
-						<label class="mb-1.5 block text-sm font-semibold text-gray-700">Full Name</label>
-						<input v-model="draftProfile.fullName" type="text"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+						<FormsLabel text="Full Name" />
+						<FormsTextField v-model="draftProfile.fullName" />
 
 						<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Client Type</label>
 						<select v-model="draftProfile.clientType"
@@ -142,12 +141,9 @@
 							<option v-for="type in clientTypes" :key="type" :value="type">{{ type }}</option>
 						</select>
 
-						<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Location / City</label>
-						<div class="relative">
-							<IconBase name="map-pin"
-								class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-							<input v-model="draftProfile.location" type="text" placeholder="e.g. Quezon City"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+						<div class="mt-4">
+							<FormsLabel text="Location / City" />
+							<FormsTextField v-model="draftProfile.location" icon="map-pin" placeholder="e.g. Quezon City" />
 						</div>
 					</div>
 
@@ -218,13 +214,13 @@
 							</div>
 						</div>
 
-						<label class="mb-1.5 block text-sm font-semibold text-gray-700">Email Address</label>
-						<input v-model="draftProfile.email" type="email"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+						<FormsLabel text="Email Address" />
+						<FormsTextField v-model="draftProfile.email" type="email" />
 
-						<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Phone Number</label>
-						<input v-model="draftProfile.phone" type="text"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+						<div class="mt-4">
+							<FormsLabel text="Phone Number" />
+							<FormsTextField v-model="draftProfile.phone" />
+						</div>
 
 						<div class="mb-2 mt-6 flex items-center gap-2 text-xs font-semibold tracking-wide text-gray-400">
 							<IconBase name="user" class="h-3.5 w-3.5" /> ALTERNATE CONTACT
@@ -233,14 +229,12 @@
 
 						<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
 							<div>
-								<label class="mb-1.5 block text-sm font-semibold text-gray-700">Name</label>
-								<input v-model="draftProfile.altContactName" type="text" placeholder="e.g. Maria Santos"
-									class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+								<FormsLabel text="Name" />
+								<FormsTextField v-model="draftProfile.altContactName" placeholder="e.g. Maria Santos" />
 							</div>
 							<div>
-								<label class="mb-1.5 block text-sm font-semibold text-gray-700">Phone</label>
-								<input v-model="draftProfile.altContactPhone" type="text" placeholder="e.g. 0917 123 4567"
-									class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+								<FormsLabel text="Phone" />
+								<FormsTextField v-model="draftProfile.altContactPhone" placeholder="e.g. 0917 123 4567" />
 							</div>
 						</div>
 					</div>
@@ -265,16 +259,12 @@
 				</div>
 
 				<div class="flex shrink-0 gap-3 border-t border-gray-200 px-6 py-4">
-					<button type="button"
-						class="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-						@click="closeProfilePanel">
+					<FormsButton variant="secondary" class="flex-1" @click="closeProfilePanel">
 						Cancel
-					</button>
-					<button type="button"
-						class="flex-1 rounded-xl bg-primary-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-900"
-						@click="saveProfile">
+					</FormsButton>
+					<FormsButton class="flex-1" @click="saveProfile">
 						Save Profile
-					</button>
+					</FormsButton>
 				</div>
 			</div>
 		</Transition>

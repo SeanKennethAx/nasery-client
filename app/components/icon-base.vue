@@ -64,6 +64,10 @@
 			<line x1="5" y1="12" x2="19" y2="12" />
 			<polyline points="12 5 19 12 12 19" />
 		</template>
+		<template v-else-if="name === 'arrow-left'">
+			<line x1="19" y1="12" x2="5" y2="12" />
+			<polyline points="12 19 5 12 12 5" />
+		</template>
 		<template v-else-if="name === 'award'">
 			<circle cx="12" cy="8" r="6" />
 			<polyline points="8.5 13.5 7 22 12 19 17 22 15.5 13.5" />

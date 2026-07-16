@@ -54,13 +54,11 @@
 
 				<div class="flex-1 overflow-y-auto px-6 py-5">
 					<template v-if="activeCreateTab === 'Basic Info'">
-						<label class="mb-1.5 block text-sm font-semibold text-gray-700">Event Name <span
-								class="text-red-500">*</span></label>
-						<input v-model="eventForm.name" type="text" placeholder="e.g. Santos-Reyes Wedding Reception"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+						<FormsLabel text="Event Name" required />
+						<FormsTextField v-model="eventForm.name" placeholder="e.g. Santos-Reyes Wedding Reception" />
 
 						<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Event Type <span
-								class="text-red-500">*</span></label>
+								class="text-rose-500">*</span></label>
 						<select v-model="eventForm.eventType"
 							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15">
 							<option value="" disabled>Select event type</option>
@@ -74,10 +72,8 @@
 
 						<div class="mt-4 grid grid-cols-2 gap-3">
 							<div>
-								<label class="mb-1.5 block text-sm font-semibold text-gray-700">Event Date <span
-										class="text-red-500">*</span></label>
-								<input v-model="eventForm.eventDate" type="date"
-									class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+								<FormsLabel text="Event Date" required />
+								<FormsTextField v-model="eventForm.eventDate" type="date" />
 							</div>
 							<div>
 								<label class="mb-1.5 block text-sm font-semibold text-gray-700">Status</label>
@@ -90,46 +86,38 @@
 
 						<div class="mt-4 grid grid-cols-2 gap-3">
 							<div>
-								<label class="mb-1.5 block text-sm font-semibold text-gray-700">Start Time</label>
-								<input v-model="eventForm.startTime" type="time"
-									class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+								<FormsLabel text="Start Time" />
+								<FormsTextField v-model="eventForm.startTime" type="time" />
 							</div>
 							<div>
-								<label class="mb-1.5 block text-sm font-semibold text-gray-700">End Time</label>
-								<input v-model="eventForm.endTime" type="time"
-									class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+								<FormsLabel text="End Time" />
+								<FormsTextField v-model="eventForm.endTime" type="time" />
 							</div>
 						</div>
 
-						<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Tags <span
-								class="text-gray-400">(comma-separated)</span></label>
-						<div class="relative">
-							<IconBase name="tag"
-								class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-							<input v-model="eventForm.tags" type="text" placeholder="e.g. Wedding, Garden, Outdoor"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+						<div class="mt-4">
+							<FormsLabel text="Tags" hint="(comma-separated)" />
+							<FormsTextField v-model="eventForm.tags" icon="tag" placeholder="e.g. Wedding, Garden, Outdoor" />
 						</div>
 					</template>
 
 					<template v-else-if="activeCreateTab === 'Venue'">
-						<label class="mb-1.5 block text-sm font-semibold text-gray-700">Venue Name</label>
-						<input v-model="eventForm.venueName" type="text" placeholder="e.g. Manila Convention Center"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+						<FormsLabel text="Venue Name" />
+						<FormsTextField v-model="eventForm.venueName" placeholder="e.g. Manila Convention Center" />
 
-						<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Address</label>
-						<input v-model="eventForm.address" type="text" placeholder="Street address"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+						<div class="mt-4">
+							<FormsLabel text="Address" />
+							<FormsTextField v-model="eventForm.address" placeholder="Street address" />
+						</div>
 
 						<div class="mt-4 grid grid-cols-2 gap-3">
 							<div>
-								<label class="mb-1.5 block text-sm font-semibold text-gray-700">City / Area</label>
-								<input v-model="eventForm.city" type="text" placeholder="e.g. Makati"
-									class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+								<FormsLabel text="City / Area" />
+								<FormsTextField v-model="eventForm.city" placeholder="e.g. Makati" />
 							</div>
 							<div>
-								<label class="mb-1.5 block text-sm font-semibold text-gray-700">Capacity</label>
-								<input v-model="eventForm.capacity" type="number" placeholder="e.g. 500"
-									class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+								<FormsLabel text="Capacity" />
+								<FormsTextField v-model="eventForm.capacity" type="number" placeholder="e.g. 500" />
 							</div>
 						</div>
 					</template>
@@ -145,13 +133,11 @@
 										<IconBase name="trash" class="h-4 w-4" />
 									</button>
 								</div>
-								<input v-model="zone.name" type="text" placeholder="Zone name (e.g. VIP Front Row)"
-									class="mb-2 w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+								<FormsTextField v-model="zone.name" placeholder="Zone name (e.g. VIP Front Row)"
+									class="mb-2" />
 								<div class="grid grid-cols-2 gap-2">
-									<input v-model="zone.price" type="text" placeholder="Price (₱)"
-										class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
-									<input v-model="zone.capacity" type="number" placeholder="Capacity"
-										class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+									<FormsTextField v-model="zone.price" placeholder="Price (₱)" />
+									<FormsTextField v-model="zone.capacity" type="number" placeholder="Capacity" />
 								</div>
 							</div>
 						</div>
@@ -182,17 +168,18 @@
 					</template>
 
 					<template v-else-if="activeCreateTab === 'Contact'">
-						<label class="mb-1.5 block text-sm font-semibold text-gray-700">Contact Person</label>
-						<input v-model="eventForm.contactName" type="text" placeholder="e.g. Maria Santos"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+						<FormsLabel text="Contact Person" />
+						<FormsTextField v-model="eventForm.contactName" placeholder="e.g. Maria Santos" />
 
-						<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Email</label>
-						<input v-model="eventForm.contactEmail" type="email" placeholder="you@example.com"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+						<div class="mt-4">
+							<FormsLabel text="Email" />
+							<FormsTextField v-model="eventForm.contactEmail" type="email" placeholder="you@example.com" />
+						</div>
 
-						<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Phone</label>
-						<input v-model="eventForm.contactPhone" type="tel" placeholder="+63 9XX XXX XXXX"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+						<div class="mt-4">
+							<FormsLabel text="Phone" />
+							<FormsTextField v-model="eventForm.contactPhone" type="tel" placeholder="+63 9XX XXX XXXX" />
+						</div>
 					</template>
 				</div>
 
