@@ -45,18 +45,27 @@
 							class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-700 text-sm font-bold text-white">
 							{{ sidebarInitials }}
 						</div>
+
 						<div class="min-w-0">
-							<div class="truncate text-sm font-semibold text-gray-900">{{ profile.fullName }}</div>
+							<div class="truncate text-sm font-semibold text-gray-900">
+								{{ sidebarName }}
+							</div>
+
 							<div class="text-xs text-gray-400">
-								Client
+								{{ roleLabel }}
 							</div>
 						</div>
 					</button>
-					<p class="mb-3 px-1.5 text-[11px] text-gray-400">Click profile to customise</p>
+
+					<p class="mb-3 px-1.5 text-[11px] text-gray-400">
+						Click profile to customise
+					</p>
+
 					<button type="button"
 						class="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700"
-						@click="navigateTo('/login')">
+						@click="handleLogout">
 						<IconBase name="log-out" class="h-4 w-4" />
+
 						Sign out
 					</button>
 				</div>
@@ -143,7 +152,8 @@
 
 						<div class="mt-4">
 							<FormsLabel text="Location / City" />
-							<FormsTextField v-model="draftProfile.location" icon="map-pin" placeholder="e.g. Quezon City" />
+							<FormsTextField v-model="draftProfile.location" icon="map-pin"
+								placeholder="e.g. Quezon City" />
 						</div>
 					</div>
 
@@ -222,10 +232,12 @@
 							<FormsTextField v-model="draftProfile.phone" />
 						</div>
 
-						<div class="mb-2 mt-6 flex items-center gap-2 text-xs font-semibold tracking-wide text-gray-400">
+						<div
+							class="mb-2 mt-6 flex items-center gap-2 text-xs font-semibold tracking-wide text-gray-400">
 							<IconBase name="user" class="h-3.5 w-3.5" /> ALTERNATE CONTACT
 						</div>
-						<p class="mb-3 text-xs text-gray-400">Optional — for day-of coordination if you're unreachable</p>
+						<p class="mb-3 text-xs text-gray-400">Optional — for day-of coordination if you're unreachable
+						</p>
 
 						<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
 							<div>
@@ -234,7 +246,8 @@
 							</div>
 							<div>
 								<FormsLabel text="Phone" />
-								<FormsTextField v-model="draftProfile.altContactPhone" placeholder="e.g. 0917 123 4567" />
+								<FormsTextField v-model="draftProfile.altContactPhone"
+									placeholder="e.g. 0917 123 4567" />
 							</div>
 						</div>
 					</div>
@@ -274,75 +287,287 @@
 <script setup lang="ts">
 const route = useRoute()
 
+const {
+	user,
+	firstName,
+	fullName,
+	initials,
+	roleLabel,
+	logout,
+} = useAuth()
+
 const sidebarOpen = ref(true)
 
 const navItems = [
-	{ label: 'My Events', to: '/client/my-events', icon: 'home' },
-	{ label: 'Event Details', to: '/client/event-details', icon: 'calendar' },
-	{ label: 'Preparation Tracking', to: '/client/preparation-tracking', icon: 'clipboard-list' },
-	{ label: 'Activity Timeline', to: '/client/activity-timeline', icon: 'activity' }
+	{
+		label: 'My Events',
+		to: '/client/my-events',
+		icon: 'home',
+	},
+	{
+		label: 'Event Details',
+		to: '/client/event-details',
+		icon: 'calendar',
+	},
+	{
+		label: 'Preparation Tracking',
+		to: '/client/preparation-tracking',
+		icon: 'clipboard-list',
+	},
+	{
+		label: 'Activity Timeline',
+		to: '/client/activity-timeline',
+		icon: 'activity',
+	},
 ]
 
-const activeItem = computed(() => navItems.find((item) => item.to === route.path) ?? navItems[0])
+const activeItem = computed(() => {
+	return (
+		navItems.find(
+			(item) => item.to === route.path
+		) ?? navItems[0]
+	)
+})
+
+/**
+ * Sidebar name.
+ *
+ * Example:
+ * firstname = "Nina"
+ *
+ * Sidebar:
+ * Nina
+ */
+const sidebarName = computed(() => {
+	return (
+		firstName.value ||
+		profile.fullName ||
+		'User'
+	)
+})
+
+const sidebarInitials = computed(() => {
+	return (
+		initials.value ||
+		initialsOf(profile.fullName) ||
+		'U'
+	)
+})
 
 const profileTabs = [
-	{ label: 'Identity', icon: 'user' },
-	{ label: 'About', icon: 'file-text' },
-	{ label: 'Event Preferences', icon: 'tag' },
-	{ label: 'Planning Style', icon: 'sparkles' },
-	{ label: 'Contact', icon: 'phone' },
-	{ label: 'Appearance', icon: 'settings' }
+	{
+		label: 'Identity',
+		icon: 'user',
+	},
+	{
+		label: 'About',
+		icon: 'file-text',
+	},
+	{
+		label: 'Event Preferences',
+		icon: 'tag',
+	},
+	{
+		label: 'Planning Style',
+		icon: 'sparkles',
+	},
+	{
+		label: 'Contact',
+		icon: 'phone',
+	},
+	{
+		label: 'Appearance',
+		icon: 'settings',
+	},
 ]
 
-const clientTypes = ['Individual', 'Couple', 'Family', 'Corporate']
-const eventPreferenceOptions = ['Wedding', 'Corporate', 'Birthday', 'Debut', 'Concert', 'Conference', 'Reunion', 'Seminar']
-const planningStyleOptions = ['Full Coordination', 'Partial Planning', 'Day-of Coordination', 'Vendor Referrals Only', 'Budget-Conscious', 'Premium / Luxury']
-const bannerColors = ['#285F6b', '#7c3aed', '#be123c', '#b45309', '#15803d', '#1d4ed8']
+const clientTypes = [
+	'Individual',
+	'Couple',
+	'Family',
+	'Corporate',
+]
+
+const eventPreferenceOptions = [
+	'Wedding',
+	'Corporate',
+	'Birthday',
+	'Debut',
+	'Concert',
+	'Conference',
+	'Reunion',
+	'Seminar',
+]
+
+const planningStyleOptions = [
+	'Full Coordination',
+	'Partial Planning',
+	'Day-of Coordination',
+	'Vendor Referrals Only',
+	'Budget-Conscious',
+	'Premium / Luxury',
+]
+
+const bannerColors = [
+	'#285F6b',
+	'#7c3aed',
+	'#be123c',
+	'#b45309',
+	'#15803d',
+	'#1d4ed8',
+]
 
 function defaultProfile() {
 	return {
-		fullName: 'EventPro Solutions',
+		fullName: '',
 		clientType: clientTypes[0],
 		location: '',
 		bio: '',
 		eventPreferences: ['Wedding'],
-		planningStyle: ['Full Coordination'],
+		planningStyle: [
+			'Full Coordination',
+		],
 		email: '',
 		phone: '',
 		altContactName: '',
 		altContactPhone: '',
-		bannerColor: '#285F6b'
+		bannerColor: '#285F6b',
 	}
 }
 
-const profile = reactive(defaultProfile())
-const draftProfile = reactive(defaultProfile())
+const profile = reactive(
+	defaultProfile()
+)
+
+const draftProfile = reactive(
+	defaultProfile()
+)
+
 const showProfilePanel = ref(false)
+
 const activeProfileTab = ref('Identity')
 
-const profileTabButtonRefs = {}
-function setProfileTabRef(label, el) {
-	if (el) profileTabButtonRefs[label] = el
+/**
+ * Populate profile information from
+ * the actual authenticated user.
+ */
+function syncProfileFromUser() {
+	if (!user.value) {
+		return
+	}
+
+	profile.fullName =
+		fullName.value
+
+	profile.email =
+		user.value.email ?? ''
+
+	profile.phone =
+		user.value.phone ?? ''
+
+	Object.assign(
+		draftProfile,
+		profile
+	)
+
+	draftProfile.eventPreferences = [
+		...profile.eventPreferences,
+	]
+
+	draftProfile.planningStyle = [
+		...profile.planningStyle,
+	]
 }
 
-watch(activeProfileTab, (label) => {
-	nextTick(() => {
-		profileTabButtonRefs[label]?.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' })
-	})
+/**
+ * Run when the authenticated
+ * user becomes available.
+ */
+watch(
+	() => user.value?.id,
+	() => {
+		syncProfileFromUser()
+	},
+	{
+		immediate: true,
+	}
+)
+
+const profileTabButtonRefs: Record<
+	string,
+	HTMLElement
+> = {}
+
+function setProfileTabRef(
+	label: string,
+	el: any
+) {
+	if (!el) {
+		return
+	}
+
+	profileTabButtonRefs[label] =
+		el instanceof HTMLElement
+			? el
+			: el.$el
+}
+
+watch(
+	activeProfileTab,
+	(label) => {
+		nextTick(() => {
+			profileTabButtonRefs[label]
+				?.scrollIntoView({
+					behavior: 'smooth',
+					inline: 'nearest',
+					block: 'nearest',
+				})
+		})
+	}
+)
+
+function initialsOf(
+	name: string
+): string {
+	return (name || '')
+		.trim()
+		.split(/\s+/)
+		.filter(Boolean)
+		.slice(0, 2)
+		.map((word) => word[0])
+		.join('')
+		.toUpperCase()
+}
+
+/**
+ * Profile-panel initials.
+ *
+ * These can change when the user edits
+ * their profile name.
+ */
+const panelInitials = computed(() => {
+	return initialsOf(
+		draftProfile.fullName
+	)
 })
 
-function initialsOf(name) {
-	return (name || '').trim().split(/\s+/).slice(0, 2).map((word) => word[0]).join('').toUpperCase()
-}
-
-const sidebarInitials = computed(() => initialsOf(profile.fullName))
-const panelInitials = computed(() => initialsOf(draftProfile.fullName))
-
 function openProfilePanel() {
-	Object.assign(draftProfile, profile)
-	draftProfile.eventPreferences = [...profile.eventPreferences]
-	draftProfile.planningStyle = [...profile.planningStyle]
-	activeProfileTab.value = 'Identity'
+	Object.assign(
+		draftProfile,
+		profile
+	)
+
+	draftProfile.eventPreferences = [
+		...profile.eventPreferences,
+	]
+
+	draftProfile.planningStyle = [
+		...profile.planningStyle,
+	]
+
+	activeProfileTab.value =
+		'Identity'
+
 	showProfilePanel.value = true
 }
 
@@ -351,43 +576,61 @@ function closeProfilePanel() {
 }
 
 function saveProfile() {
-	Object.assign(profile, draftProfile)
-	profile.eventPreferences = [...draftProfile.eventPreferences]
-	profile.planningStyle = [...draftProfile.planningStyle]
+	Object.assign(
+		profile,
+		draftProfile
+	)
+
+	profile.eventPreferences = [
+		...draftProfile.eventPreferences,
+	]
+
+	profile.planningStyle = [
+		...draftProfile.planningStyle,
+	]
+
 	closeProfilePanel()
 }
 
-function toggleEventPreference(type) {
-	const index = draftProfile.eventPreferences.indexOf(type)
-	if (index === -1) draftProfile.eventPreferences.push(type)
-	else draftProfile.eventPreferences.splice(index, 1)
+function toggleEventPreference(
+	type: string
+) {
+	const index =
+		draftProfile.eventPreferences
+			.indexOf(type)
+
+	if (index === -1) {
+		draftProfile.eventPreferences
+			.push(type)
+
+		return
+	}
+
+	draftProfile.eventPreferences
+		.splice(index, 1)
 }
 
-function togglePlanningStyle(style) {
-	const index = draftProfile.planningStyle.indexOf(style)
-	if (index === -1) draftProfile.planningStyle.push(style)
-	else draftProfile.planningStyle.splice(index, 1)
+function togglePlanningStyle(
+	style: string
+) {
+	const index =
+		draftProfile.planningStyle
+			.indexOf(style)
+
+	if (index === -1) {
+		draftProfile.planningStyle
+			.push(style)
+
+		return
+	}
+
+	draftProfile.planningStyle
+		.splice(index, 1)
+}
+
+async function handleLogout() {
+	logout()
+
+	await navigateTo('/login')
 }
 </script>
-
-<style scoped>
-.slide-enter-active,
-.slide-leave-active {
-	transition: transform 0.25s ease;
-}
-
-.slide-enter-from,
-.slide-leave-to {
-	transform: translateX(100%);
-}
-
-.fade-enter-active,
-.fade-leave-active {
-	transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-	opacity: 0;
-}
-</style>

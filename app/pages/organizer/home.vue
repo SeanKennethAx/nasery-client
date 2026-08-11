@@ -2,7 +2,7 @@
 	<div>
 		<div class="mb-6 rounded-2xl bg-gradient-to-r from-gray-100 to-gray-50 p-8">
 			<h1 class="text-3xl font-extrabold text-gray-900">
-				Good Afternoon, EventPro Solutions
+				{{ greeting }}, {{ firstName || 'Organizer' }} 👋
 			</h1>
 			<p class="mt-1.5 text-gray-500">
 				Here's what's happening with your events today
@@ -126,31 +126,118 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'dashboard' })
+definePageMeta({
+	layout: 'dashboard',
+})
+
+const {
+	firstName,
+} = useAuth()
+
+const greeting = computed(() => {
+	const hour = new Date().getHours()
+
+	if (hour < 12) {
+		return 'Good morning'
+	}
+
+	if (hour < 18) {
+		return 'Good afternoon'
+	}
+
+	return 'Good evening'
+})
 
 const stats = [
-	{ label: 'Active Events', value: '8', icon: 'calendar', trend: '+2 from last month', hasTrendIcon: true },
-	{ label: 'Pending Offers', value: '5', icon: 'clock', trend: '3 new inquiries', hasTrendIcon: false },
-	{ label: 'Win Rate', value: '72.7%', icon: 'trending-up', trend: '+5.2% this month', hasTrendIcon: true },
-	{ label: 'Total Revenue', value: '₱2.4M', icon: 'cash', trend: 'This quarter', hasTrendIcon: true }
+	{
+		label: 'Active Events',
+		value: '8',
+		icon: 'calendar',
+		trend: '+2 from last month',
+		hasTrendIcon: true,
+	},
+	{
+		label: 'Pending Offers',
+		value: '5',
+		icon: 'clock',
+		trend: '3 new inquiries',
+		hasTrendIcon: false,
+	},
+	{
+		label: 'Win Rate',
+		value: '72.7%',
+		icon: 'trending-up',
+		trend: '+5.2% this month',
+		hasTrendIcon: true,
+	},
+	{
+		label: 'Total Revenue',
+		value: '₱2.4M',
+		icon: 'cash',
+		trend: 'This quarter',
+		hasTrendIcon: true,
+	},
 ]
 
 const recentActivity = [
-	{ title: 'New matching inquiry: 18th Debut Birthday Party', time: '2 hours ago', action: 'Submit Offer' },
-	{ title: 'Congratulations! You won: STI College of Davao Intrammurals', time: '1 day ago', action: 'Start Planning' },
-	{ title: 'Event check-in starts in 3 days: Product Launch', time: '2 days ago', action: 'View Details' }
+	{
+		title: 'New matching inquiry: 18th Debut Birthday Party',
+		time: '2 hours ago',
+		action: 'Submit Offer',
+	},
+	{
+		title: 'Congratulations! You won: STI College of Davao Intrammurals',
+		time: '1 day ago',
+		action: 'Start Planning',
+	},
+	{
+		title: 'Event check-in starts in 3 days: Product Launch',
+		time: '2 days ago',
+		action: 'View Details',
+	},
 ]
 
 const upcomingEvents = [
-	{ name: 'Tech Conference 2026', date: 'June 15, 2026', guests: 1000, progress: 85 },
-	{ name: 'STI College of Davao Social Night', date: 'July 20, 2026', guests: 500, progress: 45 },
-	{ name: 'Wedding', date: 'August 5, 2026', guests: 200, progress: 30 }
+	{
+		name: 'Tech Conference 2026',
+		date: 'June 15, 2026',
+		guests: 1000,
+		progress: 85,
+	},
+	{
+		name: 'STI College of Davao Social Night',
+		date: 'July 20, 2026',
+		guests: 500,
+		progress: 45,
+	},
+	{
+		name: 'Wedding',
+		date: 'August 5, 2026',
+		guests: 200,
+		progress: 30,
+	},
 ]
 
 const quickActions = [
-	{ label: 'View Inquiries', sub: '3 new matches', icon: 'bell' },
-	{ label: 'Create Event', sub: 'Start planning', icon: 'calendar' },
-	{ label: 'Check Attendance', sub: 'QR scanning', icon: 'users' },
-	{ label: 'View Analytics', sub: 'Performance', icon: 'award' }
+	{
+		label: 'View Inquiries',
+		sub: '3 new matches',
+		icon: 'bell',
+	},
+	{
+		label: 'Create Event',
+		sub: 'Start planning',
+		icon: 'calendar',
+	},
+	{
+		label: 'Check Attendance',
+		sub: 'QR scanning',
+		icon: 'users',
+	},
+	{
+		label: 'View Analytics',
+		sub: 'Performance',
+		icon: 'award',
+	},
 ]
 </script>

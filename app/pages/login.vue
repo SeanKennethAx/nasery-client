@@ -1,23 +1,25 @@
 <template>
 	<div>
-
-		<Alert type="danger" :text="state?.error?.message"
-			v-if="state.error?.message && state.error.message.length > 0" />
+		<Alert v-if="errorMessage" type="danger" :text="errorMessage" />
 
 		<h2 class="mb-1.5 text-2xl font-extrabold text-gray-900 sm:text-[28px]">
 			Welcome back
 		</h2>
+
 		<p class="mb-6 text-sm text-gray-500">
 			Sign in to manage your events and bids
 		</p>
 
 		<AuthSocialButtons mode="login" @continue="handleSocialContinue" />
+
 		<AuthContactMethodToggle v-model="loginMethod" />
 
 		<form @submit.prevent="handleSubmit">
+			<!-- Email Login -->
 			<template v-if="loginMethod === 'email'">
 				<div class="mb-5">
 					<FormsLabel text="Email Address" required />
+
 					<FormsTextField v-model="state.email" type="email" placeholder="you@example.com" size="lg" required>
 						<template #icon>
 							<svg viewBox="0 0 20 20"
@@ -29,10 +31,13 @@
 					</FormsTextField>
 				</div>
 			</template>
+
+			<!-- Phone Login -->
 			<template v-else>
 				<div class="mb-5">
 					<FormsLabel text="Phone Number" required />
-					<FormsTextField v-model="state.phone" type="tel" placeholder="+1 (555) 000-0000" size="lg" required>
+
+					<FormsTextField v-model="state.phone" type="tel" placeholder="+63 912 345 6789" size="lg" required>
 						<template #icon>
 							<svg viewBox="0 0 20 20"
 								class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
@@ -44,14 +49,17 @@
 				</div>
 			</template>
 
+			<!-- Password -->
 			<div class="mb-2 flex items-center justify-between">
 				<label class="text-sm font-semibold text-gray-700">
 					Password
 				</label>
+
 				<span class="cursor-pointer text-[13px] font-semibold text-primary-600">
 					Forgot password?
 				</span>
 			</div>
+
 			<div class="mb-6">
 				<FormsPasswordField v-model="state.password" placeholder="Enter password" size="lg" required>
 					<template #icon>
@@ -64,54 +72,112 @@
 				</FormsPasswordField>
 			</div>
 
-			<button type="submit"
-				class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-700 py-4 text-[15px] font-bold text-white hover:bg-primary-900">
-				Sign In to NaSeRy
-				<svg viewBox="0 0 20 20" class="h-4 w-4">
-					<path fill="currentColor"
-						d="M11.3 4.3a1 1 0 0 1 1.4 0l5 5a1 1 0 0 1 0 1.4l-5 5a1 1 0 1 1-1.4-1.4L14.6 11H3a1 1 0 1 1 0-2h11.6l-3.3-3.3a1 1 0 0 1 0-1.4Z" />
-				</svg>
+			<!-- Submit -->
+			<button type="submit" :disabled="isLoading"
+				class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-700 py-4 text-[15px] font-bold text-white transition hover:bg-primary-900 disabled:cursor-not-allowed disabled:opacity-60">
+				<template v-if="isLoading">
+					Signing In...
+				</template>
+
+				<template v-else>
+					Sign In to NaSeRy
+
+					<svg viewBox="0 0 20 20" class="h-4 w-4">
+						<path fill="currentColor"
+							d="M11.3 4.3a1 1 0 0 1 1.4 0l5 5a1 1 0 0 1 0 1.4l-5 5a1 1 0 1 1-1.4-1.4L14.6 11H3a1 1 0 1 1 0-2h11.6l-3.3-3.3a1 1 0 0 1 0-1.4Z" />
+					</svg>
+				</template>
 			</button>
 		</form>
 
 		<p class="mt-5 text-center text-sm text-gray-500">
-			New to NaSeRy? <NuxtLink to="/register" class="font-bold text-primary-600">Create account</NuxtLink>
+			New to NaSeRy?
+
+			<NuxtLink to="/register" class="font-bold text-primary-600">
+				Create account
+			</NuxtLink>
 		</p>
 	</div>
 </template>
-
 <script setup lang="ts">
-import { authService } from '@/components/api/user/AuthService'
-definePageMeta({ layout: 'auth' })
+definePageMeta({
+	layout: 'auth',
+})
 
 const loginMethod = ref<'email' | 'phone'>('email')
 
 const state = reactive({
 	email: '',
-	error: null as any,
 	phone: '',
-	password: ''
+	password: '',
 })
 
-async function handleSubmit() {
-	try {
-		const params = {
-			email: state.email,
-			password: state.password,
-		}
-		const response = await authService.login(params)
-		if (response) {
-			localStorage.setItem("_token", response)
-			navigateTo('/organizer/home')
+const {
+	login,
+	redirectByRole,
+	isLoading,
+	errorMessage,
+} = useAuth()
 
-		}
+function normalizePhone(phone: string): string {
+	const normalized = phone
+		.trim()
+		.replace(/[\s\-()]+/g, '')
+
+	if (/^\+639\d{9}$/.test(normalized)) {
+		return normalized
 	}
-	catch (error: any) {
-		state.error = error
+
+	if (/^639\d{9}$/.test(normalized)) {
+		return `+${normalized}`
+	}
+
+	if (/^09\d{9}$/.test(normalized)) {
+		return `+63${normalized.slice(1)}`
+	}
+
+	if (/^9\d{9}$/.test(normalized)) {
+		return `+63${normalized}`
+	}
+
+	return normalized
+}
+
+async function handleSubmit() {
+	errorMessage.value = ''
+
+	try {
+		if (loginMethod.value === 'email') {
+			const user = await login({
+				email: state.email.trim(),
+				password: state.password,
+			})
+
+			await redirectByRole(user)
+			return
+		}
+
+		const user = await login({
+			phone: normalizePhone(state.phone),
+			password: state.password,
+		})
+
+		await redirectByRole(user)
+
+	} catch (error) {
+		console.error(
+			'Login failed:',
+			error
+		)
 	}
 }
 
 function handleSocialContinue() {
-	navigateTo('/organizer/home')
+	errorMessage.value =
+		'Social login is not available yet.'
 }
+
+watch(loginMethod, () => {
+	errorMessage.value = ''
+})
 </script>
