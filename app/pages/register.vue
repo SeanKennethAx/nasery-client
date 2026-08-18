@@ -32,10 +32,9 @@
 
 		<AuthSocialButtons mode="register" @continue="handleSocialContinue" />
 
-		<AuthContactMethodToggle v-model="registerMethod" />
-
 		<form @submit.prevent="handleSubmit">
 
+			<!-- Full Name -->
 			<div class="mb-5">
 				<FormsLabel text="Full Name" required />
 
@@ -51,39 +50,25 @@
 				</FormsTextField>
 			</div>
 
-			<template v-if="registerMethod === 'email'">
-				<div class="mb-5">
-					<FormsLabel text="Email Address" required />
 
-					<FormsTextField v-model="form.email" type="email" placeholder="you@example.com" size="lg" required>
-						<template #icon>
-							<svg viewBox="0 0 20 20"
-								class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
-								<path fill="currentColor"
-									d="M2.5 4.5A1.5 1.5 0 0 1 4 3h12a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 16 17H4a1.5 1.5 0 0 1-1.5-1.5v-11Zm1.7.3 5.34 4.27a.9.9 0 0 0 1.12 0L16 4.8a.3.3 0 0 0-.19-.3H4.19a.3.3 0 0 0-.19.3Z" />
-							</svg>
-						</template>
-					</FormsTextField>
-				</div>
-			</template>
+			<!-- Email -->
+			<div class="mb-5">
+				<FormsLabel text="Email Address" required />
 
-			<template v-else>
-				<div class="mb-5">
-					<FormsLabel text="Phone Number" required />
+				<FormsTextField v-model="form.email" type="email" placeholder="you@example.com" size="lg" required>
+					<template #icon>
+						<svg viewBox="0 0 20 20"
+							class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
+							<path fill="currentColor"
+								d="M2.5 4.5A1.5 1.5 0 0 1 4 3h12a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 16 17H4a1.5 1.5 0 0 1-1.5-1.5v-11Zm1.7.3 5.34 4.27a.9.9 0 0 0 1.12 0L16 4.8a.3.3 0 0 0-.19-.3H4.19a.3.3 0 0 0-.19.3Z" />
+						</svg>
+					</template>
+				</FormsTextField>
+			</div>
 
-					<FormsTextField v-model="form.phone" type="tel" placeholder="+63 912 345 6789" size="lg" required>
-						<template #icon>
-							<svg viewBox="0 0 20 20"
-								class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
-								<path fill="currentColor"
-									d="M4.4 2.6h2.9c.5 0 1 .3 1.1.8l.9 3a1.2 1.2 0 0 1-.3 1.2l-1.5 1.5a11.3 11.3 0 0 0 4.4 4.4l1.5-1.5a1.2 1.2 0 0 1 1.2-.3l3 .9c.5.1.8.6.8 1.1v2.9c0 .7-.6 1.3-1.3 1.2C9.9 17 3 10.1 2.6 2.7c0-.7.6-1.3 1.3-1.3Z" />
-							</svg>
-						</template>
-					</FormsTextField>
-				</div>
-			</template>
 
-			<div class="mb-6">
+			<!-- Password -->
+			<div class="mb-5">
 				<FormsLabel text="Password" required />
 
 				<FormsPasswordField v-model="form.password" placeholder="Create a strong password" size="lg" required>
@@ -96,6 +81,39 @@
 					</template>
 				</FormsPasswordField>
 			</div>
+
+
+			<!-- Phone -->
+			<div class="mb-5">
+				<FormsLabel text="Phone No" required />
+
+				<FormsTextField v-model="form.phone" type="tel" placeholder="+63 912 345 6789" size="lg" required>
+					<template #icon>
+						<svg viewBox="0 0 20 20"
+							class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
+							<path fill="currentColor"
+								d="M4.4 2.6h2.9c.5 0 1 .3 1.1.8l.9 3a1.2 1.2 0 0 1-.3 1.2l-1.5 1.5a11.3 11.3 0 0 0 4.4 4.4l1.5-1.5a1.2 1.2 0 0 1 1.2-.3l3 .9c.5.1.8.6.8 1.1v2.9c0 .7-.6 1.3-1.3 1.2C9.9 17 3 10.1 2.6 2.7c0-.7.6-1.3 1.3-1.3Z" />
+						</svg>
+					</template>
+				</FormsTextField>
+			</div>
+
+
+			<!-- Address -->
+			<div class="mb-6">
+				<FormsLabel text="Address" required />
+
+				<FormsTextField v-model="form.address" type="text" placeholder="Enter your address" size="lg" required>
+					<template #icon>
+						<svg viewBox="0 0 20 20"
+							class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
+							<path fill="currentColor"
+								d="M10 1.5a6 6 0 0 0-6 6c0 4.5 6 11 6 11s6-6.5 6-11a6 6 0 0 0-6-6Zm0 8.2a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Z" />
+						</svg>
+					</template>
+				</FormsTextField>
+			</div>
+
 
 			<p class="mb-5 text-[13px] leading-relaxed text-gray-500">
 				By creating an account, you agree to our
@@ -111,10 +129,12 @@
 				</span>.
 			</p>
 
+
 			<div v-if="errorMessage"
 				class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
 				{{ errorMessage }}
 			</div>
+
 
 			<button type="submit" :disabled="isLoading"
 				class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-700 py-4 text-[15px] font-bold text-white transition hover:bg-primary-900 disabled:cursor-not-allowed disabled:opacity-60">
@@ -195,21 +215,16 @@ definePageMeta({
 
 const role = ref<UserRole>('organizer')
 
-const registerMethod =
-	ref<'email' | 'phone'>('email')
-
 const showSuccessModal = ref(false)
-
-const registeredMethod =
-	ref<'email' | 'phone'>('email')
 
 const registeredContact = ref('')
 
 const form = reactive({
 	fullName: '',
 	email: '',
-	phone: '',
 	password: '',
+	phone: '',
+	address: '',
 })
 
 const {
@@ -218,17 +233,16 @@ const {
 	errorMessage,
 } = useAuth()
 
+
 const successContactLabel = computed(() => {
-	return registeredMethod.value === 'phone'
-		? 'Registered phone number'
-		: 'Registered email'
+	return 'Registered email'
 })
 
+
 const successLoginMessage = computed(() => {
-	return registeredMethod.value === 'phone'
-		? 'Please sign in using your phone number and password to access your new account.'
-		: 'Please sign in using your email and password to access your new account.'
+	return 'Please sign in using your email and password to access your new account.'
 })
+
 
 function parseFullName(fullName: string) {
 	const parts = fullName
@@ -272,6 +286,7 @@ function parseFullName(fullName: string) {
 	}
 }
 
+
 function normalizePhone(phone: string): string {
 	const normalized = phone
 		.trim()
@@ -300,6 +315,7 @@ function normalizePhone(phone: string): string {
 	return normalized
 }
 
+
 async function handleSubmit() {
 	errorMessage.value = ''
 
@@ -310,12 +326,40 @@ async function handleSubmit() {
 			lastname,
 		} = parseFullName(form.fullName)
 
+
+		// Full name validation
 		if (!firstname || !lastname) {
 			errorMessage.value =
 				'Please enter your first name and last name.'
 
 			return
 		}
+
+
+		// Email validation
+		const email = form.email
+			.trim()
+			.toLowerCase()
+
+		if (!email) {
+			errorMessage.value =
+				'Email address is required.'
+
+			return
+		}
+
+		const emailPattern =
+			/^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+		if (!emailPattern.test(email)) {
+			errorMessage.value =
+				'Please enter a valid email address.'
+
+			return
+		}
+
+
+		// Password validation
 		if (!form.password) {
 			errorMessage.value =
 				'Password is required.'
@@ -329,103 +373,115 @@ async function handleSubmit() {
 
 			return
 		}
-		if (registerMethod.value === 'email') {
-			const email = form.email
-				.trim()
-				.toLowerCase()
 
-			if (!email) {
-				errorMessage.value =
-					'Email address is required.'
 
-				return
-			}
-			const emailPattern =
-				/^[^\s@]+@[^\s@]+\.[^\s@]+$/
+		// Phone validation
+		const phone = normalizePhone(
+			form.phone
+		)
 
-			if (!emailPattern.test(email)) {
-				errorMessage.value =
-					'Please enter a valid email address.'
+		if (!phone) {
+			errorMessage.value =
+				'Phone number is required.'
 
-				return
-			}
-
-			await register({
-				firstname,
-				...(middlename
-					? { middlename }
-					: {}),
-
-				lastname,
-				email,
-				password: form.password,
-				role: role.value,
-				register_method: 'email',
-			})
-
-			registeredMethod.value = 'email'
-			registeredContact.value = email
+			return
 		}
-		else {
-			const phone = normalizePhone(
-				form.phone
-			)
 
-			if (!phone) {
-				errorMessage.value =
-					'Phone number is required.'
+		if (!/^\+639\d{9}$/.test(phone)) {
+			errorMessage.value =
+				'Please enter a valid Philippine mobile number.'
 
-				return
-			}
-
-			if (!/^\+639\d{9}$/.test(phone)) {
-				errorMessage.value =
-					'Please enter a valid Philippine mobile number.'
-
-				return
-			}
-
-			await register({
-				firstname,
-				...(middlename
-					? { middlename }
-					: {}),
-
-				lastname,
-				phone,
-				password: form.password,
-				role: role.value,
-				register_method: 'phone',
-			})
-
-			registeredMethod.value = 'phone'
-			registeredContact.value = phone
+			return
 		}
-		showSuccessModal.value = true
 
-	} catch (error: any) {
+
+		// Address validation
+		const address =
+			form.address.trim()
+
+		if (!address) {
+			errorMessage.value =
+				'Address is required.'
+
+			return
+		}
+
+
+		// Register account
+		await register({
+			firstname,
+
+			...(middlename
+				? { middlename }
+				: {}),
+
+			lastname,
+
+			email,
+
+			password:
+				form.password,
+
+			phone,
+
+			address,
+
+			role:
+				role.value,
+		})
+
+
+		registeredContact.value =
+			email
+
+		showSuccessModal.value =
+			true
+
+	} catch (error: unknown) {
 		console.error(
 			'Registration failed:',
 			error
 		)
-		if (error?.data?.errors) {
-			const errors = error.data.errors
 
-			const firstError = Object
-				.values(errors)
-				.flat()[0]
+		if (
+			typeof error === 'object' &&
+			error !== null
+		) {
+			const apiError = error as {
+				data?: {
+					message?: string
+					errors?: Record<
+						string,
+						string[]
+					>
+				}
+			}
 
-			errorMessage.value =
-				String(firstError)
+			if (apiError.data?.errors) {
+				const firstError =
+					Object
+						.values(
+							apiError.data.errors
+						)
+						.flat()
+						.at(0)
 
-			return
+				if (firstError) {
+					errorMessage.value =
+						String(firstError)
+
+					return
+				}
+			}
+
+			if (apiError.data?.message) {
+				errorMessage.value =
+					apiError.data.message
+
+				return
+			}
 		}
-		if (error?.data?.message) {
-			errorMessage.value =
-				error.data.message
 
-			return
-		}
 		if (error instanceof Error) {
 			errorMessage.value =
 				error.message
@@ -438,30 +494,17 @@ async function handleSubmit() {
 	}
 }
 
-async function goToLogin() {
-	showSuccessModal.value = false
 
-	await navigateTo({
-		path: '/login',
-		query: {
-			method: registeredMethod.value,
-		},
-	})
+async function goToLogin() {
+	showSuccessModal.value =
+		false
+
+	await navigateTo('/login')
 }
+
 
 function handleSocialContinue() {
 	errorMessage.value =
 		'Social registration is not available yet.'
 }
-
-
-watch(registerMethod, (method) => {
-	errorMessage.value = ''
-
-	if (method === 'email') {
-		form.phone = ''
-	} else {
-		form.email = ''
-	}
-})
 </script>

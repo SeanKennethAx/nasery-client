@@ -5,7 +5,7 @@ const activeTab = computed(() => (route.path === '/register' ? 'register' : 'sig
 
 <template>
 	<div class="relative flex min-h-screen flex-col bg-gray-50 lg:flex-row">
-		<div class="fixed inset-x-0 top-0 z-50 h-1 bg-gray-900" />
+		<!-- <div class="fixed inset-x-0 top-0 z-50 h-1 bg-gray-900" /> -->
 
 		<div
 			class="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-primary-600 to-primary-900 px-10 py-12 text-white lg:flex lg:w-1/2 lg:px-16 lg:py-14">

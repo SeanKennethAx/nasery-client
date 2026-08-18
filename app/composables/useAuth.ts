@@ -27,6 +27,7 @@ export function useAuth() {
         }
     )
 
+
     const fullName = computed(() => {
         if (!user.value) {
             return ''
@@ -86,6 +87,7 @@ export function useAuth() {
         )
     })
 
+
     async function register(
         payload: RegisterPayload
     ): Promise<User> {
@@ -93,77 +95,47 @@ export function useAuth() {
         errorMessage.value = ''
 
         try {
-            let registrationPayload: RegisterPayload
+            const registrationPayload: RegisterPayload = {
+                firstname:
+                    payload.firstname,
 
-            if (
-                payload.register_method === 'email'
-            ) {
-                registrationPayload = {
-                    firstname:
-                        payload.firstname,
+                ...(payload.middlename
+                    ? {
+                        middlename:
+                            payload.middlename,
+                    }
+                    : {}),
 
-                    ...(payload.middlename
-                        ? {
-                            middlename:
-                                payload.middlename,
-                        }
-                        : {}),
+                lastname:
+                    payload.lastname,
 
-                    lastname:
-                        payload.lastname,
+                email:
+                    payload.email
+                        .trim()
+                        .toLowerCase(),
 
-                    email:
-                        payload.email?.trim()
-                            .toLowerCase(),
+                phone:
+                    payload.phone.trim(),
 
-                    password:
-                        payload.password,
+                address:
+                    payload.address.trim(),
 
-                    role:
-                        payload.role,
+                password:
+                    payload.password,
 
-                    register_method:
-                        'email',
-                }
-            } else {
-                registrationPayload = {
-                    firstname:
-                        payload.firstname,
-
-                    ...(payload.middlename
-                        ? {
-                            middlename:
-                                payload.middlename,
-                        }
-                        : {}),
-
-                    lastname:
-                        payload.lastname,
-
-                    phone:
-                        payload.phone,
-
-                    password:
-                        payload.password,
-
-                    role:
-                        payload.role,
-
-                    register_method:
-                        'phone',
-                }
+                role:
+                    payload.role,
             }
+
             console.log(
                 'REGISTER REQUEST:',
                 registrationPayload
             )
 
-
             const response =
                 await authService.register(
                     registrationPayload
                 )
-
 
             return response.data
 
@@ -182,6 +154,7 @@ export function useAuth() {
             isLoading.value = false
         }
     }
+
 
     async function login(
         payload: LoginPayload
@@ -213,6 +186,8 @@ export function useAuth() {
             isLoading.value = false
         }
     }
+
+
     async function redirectByRole(
         authenticatedUser: User
     ) {
@@ -238,11 +213,15 @@ export function useAuth() {
             'Invalid user role.'
         )
     }
+
+
     function logout() {
         token.value = null
         user.value = null
         errorMessage.value = ''
     }
+
+
     function getErrorMessage(
         error: unknown
     ): string {

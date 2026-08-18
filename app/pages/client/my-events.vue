@@ -42,28 +42,39 @@
 			</div>
 		</div>
 
-		<div v-if="clientEvents.length" class="space-y-4">
+		<!-- Loading -->
+		<div v-if="isLoading" class="rounded-2xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
+			Loading your inquiries...
+		</div>
+
+		<!-- Error -->
+		<div v-else-if="errorMessage" class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+			{{ errorMessage }}
+		</div>
+
+		<!-- Inquiry Cards -->
+		<div v-else-if="clientEvents.length" class="space-y-4">
 			<div v-for="event in clientEvents" :key="event.id"
 				class="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
 				<div class="flex flex-wrap items-start justify-between gap-3">
 					<div class="flex min-w-0 items-start gap-3">
 						<div
 							class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
-							<IconBase :name="eventTypeIcon(event.eventType)" class="h-5 w-5" />
+							<IconBase :name="eventTypeIcon(event.event_type)" class="h-5 w-5" />
 						</div>
 
 						<div class="min-w-0">
 							<h3 class="truncate text-base font-bold text-gray-900">
 								{{
-									event.title ||
-									event.eventType + ' Inquiry'
+									event.event_title ||
+									event.event_type + ' Inquiry'
 								}}
 							</h3>
 
 							<p class="mt-0.5 text-sm text-gray-500">
-								{{ event.eventType }}
+								{{ event.event_type }}
 								&bull;
-								{{ formatDate(event.date) }}
+								{{ formatDate(event.event_date) }}
 								&bull;
 								{{ event.location }}
 							</p>
@@ -76,14 +87,14 @@
 					</span>
 				</div>
 
-				<div class="mt-4 grid grid-cols-2 gap-3">
+				<div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
 					<div class="rounded-lg bg-gray-50 p-3">
 						<div class="text-xs text-gray-500">
 							Guests
 						</div>
 
 						<div class="mt-1 text-sm font-bold text-gray-900">
-							{{ event.guests }}
+							{{ event.expected_guests }}
 						</div>
 					</div>
 
@@ -93,13 +104,24 @@
 						</div>
 
 						<div class="mt-1 truncate text-sm font-bold text-gray-900">
-							{{ event.budget }}
+							{{ event.budget_range }}
 						</div>
 					</div>
+				</div>
+
+				<div v-if="event.additional_details" class="mt-4 rounded-lg bg-gray-50 p-3">
+					<div class="text-xs text-gray-500">
+						Additional Details
+					</div>
+
+					<p class="mt-1 text-sm text-gray-700">
+						{{ event.additional_details }}
+					</p>
 				</div>
 			</div>
 		</div>
 
+		<!-- Empty State -->
 		<div v-else
 			class="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 bg-gray-50/60 px-5 py-16 text-center sm:px-6 sm:py-20">
 			<div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 text-gray-400">
@@ -127,34 +149,48 @@
 </template>
 
 <script setup lang="ts">
+interface ClientInquiry {
+	id: number
+	client_id: number
+	event_title: string | null
+	event_type: string
+	event_date: string
+	location: string
+	expected_guests: number
+	budget_range: string
+	additional_details: string | null
+	created_at: string
+	updated_at: string
+}
+
+interface ClientInquiryResponse {
+	data: ClientInquiry[]
+}
+
 definePageMeta({
 	layout: 'client',
 })
 
-/**
- * Logged-in user information.
- */
 const {
 	firstName,
+	token,
 } = useAuth()
 
-/**
- * Name displayed in:
- * "Welcome back, ..."
- *
- * Falls back to "Client" if user state
- * has not been loaded yet.
- */
+const config = useRuntimeConfig()
+
 const clientName = computed(() => {
 	return firstName.value || 'Client'
 })
 
-const clientEvents = useState<any[]>(
-	'clientEvents',
-	() => []
-)
+const clientEvents =
+	ref<ClientInquiry[]>([])
 
-const eventTypeIcons: Record<string, string> = {
+const isLoading = ref(false)
+
+const errorMessage = ref('')
+
+const eventTypeIcons:
+	Record<string, string> = {
 	Wedding: 'heart',
 	Corporate: 'briefcase',
 	Birthday: 'gift',
@@ -165,18 +201,30 @@ const eventTypeIcons: Record<string, string> = {
 	Seminar: 'award',
 }
 
-function eventTypeIcon(type: string): string {
-	return eventTypeIcons[type] ?? 'sparkles'
+function eventTypeIcon(
+	type: string
+): string {
+	return (
+		eventTypeIcons[type] ??
+		'sparkles'
+	)
 }
 
-function formatDate(dateStr: string): string {
+function formatDate(
+	dateStr: string
+): string {
 	if (!dateStr) {
 		return ''
 	}
 
-	return new Date(
-		`${dateStr}T00:00:00`
-	).toLocaleDateString(
+	const date =
+		dateStr.includes('T')
+			? new Date(dateStr)
+			: new Date(
+				`${dateStr}T00:00:00`
+			)
+
+	return date.toLocaleDateString(
 		'en-US',
 		{
 			month: 'long',
@@ -186,34 +234,135 @@ function formatDate(dateStr: string): string {
 	)
 }
 
+async function loadClientInquiries() {
+	if (!token.value) {
+		errorMessage.value =
+			'You are not authenticated.'
+
+		return
+	}
+
+	isLoading.value = true
+	errorMessage.value = ''
+
+	try {
+		const response =
+			await $fetch<ClientInquiryResponse>(
+				`${config.public.apiBaseURL}/inquiries/client`,
+				{
+					method: 'GET',
+
+					headers: {
+						Accept:
+							'application/json',
+
+						Authorization:
+							`Bearer ${token.value}`,
+					},
+				}
+			)
+
+		clientEvents.value =
+			response.data
+
+	} catch (error: unknown) {
+		console.error(
+			'Failed to load client inquiries:',
+			error
+		)
+
+		if (
+			typeof error === 'object' &&
+			error !== null
+		) {
+			const apiError = error as {
+				data?: {
+					message?: string
+				}
+			}
+
+			if (
+				apiError.data?.message
+			) {
+				errorMessage.value =
+					apiError.data.message
+
+				return
+			}
+		}
+
+		errorMessage.value =
+			'Unable to load your inquiries.'
+	} finally {
+		isLoading.value = false
+	}
+}
+
+onMounted(() => {
+	loadClientInquiries()
+})
+
 const stats = computed(() => [
 	{
 		label: 'Total Inquiries',
-		value: clientEvents.value.length,
-		icon: 'file-text',
-		iconBg: 'bg-gray-100',
-		iconColor: 'text-gray-500',
+
+		value:
+			clientEvents.value.length,
+
+		icon:
+			'file-text',
+
+		iconBg:
+			'bg-gray-100',
+
+		iconColor:
+			'text-gray-500',
 	},
+
 	{
 		label: 'Receiving Bids',
+
 		value: 0,
-		icon: 'sparkles',
-		iconBg: 'bg-gray-100',
-		iconColor: 'text-gray-500',
+
+		icon:
+			'sparkles',
+
+		iconBg:
+			'bg-gray-100',
+
+		iconColor:
+			'text-gray-500',
 	},
+
 	{
 		label: 'Awarded Events',
+
 		value: 0,
-		icon: 'award',
-		iconBg: 'bg-green-50',
-		iconColor: 'text-green-600',
+
+		icon:
+			'award',
+
+		iconBg:
+			'bg-green-50',
+
+		iconColor:
+			'text-green-600',
 	},
+
 	{
 		label: 'Open Events',
-		value: clientEvents.value.length,
-		icon: 'clock',
-		iconBg: 'bg-amber-50',
-		iconColor: 'text-amber-600',
+
+		value:
+			clientEvents.value.length,
+
+		icon:
+			'clock',
+
+		iconBg:
+			'bg-amber-50',
+
+		iconColor:
+			'text-amber-600',
 	},
 ])
 </script>

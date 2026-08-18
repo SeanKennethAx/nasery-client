@@ -12,66 +12,41 @@ export const authService = {
         payload: RegisterPayload
     ): Promise<RegisterResponse> {
         const config = useRuntimeConfig()
-        const body: RegisterPayload =
-            payload.register_method === 'email'
+
+        const body: RegisterPayload = {
+            firstname: payload.firstname,
+
+            ...(payload.middlename
                 ? {
-                    firstname: payload.firstname,
-
-                    ...(payload.middlename
-                        ? {
-                            middlename:
-                                payload.middlename,
-                        }
-                        : {}),
-
-                    lastname: payload.lastname,
-
-                    email:
-                        payload.email
-                            ?.trim()
-                            .toLowerCase(),
-
-                    password:
-                        payload.password,
-
-                    role:
-                        payload.role,
-
-                    register_method: 'email',
+                    middlename:
+                        payload.middlename,
                 }
-                : {
-                    firstname: payload.firstname,
+                : {}),
 
-                    ...(payload.middlename
-                        ? {
-                            middlename:
-                                payload.middlename,
-                        }
-                        : {}),
+            lastname: payload.lastname,
 
-                    lastname: payload.lastname,
+            email:
+                payload.email
+                    .trim()
+                    .toLowerCase(),
 
-                    phone:
-                        payload.phone?.trim(),
+            phone:
+                payload.phone.trim(),
 
-                    password:
-                        payload.password,
+            address:
+                payload.address.trim(),
 
-                    role:
-                        payload.role,
+            password:
+                payload.password,
 
-                    register_method: 'phone',
-                }
-        console.log(
-            'REGISTER METHOD:',
-            body.register_method
-        )
+            role:
+                payload.role,
+        }
 
         console.log(
             'REGISTER API BODY:',
             body
         )
-
 
         return await $fetch<RegisterResponse>(
             `${config.public.apiBaseURL}/auth/register`,
