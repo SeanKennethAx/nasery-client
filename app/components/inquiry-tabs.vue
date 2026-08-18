@@ -23,8 +23,8 @@
 		<div class="mb-6 inline-flex rounded-xl bg-gray-100 p-1">
 			<NuxtLink v-for="tab in tabs" :key="tab.label" :to="tab.to"
 				class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold" :class="route.path === tab.to
-						? 'bg-white text-gray-900 shadow-sm'
-						: 'text-gray-500 hover:text-gray-700'
+					? 'bg-white text-gray-900 shadow-sm'
+					: 'text-gray-500 hover:text-gray-700'
 					">
 				<IconBase :name="tab.icon" class="h-4 w-4" />
 
