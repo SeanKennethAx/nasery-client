@@ -168,6 +168,17 @@
 						</p>
 					</div>
 
+					<!-- Loading state while fetching profile -->
+					<div v-if="isProfileLoading" class="px-6 pb-4">
+						<p class="text-sm text-gray-400">Loading profile...</p>
+					</div>
+
+					<!-- Save error -->
+					<div v-if="profileSaveError"
+						class="mx-6 mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+						{{ profileSaveError }}
+					</div>
+
 					<!-- Tabs -->
 					<div
 						class="flex shrink-0 scroll-px-6 scroll-smooth gap-5 overflow-x-auto border-b border-gray-200 px-6">
@@ -404,12 +415,13 @@
 
 				<!-- Footer -->
 				<div class="flex shrink-0 gap-3 border-t border-gray-200 bg-white px-6 py-4">
-					<FormsButton variant="secondary" class="flex-1" @click="closeProfilePanel">
+					<FormsButton variant="secondary" class="flex-1" :disabled="isSavingProfile"
+						@click="closeProfilePanel">
 						Cancel
 					</FormsButton>
 
-					<FormsButton class="flex-1" @click="saveProfile">
-						Save Profile
+					<FormsButton class="flex-1" :disabled="isSavingProfile" @click="saveProfile">
+						{{ isSavingProfile ? 'Saving...' : 'Save Profile' }}
 					</FormsButton>
 				</div>
 			</div>
@@ -428,7 +440,10 @@ const {
 	initials,
 	roleLabel,
 	logout,
+	token,
 } = useAuth()
+
+const config = useRuntimeConfig()
 
 const sidebarOpen = ref(true)
 
@@ -618,14 +633,25 @@ const experienceRanges = [
 	'10+ years',
 ]
 
+/*
+ * IMPORTANT: these values must exactly match the
+ * backend validation list in
+ * OrganizerController::updateProfile
+ * ('in:Wedding,Corporate,Birthday,Debut,Concert,
+ *   Conference,Reunion,Seminar')
+ * and must match Inquiry.event_type values used
+ * when clients post inquiries, otherwise matching
+ * will silently return nothing.
+ */
 const eventTypeOptions = [
 	'Wedding',
-	'Corporate Event',
-	'Birthday Party',
+	'Corporate',
+	'Birthday',
+	'Debut',
 	'Concert',
 	'Conference',
-	'Social Event',
-	'Product Launch',
+	'Reunion',
+	'Seminar',
 ]
 
 const specialtyOptions = [
@@ -677,6 +703,29 @@ const showProfilePanel = ref(false)
 
 const activeProfileTab = ref('Identity')
 
+const isProfileLoading = ref(false)
+const isSavingProfile = ref(false)
+const profileSaveError = ref('')
+
+interface OrganizerProfileData {
+	id: number
+	user_id: number
+	company_name: string | null
+	years_experience: string | null
+	location: string | null
+	bio: string | null
+	tags: string[] | null
+	specialties: string[] | null
+	website: string | null
+	facebook: string | null
+	instagram: string | null
+	banner_color: string | null
+}
+
+interface OrganizerProfileResponse {
+	data: OrganizerProfileData
+}
+
 function syncProfileFromUser() {
 	if (!user.value) {
 		return
@@ -690,12 +739,86 @@ function syncProfileFromUser() {
 	profile.phone =
 		user.value.phone ?? ''
 
-	profile.location =
-		user.value.address ?? ''
+	// Don't overwrite location if it was
+	// already loaded from the organizer
+	// profile endpoint.
+	if (!profile.location) {
+		profile.location =
+			user.value.address ?? ''
+	}
 
 	syncDraftProfile()
 }
 
+/*
+ * Fetches the organizer's saved profile
+ * (company name, tags, specialties, etc.)
+ * from the backend and merges it into the
+ * local `profile` state.
+ */
+async function loadOrganizerProfile() {
+	if (!token.value) {
+		return
+	}
+
+	isProfileLoading.value = true
+
+	try {
+		const response =
+			await $fetch<OrganizerProfileResponse>(
+				`${config.public.apiBaseURL}/organizer/profile`,
+				{
+					method: 'GET',
+					headers: {
+						Accept: 'application/json',
+						Authorization: `Bearer ${token.value}`,
+					},
+				},
+			)
+
+		const data = response.data
+
+		profile.company =
+			data.company_name ?? ''
+
+		profile.yearsExperience =
+			data.years_experience ?? ''
+
+		if (data.location) {
+			profile.location = data.location
+		}
+
+		profile.bio = data.bio ?? ''
+
+		profile.tags = Array.isArray(data.tags)
+			? [...data.tags]
+			: []
+
+		profile.specialties = Array.isArray(
+			data.specialties,
+		)
+			? [...data.specialties]
+			: []
+
+		profile.website = data.website ?? ''
+		profile.facebook = data.facebook ?? ''
+		profile.instagram =
+			data.instagram ?? ''
+
+		profile.bannerColor =
+			data.banner_color ||
+			profile.bannerColor
+
+		syncDraftProfile()
+	} catch (error) {
+		console.error(
+			'Failed to load organizer profile:',
+			error,
+		)
+	} finally {
+		isProfileLoading.value = false
+	}
+}
 
 function syncDraftProfile() {
 	Object.assign(
@@ -729,6 +852,10 @@ watch(
 		immediate: true,
 	}
 )
+
+onMounted(() => {
+	loadOrganizerProfile()
+})
 
 const profileTabButtonRefs:
 	Record<string, HTMLElement | null> = {}
@@ -790,34 +917,153 @@ const panelInitials = computed(() => {
 	)
 })
 
-function openProfilePanel() {
+async function openProfilePanel() {
+	profileSaveError.value = ''
+
 	syncDraftProfile()
 
 	activeProfileTab.value =
 		'Identity'
 
 	showProfilePanel.value = true
+
+	// Refresh from the server each time
+	// the panel opens, in case it changed
+	// elsewhere.
+	await loadOrganizerProfile()
 }
 
 function closeProfilePanel() {
+	if (isSavingProfile.value) {
+		return
+	}
+
 	showProfilePanel.value = false
+	profileSaveError.value = ''
 }
 
-function saveProfile() {
-	Object.assign(
-		profile,
-		draftProfile
-	)
+/*
+ * Persists the draft profile (identity,
+ * about, tags, specialties, contact,
+ * appearance) to the backend via
+ * PUT /organizer/profile.
+ */
+async function saveProfile() {
+	if (!token.value) {
+		profileSaveError.value =
+			'Your session has expired. Please log in again.'
 
-	profile.tags = [
-		...draftProfile.tags,
-	]
+		return
+	}
 
-	profile.specialties = [
-		...draftProfile.specialties,
-	]
+	profileSaveError.value = ''
+	isSavingProfile.value = true
 
-	closeProfilePanel()
+	try {
+		await $fetch<OrganizerProfileResponse>(
+			`${config.public.apiBaseURL}/organizer/profile`,
+			{
+				method: 'PUT',
+				headers: {
+					Accept: 'application/json',
+					Authorization: `Bearer ${token.value}`,
+				},
+				body: {
+					company_name:
+						draftProfile.company || null,
+
+					years_experience:
+						draftProfile.yearsExperience ||
+						null,
+
+					location:
+						draftProfile.location || null,
+
+					bio: draftProfile.bio || null,
+
+					tags: draftProfile.tags,
+
+					specialties:
+						draftProfile.specialties,
+
+					website:
+						draftProfile.website || null,
+
+					facebook:
+						draftProfile.facebook || null,
+
+					instagram:
+						draftProfile.instagram || null,
+
+					banner_color:
+						draftProfile.bannerColor ||
+						null,
+				},
+			},
+		)
+
+		Object.assign(
+			profile,
+			draftProfile
+		)
+
+		profile.tags = [
+			...draftProfile.tags,
+		]
+
+		profile.specialties = [
+			...draftProfile.specialties,
+		]
+
+		showProfilePanel.value = false
+	} catch (error: unknown) {
+		console.error(
+			'Failed to save organizer profile:',
+			error,
+		)
+
+		if (
+			typeof error === 'object' &&
+			error !== null
+		) {
+			const apiError =
+				error as {
+					data?: {
+						message?: string
+						errors?: Record<string, string[]>
+					}
+				}
+
+			const validationErrors =
+				apiError.data?.errors
+
+			if (validationErrors) {
+				const firstError =
+					Object.values(
+						validationErrors,
+					)[0]?.[0]
+
+				if (firstError) {
+					profileSaveError.value =
+						firstError
+
+					return
+				}
+			}
+
+			if (apiError.data?.message) {
+				profileSaveError.value =
+					apiError.data.message
+
+				return
+			}
+		}
+
+		profileSaveError.value =
+			'Unable to save your profile. Please try again.'
+	} finally {
+		isSavingProfile.value = false
+	}
 }
 
 function toggleTag(

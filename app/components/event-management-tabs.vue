@@ -13,11 +13,20 @@
 		</div>
 
 		<div class="mb-6 inline-flex rounded-xl bg-gray-100 p-1">
-			<NuxtLink v-for="tab in tabs" :key="tab.label" :to="tab.to"
-				class="rounded-lg px-4 py-2 text-sm font-semibold"
-				:class="route.path === tab.to ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
-				{{ tab.label }}
-			</NuxtLink>
+			<template v-for="tab in tabs" :key="tab.label">
+				<NuxtLink v-if="!tab.disabled" :to="tab.to"
+					class="rounded-lg px-4 py-2 text-sm font-semibold transition" :class="route.path === tab.path
+						? 'bg-white text-gray-900 shadow-sm'
+						: 'bg-transparent text-gray-500 hover:bg-white/60 hover:text-gray-700'
+						">
+					{{ tab.label }}
+				</NuxtLink>
+
+				<button v-else type="button" disabled
+					class="cursor-not-allowed rounded-lg px-4 py-2 text-sm font-semibold text-gray-400 opacity-60">
+					{{ tab.label }}
+				</button>
+			</template>
 		</div>
 
 		<Transition name="fade">
@@ -43,8 +52,10 @@
 					</button>
 				</div>
 
-				<div class="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-gray-200 px-6 scroll-smooth">
-					<button v-for="tab in createTabs" :key="tab.label" :ref="(el) => setTabRef(tab.label, el)" type="button"
+				<div
+					class="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-gray-200 px-6 scroll-smooth">
+					<button v-for="tab in createTabs" :key="tab.label" :ref="(el) => setTabRef(tab.label, el)"
+						type="button"
 						class="flex shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-3 text-sm font-semibold"
 						:class="activeCreateTab === tab.label ? 'border-primary-700 text-primary-700' : 'border-transparent text-gray-400 hover:text-gray-600'"
 						@click="activeCreateTab = tab.label">
@@ -53,6 +64,11 @@
 				</div>
 
 				<div class="flex-1 overflow-y-auto px-6 py-5">
+					<div v-if="createEventError"
+						class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+						{{ createEventError }}
+					</div>
+
 					<template v-if="activeCreateTab === 'Basic Info'">
 						<FormsLabel text="Event Name" required />
 						<FormsTextField v-model="eventForm.name" placeholder="e.g. Santos-Reyes Wedding Reception" />
@@ -97,7 +113,8 @@
 
 						<div class="mt-4">
 							<FormsLabel text="Tags" hint="(comma-separated)" />
-							<FormsTextField v-model="eventForm.tags" icon="tag" placeholder="e.g. Wedding, Garden, Outdoor" />
+							<FormsTextField v-model="eventForm.tags" icon="tag"
+								placeholder="e.g. Wedding, Garden, Outdoor" />
 						</div>
 					</template>
 
@@ -141,7 +158,8 @@
 								</div>
 							</div>
 						</div>
-						<button type="button" class="mt-3 flex items-center gap-1 text-sm font-semibold text-primary-700"
+						<button type="button"
+							class="mt-3 flex items-center gap-1 text-sm font-semibold text-primary-700"
 							@click="addZone">
 							<IconBase name="plus" class="h-3.5 w-3.5" /> Add Zone
 						</button>
@@ -173,22 +191,31 @@
 
 						<div class="mt-4">
 							<FormsLabel text="Email" />
-							<FormsTextField v-model="eventForm.contactEmail" type="email" placeholder="you@example.com" />
+							<FormsTextField v-model="eventForm.contactEmail" type="email"
+								placeholder="you@example.com" />
 						</div>
 
 						<div class="mt-4">
 							<FormsLabel text="Phone" />
-							<FormsTextField v-model="eventForm.contactPhone" type="tel" placeholder="+63 9XX XXX XXXX" />
+							<FormsTextField v-model="eventForm.contactPhone" type="tel"
+								placeholder="+63 9XX XXX XXXX" />
 						</div>
 					</template>
 				</div>
 
 				<div class="shrink-0 border-t border-gray-200 px-6 py-4">
 					<button type="button"
-						class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#285F6b] px-4 py-3 text-sm font-semibold text-white hover:bg-[#1f4a54]"
-						@click="goNext">
-						{{ isLastTab ? 'Create Event' : 'Next' }}
-						<IconBase name="arrow-right" class="h-4 w-4" />
+						class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#285F6b] px-4 py-3 text-sm font-semibold text-white hover:bg-[#1f4a54] disabled:cursor-not-allowed disabled:opacity-60"
+						:disabled="isSubmittingEvent" @click="goNext">
+						{{
+							isSubmittingEvent
+								? 'Creating...'
+								: isLastTab
+									? 'Create Event'
+									: 'Next'
+						}}
+
+						<IconBase v-if="!isSubmittingEvent" name="arrow-right" class="h-4 w-4" />
 					</button>
 				</div>
 			</div>
@@ -219,92 +246,560 @@
 </style>
 
 <script setup lang="ts">
+const config = useRuntimeConfig()
 const route = useRoute()
 
-const tabs = [
-	{ label: 'All Events', to: '/organizer/eventmanagement/all-events' },
-	{ label: 'Event Details', to: '/organizer/eventmanagement/event-details' },
-	{ label: 'Ticket Tiers', to: '/organizer/eventmanagement/ticket-tiers' },
-	{ label: 'Preparation Tracking', to: '/organizer/eventmanagement/preparation-tracking' }
-]
+const {
+	token,
+} = useAuth()
 
-const createTabs = [
-	{ label: 'Basic Info', icon: 'file-text' },
-	{ label: 'Venue', icon: 'map-pin' },
-	{ label: 'Ticket Zones', icon: 'tag' },
-	{ label: 'Settings', icon: 'settings' },
-	{ label: 'Contact', icon: 'phone' }
-]
+const isSubmittingEvent = ref(false)
+const createEventError = ref('')
 
-const eventTypes = ['Wedding', 'Corporate', 'Conference', 'Birthday', 'Social', 'Charity', 'Other']
-const statusOptions = ['Draft', 'Published']
+/*
+ * Keep track of the currently selected event / quotation.
+ */
+const selectedEventId =
+	computed<string | null>(() => {
+		const value =
+			route.query.event
 
-const showCreateEvent = ref(false)
-const activeCreateTab = ref(createTabs[0].label)
+		return typeof value === 'string'
+			? value
+			: null
+	})
 
-const tabButtonRefs = {}
-function setTabRef(label, el) {
-	if (el) tabButtonRefs[label] = el
+const selectedQuotationId =
+	computed<string | null>(() => {
+		const value =
+			route.query.quotation
+
+		return typeof value === 'string'
+			? value
+			: null
+	})
+
+const hasSelectedEvent =
+	computed(() =>
+		Boolean(
+			selectedEventId.value ||
+			selectedQuotationId.value,
+		),
+	)
+
+function selectedQuery():
+	Record<string, string> {
+	const query:
+		Record<string, string> = {}
+
+	if (selectedEventId.value) {
+		query.event =
+			selectedEventId.value
+	}
+
+	if (selectedQuotationId.value) {
+		query.quotation =
+			selectedQuotationId.value
+	}
+
+	return query
 }
 
-watch(activeCreateTab, (label) => {
-	nextTick(() => {
-		tabButtonRefs[label]?.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' })
-	})
-})
+const tabs =
+	computed(() => [
+		{
+			label:
+				'All Events',
+
+			path:
+				'/organizer/eventmanagement/all-events',
+
+			to: {
+				path:
+					'/organizer/eventmanagement/all-events',
+			},
+
+			disabled:
+				false,
+		},
+
+		{
+			label:
+				'Event Details',
+
+			path:
+				'/organizer/eventmanagement/event-details',
+
+			to: {
+				path:
+					'/organizer/eventmanagement/event-details',
+
+				query:
+					selectedQuery(),
+			},
+
+			disabled:
+				!hasSelectedEvent.value,
+		},
+
+		{
+			label:
+				'Ticket Tiers',
+
+			path:
+				'/organizer/eventmanagement/ticket-tiers',
+
+			to: {
+				path:
+					'/organizer/eventmanagement/ticket-tiers',
+
+				query:
+					selectedQuery(),
+			},
+
+			disabled:
+				!hasSelectedEvent.value,
+		},
+
+		{
+			label:
+				'Preparation Tracking',
+
+			path:
+				'/organizer/eventmanagement/preparation-tracking',
+
+			to: {
+				path:
+					'/organizer/eventmanagement/preparation-tracking',
+
+				query:
+					selectedQuery(),
+			},
+
+			disabled:
+				!hasSelectedEvent.value,
+		},
+	])
+const createTabs = [
+	{
+		label:
+			'Basic Info',
+
+		icon:
+			'file-text',
+	},
+
+	{
+		label:
+			'Venue',
+
+		icon:
+			'map-pin',
+	},
+
+	{
+		label:
+			'Ticket Zones',
+
+		icon:
+			'tag',
+	},
+
+	{
+		label:
+			'Settings',
+
+		icon:
+			'settings',
+	},
+
+	{
+		label:
+			'Contact',
+
+		icon:
+			'phone',
+	},
+]
+
+const eventTypes = [
+	'Wedding',
+	'Corporate',
+	'Conference',
+	'Birthday',
+	'Social',
+	'Charity',
+	'Other',
+]
+
+const statusOptions = [
+	'Draft',
+	'Published',
+]
+
+const showCreateEvent =
+	ref(false)
+
+const activeCreateTab =
+	ref<string>(
+		createTabs[0]?.label ??
+		'Basic Info',
+	)
+
+const tabButtonRefs:
+	Record<string, HTMLElement> = {}
+
+function setTabRef(
+	label: string,
+	el:
+		| Element
+		| ComponentPublicInstance
+		| null,
+) {
+	if (
+		el instanceof HTMLElement
+	) {
+		tabButtonRefs[label] =
+			el
+	}
+}
+
+watch(
+	activeCreateTab,
+	(label) => {
+		nextTick(() => {
+			tabButtonRefs[
+				label
+			]?.scrollIntoView({
+				behavior:
+					'smooth',
+
+				inline:
+					'nearest',
+
+				block:
+					'nearest',
+			})
+		})
+	},
+)
 
 function emptyEventForm() {
 	return {
 		name: '',
-		eventType: '',
-		description: '',
-		eventDate: '',
-		status: 'Draft',
-		startTime: '',
-		endTime: '',
-		tags: '',
-		venueName: '',
-		address: '',
-		city: '',
-		capacity: '',
-		zones: [{ name: '', price: '', capacity: '' }],
-		publicRegistration: true,
-		requireApproval: false,
-		waitlistEnabled: false,
-		contactName: '',
-		contactEmail: '',
-		contactPhone: ''
+
+		eventType:
+			'',
+
+		description:
+			'',
+
+		eventDate:
+			'',
+
+		status:
+			'Draft',
+
+		startTime:
+			'',
+
+		endTime:
+			'',
+
+		tags:
+			'',
+
+		venueName:
+			'',
+
+		address:
+			'',
+
+		city:
+			'',
+
+		capacity:
+			'',
+
+		zones: [
+			{
+				name:
+					'',
+
+				price:
+					'',
+
+				capacity:
+					'',
+			},
+		],
+
+		publicRegistration:
+			true,
+
+		requireApproval:
+			false,
+
+		waitlistEnabled:
+			false,
+
+		contactName:
+			'',
+
+		contactEmail:
+			'',
+
+		contactPhone:
+			'',
 	}
 }
 
-const eventForm = reactive(emptyEventForm())
+const eventForm =
+	reactive(
+		emptyEventForm(),
+	)
 
 function openCreateEvent() {
-	Object.assign(eventForm, emptyEventForm())
-	activeCreateTab.value = createTabs[0].label
-	showCreateEvent.value = true
+	Object.assign(
+		eventForm,
+		emptyEventForm(),
+	)
+
+	activeCreateTab.value =
+		createTabs[0]?.label ??
+		'Basic Info'
+
+	createEventError.value =
+		''
+
+	showCreateEvent.value =
+		true
+}
+
+async function createEvent() {
+	if (!token.value) {
+		createEventError.value =
+			'Your session has expired.'
+
+		return
+	}
+
+	if (
+		!eventForm.name.trim() ||
+		!eventForm.eventType ||
+		!eventForm.eventDate
+	) {
+		createEventError.value =
+			'Event name, event type, and event date are required.'
+
+		activeCreateTab.value =
+			'Basic Info'
+
+		return
+	}
+
+	isSubmittingEvent.value =
+		true
+
+	createEventError.value =
+		''
+
+	try {
+		const response =
+			await $fetch<{
+				data?: {
+					id?: number
+				}
+			}>(
+				`${config.public.apiBaseURL}/organizer/events`,
+				{
+					method:
+						'POST',
+
+					headers: {
+						Accept:
+							'application/json',
+
+						Authorization:
+							`Bearer ${token.value}`,
+					},
+
+					body: {
+						name:
+							eventForm.name.trim(),
+
+						event_type:
+							eventForm.eventType,
+
+						description:
+							eventForm.description
+								.trim() ||
+							null,
+
+						event_date:
+							eventForm.eventDate,
+
+						start_time:
+							eventForm.startTime ||
+							null,
+
+						end_time:
+							eventForm.endTime ||
+							null,
+
+						location:
+							[
+								eventForm.venueName,
+								eventForm.address,
+								eventForm.city,
+							]
+								.map(
+									item =>
+										item.trim(),
+								)
+								.filter(
+									Boolean,
+								)
+								.join(
+									', ',
+								) ||
+							null,
+
+						expected_guests:
+							eventForm.capacity
+								? Number(
+									eventForm.capacity,
+								)
+								: null,
+
+						status:
+							eventForm.status.toLowerCase(),
+					},
+				},
+			)
+
+		showCreateEvent.value =
+			false
+
+		createEventError.value =
+			''
+
+		/*
+		 * If backend returns the newly created event ID,
+		 * go directly to its details.
+		 */
+		if (
+			response.data?.id
+		) {
+			await navigateTo({
+				path:
+					'/organizer/eventmanagement/event-details',
+
+				query: {
+					event:
+						response.data.id,
+				},
+			})
+
+			return
+		}
+
+		await navigateTo(
+			'/organizer/eventmanagement/all-events',
+		)
+
+	} catch (error: unknown) {
+		console.error(
+			'Failed to create event:',
+			error,
+		)
+
+		const apiError =
+			error as {
+				data?: {
+					message?: string
+				}
+			}
+
+		createEventError.value =
+			apiError.data?.message ??
+			'Unable to create event.'
+
+	} finally {
+		isSubmittingEvent.value =
+			false
+	}
 }
 
 function closeCreateEvent() {
-	showCreateEvent.value = false
+	if (
+		isSubmittingEvent.value
+	) {
+		return
+	}
+
+	showCreateEvent.value =
+		false
+
+	createEventError.value =
+		''
 }
 
 function addZone() {
-	eventForm.zones.push({ name: '', price: '', capacity: '' })
+	eventForm.zones.push({
+		name:
+			'',
+
+		price:
+			'',
+
+		capacity:
+			'',
+	})
 }
 
-function removeZone(index: number) {
-	eventForm.zones.splice(index, 1)
+function removeZone(
+	index: number,
+) {
+	eventForm.zones.splice(
+		index,
+		1,
+	)
 }
 
-const currentTabIndex = computed(() => createTabs.findIndex((t) => t.label === activeCreateTab.value))
-const isLastTab = computed(() => currentTabIndex.value === createTabs.length - 1)
+const currentTabIndex =
+	computed(() =>
+		createTabs.findIndex(
+			tab =>
+				tab.label ===
+				activeCreateTab.value,
+		),
+	)
 
-function goNext() {
-	if (isLastTab.value) {
-		closeCreateEvent()
-	} else {
-		activeCreateTab.value = createTabs[currentTabIndex.value + 1].label
+const isLastTab =
+	computed(
+		() =>
+			currentTabIndex.value ===
+			createTabs.length - 1,
+	)
+
+async function goNext() {
+	if (
+		isLastTab.value
+	) {
+		await createEvent()
+
+		return
+	}
+
+	const nextTab =
+		createTabs[
+		currentTabIndex.value + 1
+		]
+
+	if (nextTab) {
+		activeCreateTab.value =
+			nextTab.label
 	}
 }
 </script>

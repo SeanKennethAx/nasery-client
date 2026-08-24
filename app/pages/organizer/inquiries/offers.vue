@@ -98,9 +98,17 @@
 
 				<div class="mt-5 flex flex-wrap gap-3">
 					<button v-if="offer.quotation_status === 'accepted'" type="button"
-						class="flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700">
+						class="flex items-center gap-2 rounded-xl bg-primary-700 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-500 disabled:cursor-not-allowed disabled:opacity-60"
+						:disabled="startingPlanningId === offer.id" @click="startEventPlanning(offer)">
 						<IconBase name="arrow-right" class="h-4 w-4" />
-						Start Event Planning
+
+						{{
+							startingPlanningId === offer.id
+								? 'Starting...'
+								: offer.event
+									? 'Open Event'
+									: 'Start Event Planning'
+						}}
 					</button>
 
 					<button v-else-if="offer.quotation_status === 'pending'" type="button"
@@ -134,6 +142,9 @@
 </template>
 
 <script setup lang="ts">
+const startingPlanningId =
+	ref<number | null>(null)
+
 interface OfferInclusion {
 	id: number
 	quotation_id: number
@@ -146,6 +157,11 @@ interface OfferInquiry {
 	event_type: string
 	event_date: string
 	location: string
+}
+
+interface OrganizerEvent {
+	id: number
+	status: string
 }
 
 interface OrganizerOffer {
@@ -161,6 +177,7 @@ interface OrganizerOffer {
 	updated_at: string
 	inclusions?: OfferInclusion[]
 	inquiry?: OfferInquiry
+	event?: OrganizerEvent | null
 }
 
 interface OrganizerOffersResponse {
@@ -261,6 +278,69 @@ async function loadOffers() {
 		errorMessage.value = 'Unable to load your offers.'
 	} finally {
 		isLoading.value = false
+	}
+}
+async function startEventPlanning(
+	offer: OrganizerOffer,
+) {
+	if (!token.value) {
+		errorMessage.value =
+			'You are not authenticated.'
+
+		return
+	}
+
+	if (offer.event) {
+		await navigateTo(
+			'/organizer/eventmanagement/all-events',
+		)
+
+		return
+	}
+
+	startingPlanningId.value =
+		offer.id
+
+	try {
+		await $fetch(
+			`${config.public.apiBaseURL}/organizer/quotations/${offer.id}/start-planning`,
+			{
+				method: 'POST',
+
+				headers: {
+					Accept:
+						'application/json',
+
+					Authorization:
+						`Bearer ${token.value}`,
+				},
+			},
+		)
+
+		await navigateTo(
+			'/organizer/eventmanagement/all-events',
+		)
+
+	} catch (error: unknown) {
+		console.error(
+			'Failed to start event planning:',
+			error,
+		)
+
+		const apiError =
+			error as {
+				data?: {
+					message?: string
+				}
+			}
+
+		window.alert(
+			apiError.data?.message ??
+			'Unable to start event planning.',
+		)
+	} finally {
+		startingPlanningId.value =
+			null
 	}
 }
 

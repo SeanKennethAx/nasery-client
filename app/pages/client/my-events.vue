@@ -1,8 +1,5 @@
 <template>
 	<div>
-		<!-- ===================================================== -->
-		<!-- QUOTATION COMPARISON VIEW -->
-		<!-- ===================================================== -->
 		<div v-if="showQuotations && selectedEvent">
 			<div class="mb-5">
 				<button type="button"
@@ -13,7 +10,6 @@
 				</button>
 			</div>
 
-			<!-- Loading quotations -->
 			<div v-if="isLoadingQuotations" class="rounded-2xl border border-gray-200 bg-white p-10 text-center">
 				<div class="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-gray-50 text-primary-700">
 					<IconBase name="refresh-cw" class="h-5 w-5 animate-spin" />
@@ -194,40 +190,42 @@
 					</button>
 				</div>
 
-				<button v-for="notification in notifications.slice(0, 3)" :key="notification.id" type="button"
-					class="flex w-full items-start gap-3 border-b border-blue-100/70 px-4 py-3 text-left last:border-b-0 hover:bg-blue-50 sm:px-5"
-					:class="{ 'bg-white/70': !notification.read_at }" @click="openNotification(notification)">
-					<span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" :class="notification.read_at
-						? 'bg-gray-300'
-						: 'bg-blue-600'
-						"></span>
+				<div class="max-h-72 overflow-y-auto">
+					<button v-for="notification in notifications" :key="notification.id" type="button"
+						class="flex w-full items-start gap-3 border-b border-blue-100/70 px-4 py-3 text-left last:border-b-0 hover:bg-blue-50 sm:px-5"
+						:class="{ 'bg-white/70': !notification.read_at }" @click="openNotification(notification)">
+						<span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" :class="notification.read_at
+							? 'bg-gray-300'
+							: 'bg-blue-600'
+							"></span>
 
-					<div class="min-w-0 flex-1">
-						<p class="text-sm font-semibold text-gray-900">
-							{{
-								notification.data.message ||
-								'You received a new quotation.'
-							}}
-						</p>
-
-						<p class="mt-1 text-xs text-gray-500">
-							{{ notification.data.event_title || 'Event inquiry' }}
-
-							<span v-if="notification.data.quotation_amount">
-								·
+						<div class="min-w-0 flex-1">
+							<p class="text-sm font-semibold text-gray-900">
 								{{
-									formatCurrency(
-										notification.data.quotation_amount,
-									)
+									notification.data.message ||
+									'You received a new quotation.'
 								}}
-							</span>
-						</p>
-					</div>
+							</p>
 
-					<span class="shrink-0 text-xs text-gray-400">
-						{{ formatRelativeTime(notification.created_at) }}
-					</span>
-				</button>
+							<p class="mt-1 text-xs text-gray-500">
+								{{ notification.data.event_title || 'Event inquiry' }}
+
+								<span v-if="notification.data.quotation_amount">
+									·
+									{{
+										formatCurrency(
+											notification.data.quotation_amount,
+										)
+									}}
+								</span>
+							</p>
+						</div>
+
+						<span class="shrink-0 text-xs text-gray-400">
+							{{ formatRelativeTime(notification.created_at) }}
+						</span>
+					</button>
+				</div>
 			</div>
 
 			<!-- Header -->
@@ -365,22 +363,23 @@
 						</p>
 					</div>
 
-					<div v-if="
-						event.quotations_count > 0 ||
-						event.status === 'awarded'
-					" class="mt-4 flex justify-end">
+					<div class="mt-4 flex justify-end">
 						<button type="button"
 							class="flex items-center gap-2 rounded-xl bg-[#285F6b] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f4a54]"
 							@click="viewQuotations(event)">
 							<IconBase :name="event.status === 'awarded'
 								? 'calendar'
-								: 'file-text'
+								: event.quotations_count > 0
+									? 'file-text'
+									: 'clock'
 								" class="h-4 w-4" />
 
 							{{
 								event.status === 'awarded'
 									? 'View Event Details'
-									: 'View Quotations'
+									: event.quotations_count > 0
+										? 'View Quotations'
+										: 'View Status'
 							}}
 						</button>
 					</div>
@@ -510,6 +509,7 @@ interface QuotationResponse {
 
 definePageMeta({
 	layout: 'client',
+	middleware: ['client'],
 })
 
 const config = useRuntimeConfig()
@@ -519,7 +519,7 @@ const {
 	token,
 	user,
 	isAuthenticated,
-} = useAuth('client')
+} = useAuth()
 
 const clientName = computed(() => {
 	return firstName.value || 'Client'
@@ -1000,6 +1000,7 @@ async function acceptQuotation(
 				headers: {
 					Accept:
 						'application/json',
+
 					Authorization:
 						`Bearer ${token.value}`,
 				},
@@ -1012,11 +1013,14 @@ async function acceptQuotation(
 		])
 
 		if (selectedEvent.value) {
+			const selectedEventId =
+				selectedEvent.value.id
+
 			const updatedEvent =
 				clientEvents.value.find(
 					event =>
 						event.id ===
-						selectedEvent.value?.id,
+						selectedEventId,
 				)
 
 			if (updatedEvent) {
@@ -1028,39 +1032,75 @@ async function acceptQuotation(
 		window.alert(
 			'Quotation accepted successfully. This organizer has been selected for your event.',
 		)
+
 	} catch (error: unknown) {
 		console.error(
 			'Failed to accept quotation:',
 			error,
 		)
 
-		if (
-			typeof error === 'object' &&
-			error !== null
-		) {
-			const apiError =
-				error as {
-					data?: {
+		const apiError =
+			error as {
+				statusCode?: number
+				status?: number
+
+				response?: {
+					status?: number
+					_data?: {
 						message?: string
 					}
 				}
 
+				data?: {
+					message?: string
+				}
+
+				message?: string
+			}
+
+		const statusCode =
+			apiError.statusCode ??
+			apiError.status ??
+			apiError.response?.status
+
+		const backendMessage =
+			apiError.data?.message ??
+			apiError.response?._data?.message
+
+		if (statusCode === 401) {
 			window.alert(
-				apiError.data?.message ??
-				'Unable to accept quotation.',
+				'Your session has expired. Please log in again.',
+			)
+
+			return
+		}
+
+		if (statusCode === 403) {
+			window.alert(
+				backendMessage ??
+				'You are not authorized to accept this quotation.',
+			)
+
+			return
+		}
+
+		if (backendMessage) {
+			window.alert(
+				backendMessage,
 			)
 
 			return
 		}
 
 		window.alert(
-			'Unable to accept quotation.',
+			'Unable to accept quotation. Please try again.',
 		)
+
 	} finally {
-		acceptingQuotationId.value = null
+		acceptingQuotationId.value =
+			null
 	}
 }
-
 async function loadClientInquiries() {
 	errorMessage.value = ''
 
@@ -1075,7 +1115,10 @@ async function loadClientInquiries() {
 		return
 	}
 
-	if (user.value.role !== 'client') {
+	if (
+		user.value.role !==
+		'client'
+	) {
 		errorMessage.value =
 			'This account is not a client account.'
 
@@ -1085,69 +1128,117 @@ async function loadClientInquiries() {
 	isLoading.value = true
 
 	try {
+		console.log(
+			'Loading client inquiries...'
+		)
+
+		console.log(
+			'Current user:',
+			user.value
+		)
+
+		console.log(
+			'API URL:',
+			`${config.public.apiBaseURL}/inquiries/client`
+		)
+
 		const response =
 			await $fetch<ClientInquiryResponse>(
 				`${config.public.apiBaseURL}/inquiries/client`,
 				{
 					method: 'GET',
+
 					headers: {
 						Accept:
 							'application/json',
+
 						Authorization:
 							`Bearer ${token.value}`,
 					},
-				},
+				}
 			)
+
+		console.log(
+			'Client inquiries response:',
+			response
+		)
 
 		clientEvents.value =
 			response.data ?? []
+
 	} catch (error: unknown) {
 		console.error(
 			'Failed to load client inquiries:',
-			error,
+			error
 		)
 
-		if (
-			typeof error === 'object' &&
-			error !== null
-		) {
-			const apiError =
-				error as {
-					statusCode?: number
+		const apiError =
+			error as {
+				statusCode?: number
+				status?: number
+
+				response?: {
 					status?: number
-					data?: {
+
+					_data?: {
 						message?: string
 					}
 				}
 
-			const statusCode =
-				apiError.statusCode ??
-				apiError.status
+				data?: {
+					message?: string
+				}
 
-			if (statusCode === 401) {
-				errorMessage.value =
-					'Your client session has expired. Please log in again.'
-
-				return
+				message?: string
 			}
 
-			if (statusCode === 403) {
-				errorMessage.value =
-					'You are not authorized to view these inquiries.'
+		const statusCode =
+			apiError.statusCode ??
+			apiError.status ??
+			apiError.response?.status
 
-				return
-			}
+		const backendMessage =
+			apiError.data?.message ??
+			apiError.response?._data?.message
 
-			if (apiError.data?.message) {
-				errorMessage.value =
-					apiError.data.message
+		console.error(
+			'Inquiry API status:',
+			statusCode
+		)
 
-				return
-			}
+		console.error(
+			'Inquiry API message:',
+			backendMessage
+		)
+		if (statusCode === 401) {
+			errorMessage.value =
+				'Your session has expired. Please log in again.'
+
+			return
+		}
+		if (statusCode === 403) {
+			errorMessage.value =
+				backendMessage ??
+				'You are not authorized to view these inquiries.'
+
+			return
+		}
+		if (backendMessage) {
+			errorMessage.value =
+				backendMessage
+
+			return
+		}
+		if (apiError.message) {
+			errorMessage.value =
+				apiError.message
+
+			return
 		}
 
 		errorMessage.value =
 			'Unable to load your inquiries.'
+
 	} finally {
 		isLoading.value = false
 	}

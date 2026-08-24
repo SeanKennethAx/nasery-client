@@ -1,6 +1,5 @@
 <template>
 	<div>
-		<!-- Matching Inquiries Intro -->
 		<div class="mb-5 rounded-2xl border border-primary-100 bg-primary-50/70 p-4 sm:p-5">
 			<div class="flex items-start gap-3">
 				<div
@@ -22,7 +21,6 @@
 			</div>
 		</div>
 
-		<!-- Loading -->
 		<div v-if="isLoading" class="rounded-2xl border border-gray-200 bg-white p-10 text-center">
 			<div class="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-gray-50 text-primary-700">
 				<IconBase name="refresh-cw" class="h-5 w-5 animate-spin" />
@@ -57,7 +55,6 @@
 			<article v-for="inquiry in inquiries" :key="inquiry.id"
 				class="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-md">
 				<div class="p-5 sm:p-6">
-					<!-- Top row -->
 					<div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
 						<div class="min-w-0">
 							<div class="flex flex-wrap items-center gap-2.5">
@@ -117,7 +114,6 @@
 						</div>
 					</div>
 
-					<!-- Match line -->
 					<div class="mt-5 flex flex-wrap items-center gap-2">
 						<span class="text-xs font-semibold uppercase tracking-wide text-gray-400">
 							Matched service
@@ -128,7 +124,6 @@
 						</span>
 					</div>
 
-					<!-- Details -->
 					<div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
 						<div class="rounded-xl border border-gray-100 bg-gray-50/80 p-4">
 							<div class="flex items-center gap-2 text-xs font-medium text-gray-500">
@@ -175,7 +170,6 @@
 						</div>
 					</div>
 
-					<!-- Client note -->
 					<div v-if="inquiry.additional_details" class="mt-4 rounded-xl border border-gray-100 bg-white p-4">
 						<div
 							class="mb-1.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
@@ -189,7 +183,6 @@
 					</div>
 				</div>
 
-				<!-- Actions -->
 				<div
 					class="flex flex-col gap-3 border-t border-gray-100 bg-gray-50/60 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
 					<p class="text-xs text-gray-500">
@@ -230,22 +223,18 @@
 			</p>
 		</div>
 
-		<!-- Offer Overlay -->
 		<Transition name="fade">
 			<div v-if="showOfferForm" class="fixed inset-0 z-40 bg-gray-900/40" @click="closeOfferForm" />
 		</Transition>
 
-		<!-- Offer Form -->
-		<!-- Offer Overlay -->
 		<Transition name="fade">
 			<div v-if="showOfferForm" class="fixed inset-0 z-40 bg-gray-900/40" @click="closeOfferForm" />
 		</Transition>
 
-		<!-- Offer Form -->
 		<Transition name="slide">
 			<div v-if="showOfferForm"
 				class="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-white shadow-2xl">
-				<!-- Header -->
+
 				<div class="flex shrink-0 items-start justify-between border-b border-gray-200 px-6 py-5">
 					<div class="flex items-start gap-3">
 						<div
@@ -457,6 +446,21 @@ interface MatchingInquiryResponse {
 	data: MatchingInquiry[]
 }
 
+interface OrganizerOfferSummary {
+	id: number
+	inquiry_id: number
+	organizer_id: number
+	quotation_status:
+	| 'pending'
+	| 'accepted'
+	| 'rejected'
+	| 'withdrawn'
+}
+
+interface OrganizerOffersResponse {
+	data: OrganizerOfferSummary[]
+}
+
 interface SubmitQuotationResponse {
 	message: string
 	data: unknown
@@ -464,13 +468,15 @@ interface SubmitQuotationResponse {
 
 definePageMeta({
 	layout: 'dashboard',
+	middleware: ['organizer'],
 })
 
 const {
 	token,
 } = useAuth()
 
-const config = useRuntimeConfig()
+const config =
+	useRuntimeConfig()
 
 const inquiries =
 	ref<MatchingInquiry[]>([])
@@ -478,6 +484,12 @@ const inquiries =
 const matchingInquiryCount =
 	useState<number>(
 		'matchingInquiryCount',
+		() => 0,
+	)
+
+const myOffersCount =
+	useState<number>(
+		'myOffersCount',
 		() => 0,
 	)
 
@@ -521,7 +533,6 @@ const offerForm =
 	reactive(
 		emptyOfferForm(),
 	)
-
 async function loadMatchingInquiries() {
 	if (!token.value) {
 		errorMessage.value =
@@ -530,6 +541,7 @@ async function loadMatchingInquiries() {
 		inquiries.value = []
 
 		matchingInquiryCount.value = 0
+		myOffersCount.value = 0
 
 		return
 	}
@@ -538,8 +550,11 @@ async function loadMatchingInquiries() {
 	errorMessage.value = ''
 
 	try {
-		const response =
-			await $fetch<MatchingInquiryResponse>(
+		const [
+			matchingResponse,
+			offersResponse,
+		] = await Promise.all([
+			$fetch<MatchingInquiryResponse>(
 				`${config.public.apiBaseURL}/organizer/inquiries/matching`,
 				{
 					method: 'GET',
@@ -552,22 +567,49 @@ async function loadMatchingInquiries() {
 							`Bearer ${token.value}`,
 					},
 				},
-			)
+			),
 
+			$fetch<OrganizerOffersResponse>(
+				`${config.public.apiBaseURL}/organizer/quotations`,
+				{
+					method: 'GET',
+
+					headers: {
+						Accept:
+							'application/json',
+
+						Authorization:
+							`Bearer ${token.value}`,
+					},
+				},
+			),
+		])
+
+		/*
+		 * Matching inquiries
+		 */
 		inquiries.value =
-			response.data ?? []
+			matchingResponse.data ?? []
 
 		matchingInquiryCount.value =
-			response.data?.length ?? 0
+			matchingResponse.data?.length ?? 0
+
+		/*
+		 * My Offers
+		 */
+		myOffersCount.value =
+			offersResponse.data?.length ?? 0
+
 	} catch (error: unknown) {
 		console.error(
-			'Failed to load matching inquiries:',
+			'Failed to load inquiry and offer counts:',
 			error,
 		)
 
 		inquiries.value = []
 
 		matchingInquiryCount.value = 0
+		myOffersCount.value = 0
 
 		if (
 			typeof error === 'object' &&
@@ -834,16 +876,8 @@ async function submitOffer() {
 			response.message ||
 			'Quotation submitted successfully.'
 
-		/*
-		 * Refresh matching inquiries
-		 * so quotation count updates.
-		 */
 		await loadMatchingInquiries()
 
-		/*
-		 * Keep success message visible
-		 * before closing the drawer.
-		 */
 		window.setTimeout(
 			() => {
 				showOfferForm.value =
@@ -862,6 +896,7 @@ async function submitOffer() {
 			},
 			1500,
 		)
+
 	} catch (error: unknown) {
 		console.error(
 			'Failed to submit quotation:',

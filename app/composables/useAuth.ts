@@ -16,23 +16,9 @@ export function useAuth(
     const isLoading = ref(false)
     const errorMessage = ref('')
 
-    const tokenCookieName =
-        role === 'client'
-            ? 'client_auth_token'
-            : role === 'organizer'
-                ? 'organizer_auth_token'
-                : 'auth_token'
-
-    const userCookieName =
-        role === 'client'
-            ? 'client_auth_user'
-            : role === 'organizer'
-                ? 'organizer_auth_user'
-                : 'auth_user'
-
     const token =
         useCookie<string | null>(
-            tokenCookieName,
+            'auth_token',
             {
                 default: () => null,
                 sameSite: 'lax',
@@ -41,12 +27,24 @@ export function useAuth(
 
     const user =
         useCookie<User | null>(
-            userCookieName,
+            'auth_user',
             {
                 default: () => null,
                 sameSite: 'lax',
             }
         )
+
+    const hasRequiredRole =
+        computed(() => {
+            if (!role) {
+                return true
+            }
+
+            return (
+                user.value?.role ===
+                role
+            )
+        })
 
     const fullName = computed(() => {
         if (!user.value) {
@@ -180,6 +178,7 @@ export function useAuth(
             isLoading.value = false
         }
     }
+
     async function login(
         payload: LoginPayload
     ): Promise<User> {
@@ -195,83 +194,24 @@ export function useAuth(
             const authenticatedUser =
                 response.user
 
-            if (
-                authenticatedUser.role ===
-                'client'
-            ) {
-                const clientToken =
-                    useCookie<string | null>(
-                        'client_auth_token',
-                        {
-                            default:
-                                () => null,
-                            sameSite:
-                                'lax',
-                        }
-                    )
+            token.value =
+                response.token
 
-                const clientUser =
-                    useCookie<User | null>(
-                        'client_auth_user',
-                        {
-                            default:
-                                () => null,
-                            sameSite:
-                                'lax',
-                        }
-                    )
+            user.value =
+                authenticatedUser
 
-                clientToken.value =
-                    response.token
-
-                clientUser.value =
-                    authenticatedUser
-            }
-
-            if (
-                authenticatedUser.role ===
-                'organizer'
-            ) {
-                const organizerToken =
-                    useCookie<string | null>(
-                        'organizer_auth_token',
-                        {
-                            default:
-                                () => null,
-                            sameSite:
-                                'lax',
-                        }
-                    )
-
-                const organizerUser =
-                    useCookie<User | null>(
-                        'organizer_auth_user',
-                        {
-                            default:
-                                () => null,
-                            sameSite:
-                                'lax',
-                        }
-                    )
-
-                organizerToken.value =
-                    response.token
-
-                organizerUser.value =
-                    authenticatedUser
-            }
-
-
-            if (
-                !role ||
-                role ===
-                authenticatedUser.role
-            ) {
-                token.value =
-                    response.token
-
-                user.value =
-                    authenticatedUser
+            if (import.meta.client) {
+                localStorage.setItem(
+                    'auth_session_changed',
+                    JSON.stringify({
+                        role:
+                            authenticatedUser.role,
+                        userId:
+                            authenticatedUser.id,
+                        timestamp:
+                            Date.now(),
+                    })
+                )
             }
 
             return authenticatedUser
@@ -317,6 +257,17 @@ export function useAuth(
         token.value = null
         user.value = null
         errorMessage.value = ''
+
+        if (import.meta.client) {
+            localStorage.setItem(
+                'auth_session_changed',
+                JSON.stringify({
+                    role: null,
+                    timestamp:
+                        Date.now(),
+                })
+            )
+        }
     }
 
     function getErrorMessage(
@@ -373,6 +324,7 @@ export function useAuth(
         isLoading,
         errorMessage,
         isAuthenticated,
+        hasRequiredRole,
 
         fullName,
         firstName,
