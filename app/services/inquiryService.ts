@@ -4,6 +4,8 @@ export interface ClientInquiry {
     event_title: string | null
     event_type: string
     event_date: string
+    start_time: string | null
+    end_time: string | null
     location: string
     expected_guests: number
     budget_range: string

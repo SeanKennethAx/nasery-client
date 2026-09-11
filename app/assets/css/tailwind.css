@@ -6,3 +6,40 @@ html,
 body {
 	background-color: #f7f8f9;
 }
+
+/* ----------------------------------------------------------------------------------------------------
+    @vueform/multiselect
+---------------------------------------------------------------------------------------------------- */
+.multiselect {
+    @apply border border-gray-200 rounded-lg min-h-11 !important;
+}
+
+.multiselect-wrapper, .multiselect-search {
+    @apply rounded-lg !important;
+}
+
+.multiselect-dropdown {
+    @apply border border-gray-200 rounded-lg shadow-dropdown !important;
+}
+
+.multiselect-tag {
+    @apply bg-primary rounded-md !important;
+}
+
+.multiselect.is-active {
+    /* box-shadow: 0 0 0 3px rgba(44, 93, 229, 0.1) !important; */
+    @apply border border-primary !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.multiselect.is-active .multiselect-wrapper,
+.multiselect-search:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.multiselect-option.is-selected,
+.multiselect-option.is-selected.is-pointed {
+    @apply bg-primary !important;
+}

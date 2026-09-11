@@ -221,22 +221,7 @@
                         Ticket Type *
                     </label>
 
-                    <select v-model="walkInForm.ticketTypeId"
-                        class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15">
-                        <option :value="null" disabled>
-                            Select ticket type
-                        </option>
-
-                        <option v-for="tier in ticketTiers" :key="tier.id" :value="tier.id">
-                            {{ tier.name }}
-                            —
-                            {{
-                                formatCurrency(
-                                    tier.price,
-                                )
-                            }}
-                        </option>
-                    </select>
+                    <FormsSelect v-model="walkInForm.ticketTypeId" :options="ticketTiers.map(tier => ({ value: tier.id, label: `${tier.name} — ${formatCurrency(tier.price)}` }))" placeholder="Select ticket type" :can-clear="false" />
 
                     <div v-if="!ticketTiers.length"
                         class="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">

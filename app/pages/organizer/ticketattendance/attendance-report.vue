@@ -333,6 +333,10 @@
                                 </th>
 
                                 <th class="px-5 py-3">
+                                    Category
+                                </th>
+
+                                <th class="px-5 py-3">
                                     Source
                                 </th>
 
@@ -363,6 +367,12 @@
                                         attendee.ticket_type?.name ||
                                         'General Admission'
                                     }}
+                                </td>
+
+                                <td class="px-5 py-3.5">
+                                    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold" :class="categoryClass(attendee.attendee_category)">
+                                        {{ formatCategory(attendee.attendee_category) }}
+                                    </span>
                                 </td>
 
                                 <td class="px-5 py-3.5">
@@ -467,12 +477,18 @@ interface Attendee {
 
     ticket_id: string
 
+    attendee_category:
+    | 'invited'
+    | 'free'
+    | 'paid'
+
     source:
     | 'online'
     | 'walk_in'
     | string
 
     payment_status:
+    | null
     | 'pending'
     | 'paid'
     | 'refunded'
@@ -862,6 +878,25 @@ function formatSource(
         'Unknown'
 }
 
+function formatCategory(
+    category: Attendee['attendee_category'],
+): string {
+    return category.charAt(0).toUpperCase() + category.slice(1)
+}
+
+function categoryClass(
+    category: Attendee['attendee_category'],
+): string {
+    switch (category) {
+        case 'invited':
+            return 'bg-violet-50 text-violet-700'
+        case 'free':
+            return 'bg-blue-50 text-blue-700'
+        case 'paid':
+            return 'bg-green-50 text-green-700'
+    }
+}
+
 function formatCheckInDateTime(
     value: string,
 ): string {
@@ -918,6 +953,7 @@ function exportCsv() {
         'Name',
         'Email',
         'Ticket Type',
+        'Category',
         'Ticket ID',
         'Source',
         'Status',
@@ -937,6 +973,8 @@ function exportCsv() {
                     ?.name ??
                 'General Admission',
 
+                formatCategory(attendee.attendee_category),
+
                 attendee.ticket_id,
 
                 formatSource(
@@ -948,7 +986,7 @@ function exportCsv() {
                     ? 'Checked-in'
                     : 'Registered',
 
-                attendee.payment_status,
+                attendee.payment_status ?? 'Not required',
 
                 attendee.checked_in_at
                     ? formatCheckInDateTime(

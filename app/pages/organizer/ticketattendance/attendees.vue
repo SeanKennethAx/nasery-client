@@ -159,6 +159,10 @@
 							</th>
 
 							<th class="pb-3 pr-4">
+								Category
+							</th>
+
+							<th class="pb-3 pr-4">
 								Source
 							</th>
 
@@ -227,6 +231,12 @@
 									{{
 										attendee.ticket_id
 									}}
+								</span>
+							</td>
+
+							<td class="py-3.5 pr-4">
+								<span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold" :class="categoryClass(attendee.attendee_category)">
+									{{ formatCategory(attendee.attendee_category) }}
 								</span>
 							</td>
 
@@ -387,30 +397,10 @@
 							</span>
 						</label>
 
-						<select v-model="registerForm.ticketTypeId"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-[#285F6b] focus:outline-none focus:ring-2 focus:ring-[#285F6b]/15 disabled:cursor-not-allowed disabled:opacity-60"
-							:disabled="isLoadingTicketTypes ||
-								!ticketTypes.length
-								">
-							<option :value="null" disabled>
-								Select ticket type
-							</option>
-
-							<option v-for="ticketType in ticketTypes" :key="ticketType.id" :value="ticketType.id">
-								{{ ticketType.name }}
-								<span v-if="
-									ticketType.price !==
-									undefined
-								">
-									—
-									{{
-										formatCurrency(
-											ticketType.price,
-										)
-									}}
-								</span>
-							</option>
-						</select>
+						<FormsSelect v-model="registerForm.ticketTypeId"
+							:options="ticketTypes.map(ticketType => ({ value: ticketType.id, label: ticketType.price !== undefined ? `${ticketType.name} — ${formatCurrency(ticketType.price)}` : ticketType.name }))"
+							placeholder="Select ticket type" :can-clear="false"
+							:disabled="isLoadingTicketTypes || !ticketTypes.length" />
 
 						<div v-if="
 							!isLoadingTicketTypes &&
@@ -423,19 +413,19 @@
 
 					<div class="mt-4">
 						<label class="mb-1.5 block text-sm font-semibold text-gray-700">
+							Attendee Category <span class="text-red-500">*</span>
+						</label>
+
+						<FormsSelect v-model="registerForm.attendeeCategory" :options="[{ value: 'invited', label: 'Invited' }, { value: 'free', label: 'Free' }, { value: 'paid', label: 'Paid' }]" :can-clear="false" :searchable="false" />
+						<p class="mt-1.5 text-xs text-gray-500">Invited and Free attendees do not require a payment status.</p>
+					</div>
+
+					<div v-if="registerForm.attendeeCategory === 'paid'" class="mt-4">
+						<label class="mb-1.5 block text-sm font-semibold text-gray-700">
 							Payment Status
 						</label>
 
-						<select v-model="registerForm.paymentStatus"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-[#285F6b] focus:outline-none focus:ring-2 focus:ring-[#285F6b]/15">
-							<option value="paid">
-								Paid
-							</option>
-
-							<option value="pending">
-								Pending
-							</option>
-						</select>
+						<FormsSelect v-model="registerForm.paymentStatus" :options="[{ value: 'paid', label: 'Paid' }, { value: 'pending', label: 'Pending' }]" :can-clear="false" :searchable="false" />
 					</div>
 
 					<div v-if="selectedTicketType" class="mt-5 rounded-2xl border border-gray-200 bg-gray-50 p-4">
@@ -538,25 +528,31 @@
 			<div v-if="
 				showTicketResult &&
 				registeredTicket
-			" class="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-white shadow-2xl">
-				<div class="flex items-start justify-between border-b border-gray-200 px-6 py-5">
+			" class="fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col overflow-hidden bg-[#f4f8f8] shadow-2xl">
+				<div class="relative overflow-hidden bg-gradient-to-br from-[#285F6b] via-[#2f6f7c] to-[#3d8796] px-6 py-5 text-white">
+					<div class="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-white/10" />
+					<div class="relative flex items-start justify-between gap-4">
 					<div>
-						<h2 class="text-lg font-bold text-gray-900">
-							Attendee Registered
+						<span class="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white/85">
+							<span class="h-1.5 w-1.5 rounded-full bg-emerald-300" /> Official Event Pass
+						</span>
+						<h2 class="mt-3 text-2xl font-black tracking-tight">
+							QR Ticket
 						</h2>
 
-						<p class="mt-1 text-sm text-gray-500">
-							Ticket successfully created
+						<p class="mt-1 font-mono text-xs font-bold tracking-[0.12em] text-white/70">
+							{{ registeredTicket.ticket_id }}
 						</p>
 					</div>
 
-					<button type="button" class="text-gray-400 hover:text-gray-600" @click="closeTicketResult">
+					<button type="button" class="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-white/80 hover:bg-white/20" @click="closeTicketResult">
 						<IconBase name="x" class="h-5 w-5" />
 					</button>
+					</div>
 				</div>
 
-				<div class="flex-1 overflow-y-auto px-6 py-6">
-					<div class="rounded-2xl border border-gray-200 p-5">
+				<div class="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+					<div class="overflow-hidden rounded-[24px] border border-[#285F6b]/10 bg-white p-5 shadow-[0_12px_40px_rgba(40,95,107,0.08)]">
 						<div class="flex items-center gap-4">
 							<div
 								class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#285F6b]/10 text-base font-bold text-[#285F6b]">
@@ -584,6 +580,11 @@
 						<div class="my-5 border-t border-gray-100" />
 
 						<div class="space-y-4">
+							<div class="flex items-center justify-between gap-3">
+								<span class="text-sm text-gray-500">Category</span>
+								<span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="categoryClass(registeredTicket.attendee_category)">{{ formatCategory(registeredTicket.attendee_category) }}</span>
+							</div>
+
 							<div class="flex items-center justify-between gap-3">
 								<span class="text-sm text-gray-500">
 									Ticket ID
@@ -649,39 +650,39 @@
 						</div>
 					</div>
 
-					<div class="mt-5 rounded-2xl border border-green-200 bg-green-50 p-5 text-center">
+					<div class="relative mt-5 overflow-hidden rounded-[24px] border border-[#285F6b]/10 bg-white p-5 text-center shadow-[0_12px_40px_rgba(40,95,107,0.08)]">
 						<div
 							class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-green-600 shadow-sm">
 							<IconBase name="qr-code" class="h-7 w-7" />
 						</div>
 
-						<h3 class="mt-3 text-sm font-bold text-green-900">
-							QR Ticket Generated
+						<h3 class="mt-3 text-lg font-extrabold text-gray-900">
+							Ready for event check-in
 						</h3>
 
-						<p class="mt-1 text-xs leading-5 text-green-700">
-							This ticket now has a unique QR token and is ready for event check-in.
-						</p>
-					</div>
-
-					<div v-if="registeredTicket.qr_value" class="mt-5">
-						<p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-							QR Ticket Value
+						<p class="mx-auto mt-1 max-w-sm text-xs leading-5 text-gray-500">
+							Present this secure QR code to the organizer scanner at the event.
 						</p>
 
-						<div
-							class="break-all rounded-xl border border-gray-200 bg-gray-50 p-3 font-mono text-xs text-gray-500">
-							{{ registeredTicket.qr_value }}
+						<div class="mx-auto mt-5 flex h-[230px] w-[230px] items-center justify-center rounded-[24px] border border-gray-200 bg-white p-3 shadow-inner">
+							<IconBase v-if="isGeneratingTicketQr" name="refresh-cw" class="h-7 w-7 animate-spin text-[#285F6b]" />
+							<img v-else-if="registeredTicketQrDataUrl" :src="registeredTicketQrDataUrl" :alt="`QR code for ${registeredTicket.ticket_id}`" class="h-full w-full rounded-xl object-contain">
+							<IconBase v-else name="qr-code" class="h-16 w-16 text-gray-300" />
 						</div>
 					</div>
+
+					<details v-if="registeredTicket.qr_value" class="mt-4 rounded-2xl border border-gray-200 bg-white">
+						<summary class="cursor-pointer px-4 py-3.5 text-xs font-bold text-gray-600">Secure QR Value</summary>
+						<p class="break-all border-t border-gray-100 px-4 py-3 font-mono text-[10px] leading-5 text-gray-500">{{ registeredTicket.qr_value }}</p>
+					</details>
 				</div>
 
-				<div class="border-t border-gray-200 px-6 py-4">
-					<button type="button"
-						class="w-full rounded-xl bg-[#285F6b] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1f4a54]"
-						@click="closeTicketResult">
-						Done
-					</button>
+				<div class="border-t border-gray-200/80 bg-white px-5 py-5 sm:px-6">
+					<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+						<button type="button" class="rounded-2xl border border-[#285F6b]/20 bg-white px-4 py-3 text-sm font-extrabold text-[#285F6b] hover:bg-[#285F6b]/5" :disabled="!registeredTicket.qr_token" @click="downloadRegisteredTicket">Download Ticket</button>
+						<button type="button" class="rounded-2xl bg-gradient-to-br from-[#285F6b] to-[#347887] px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50" :disabled="!registeredTicket.email || !registeredTicket.qr_token || isEmailingTicket" @click="emailRegisteredTicket">{{ isEmailingTicket ? 'Sending...' : 'Email Ticket' }}</button>
+					</div>
+					<button type="button" class="mt-3 w-full rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-500 hover:bg-gray-50" @click="closeTicketResult">Done</button>
 				</div>
 			</div>
 		</Transition>
@@ -689,6 +690,7 @@
 </template>
 
 <script setup lang="ts">
+import QRCode from 'qrcode'
 interface OrganizerEvent {
 	id: number
 	name: string
@@ -717,6 +719,11 @@ interface Attendee {
 
 	ticket_id: string
 
+	attendee_category:
+	| 'invited'
+	| 'free'
+	| 'paid'
+
 	source:
 	| 'online'
 	| 'walk_in'
@@ -724,6 +731,7 @@ interface Attendee {
 	| string
 
 	payment_status:
+	| null
 	| 'pending'
 	| 'paid'
 	| 'refunded'
@@ -796,10 +804,18 @@ type AttendeeFilter =
 	| 'online'
 	| 'walk_in'
 	| 'organizer'
+	| 'invited'
+	| 'free'
+	| 'paid'
 
 type PaymentStatus =
 	| 'paid'
 	| 'pending'
+
+type AttendeeCategory =
+	| 'invited'
+	| 'free'
+	| 'paid'
 
 definePageMeta({
 	layout: 'dashboard',
@@ -899,6 +915,10 @@ const registeredTicket =
 		null,
 	)
 
+const registeredTicketQrDataUrl = ref('')
+const isGeneratingTicketQr = ref(false)
+const isEmailingTicket = ref(false)
+
 const filters: {
 	label: string
 	value: AttendeeFilter
@@ -927,6 +947,18 @@ const filters: {
 			label: 'Organizer',
 			value: 'organizer',
 		},
+		{
+			label: 'Invited',
+			value: 'invited',
+		},
+		{
+			label: 'Free',
+			value: 'free',
+		},
+		{
+			label: 'Paid',
+			value: 'paid',
+		},
 	]
 
 function emptyRegisterForm() {
@@ -937,6 +969,9 @@ function emptyRegisterForm() {
 
 		ticketTypeId:
 			null as number | null,
+
+		attendeeCategory:
+			'invited' as AttendeeCategory,
 
 		paymentStatus:
 			'paid' as PaymentStatus,
@@ -1010,6 +1045,13 @@ const filteredAttendees =
 						matchesFilter =
 							attendee.source ===
 							'organizer'
+						break
+
+					case 'invited':
+					case 'free':
+					case 'paid':
+						matchesFilter =
+							attendee.attendee_category === activeFilter.value
 						break
 				}
 
@@ -1086,6 +1128,13 @@ function getFilterCount(
 				attendee =>
 					attendee.source ===
 					'organizer',
+			).length
+
+		case 'invited':
+		case 'free':
+		case 'paid':
+			return attendees.value.filter(
+				attendee => attendee.attendee_category === filter,
 			).length
 
 		default:
@@ -1369,14 +1418,21 @@ async function submitRegisterAttendee() {
 						event_ticket_type_id:
 							registerForm.ticketTypeId,
 
+						attendee_category:
+							registerForm.attendeeCategory,
+
 						payment_status:
-							registerForm.paymentStatus,
+							registerForm.attendeeCategory === 'paid'
+								? registerForm.paymentStatus
+								: null,
 					},
 				},
 			)
 
 		registeredTicket.value =
 			response.data
+
+		await generateRegisteredTicketQr()
 
 		successMessage.value =
 			response.message ??
@@ -1421,12 +1477,66 @@ function closeTicketResult() {
 		false
 }
 
+async function generateRegisteredTicketQr() {
+	registeredTicketQrDataUrl.value = ''
+
+	if (!registeredTicket.value?.qr_value) {
+		return
+	}
+
+	isGeneratingTicketQr.value = true
+
+	try {
+		registeredTicketQrDataUrl.value = await QRCode.toDataURL(
+			registeredTicket.value.qr_value,
+			{ width: 420, margin: 2, errorCorrectionLevel: 'H' },
+		)
+	} finally {
+		isGeneratingTicketQr.value = false
+	}
+}
+
+function downloadRegisteredTicket() {
+	if (!registeredTicket.value?.qr_token || import.meta.server) {
+		return
+	}
+
+	window.open(
+		`${config.public.apiBaseURL}/tickets/${encodeURIComponent(registeredTicket.value.qr_token)}/download`,
+		'_blank',
+	)
+}
+
+async function emailRegisteredTicket() {
+	const ticket = registeredTicket.value
+
+	if (!ticket?.qr_token || !ticket.email) {
+		return
+	}
+
+	isEmailingTicket.value = true
+
+	try {
+		await $fetch(
+			`${config.public.apiBaseURL}/tickets/${encodeURIComponent(ticket.qr_token)}/email`,
+			{ method: 'POST', body: { email: ticket.email } },
+		)
+		successMessage.value = `Ticket sent to ${ticket.email}.`
+	} catch (error: unknown) {
+		errorMessage.value = getApiErrorMessage(error, 'Unable to email the ticket.')
+	} finally {
+		isEmailingTicket.value = false
+	}
+}
+
 function clearSuccess() {
 	successMessage.value =
 		''
 
 	registeredTicket.value =
 		null
+
+	registeredTicketQrDataUrl.value = ''
 }
 
 function formatStatus(
@@ -1498,10 +1608,10 @@ function sourceClass(
 }
 
 function formatPaymentStatus(
-	status: string,
+	status: string | null,
 ): string {
 	if (!status) {
-		return 'Unknown'
+		return 'Not required'
 	}
 
 	return (
@@ -1511,7 +1621,7 @@ function formatPaymentStatus(
 }
 
 function paymentClass(
-	status: string,
+	status: string | null,
 ): string {
 	switch (status) {
 		case 'paid':
@@ -1525,6 +1635,21 @@ function paymentClass(
 
 		default:
 			return 'bg-gray-100 text-gray-600'
+	}
+}
+
+function formatCategory(category: AttendeeCategory): string {
+	return category.charAt(0).toUpperCase() + category.slice(1)
+}
+
+function categoryClass(category: AttendeeCategory): string {
+	switch (category) {
+		case 'invited':
+			return 'bg-violet-50 text-violet-700'
+		case 'free':
+			return 'bg-blue-50 text-blue-700'
+		case 'paid':
+			return 'bg-green-50 text-green-700'
 	}
 }
 
@@ -1606,6 +1731,7 @@ function exportAttendees() {
 			'Email',
 			'Ticket Type',
 			'Ticket ID',
+			'Category',
 			'Source',
 			'Status',
 			'Payment Status',
@@ -1620,6 +1746,7 @@ function exportAttendees() {
 					?.name ??
 				'General Admission',
 				attendee.ticket_id,
+				formatCategory(attendee.attendee_category),
 				formatSource(
 					attendee.source,
 				),

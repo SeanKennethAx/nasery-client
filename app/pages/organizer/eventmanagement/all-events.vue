@@ -14,22 +14,24 @@
 			<article v-for="item in planningItems" :key="item.key" :id="item.event
 				? `event-${item.event.id}`
 				: `quotation-${item.quotation?.id}`
-				" class="cursor-pointer rounded-2xl border bg-white p-6 transition hover:border-primary-200 hover:shadow-sm"
+				" class="cursor-pointer overflow-hidden rounded-3xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-md"
 				:class="[
 					item.event
 						? 'border-gray-200'
-						: 'border-green-200',
+						: item.quotation?.quotation_status === 'accepted' ? 'border-green-200' : 'border-amber-200',
 
 					selectedEventId &&
 						item.event?.id === selectedEventId
 						? 'ring-2 ring-primary-500/30'
 						: '',
 				]" @click="openPlanningItem(item)">
+				<div class="h-1" :class="item.event ? 'bg-primary-700' : item.quotation?.quotation_status === 'accepted' ? 'bg-emerald-500' : 'bg-amber-400'" />
+				<div class="p-6">
 				<div class="flex flex-wrap items-start justify-between gap-4">
 					<div>
 						<div v-if="!item.event"
-							class="mb-2 text-xs font-semibold uppercase tracking-wide text-green-600">
-							Client Awarded Your Bid
+							class="mb-2 text-xs font-semibold uppercase tracking-wide" :class="item.quotation?.quotation_status === 'accepted' ? 'text-green-600' : 'text-amber-600'">
+							{{ item.quotation?.quotation_status === 'accepted' ? 'Client awarded your bid' : 'Offer awaiting client decision' }}
 						</div>
 
 						<h3 class="text-lg font-bold text-gray-900">
@@ -57,16 +59,16 @@
 						}}
 					</span>
 
-					<span v-else
-						class="shrink-0 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
-						Awarded
+					<span v-else class="shrink-0 rounded-full border px-3 py-1 text-xs font-semibold"
+						:class="item.quotation?.quotation_status === 'accepted' ? 'border-green-200 bg-green-50 text-green-700' : 'border-amber-200 bg-amber-50 text-amber-700'">
+						{{ item.quotation?.quotation_status === 'accepted' ? 'Awarded' : 'Pending offer' }}
 					</span>
 				</div>
 
 				<div v-if="item.quotation" class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
 					<div class="rounded-xl bg-gray-50 p-4">
 						<div class="text-xs text-gray-500">
-							Accepted Package
+							{{ item.quotation.quotation_status === 'accepted' ? 'Accepted Package' : 'Proposed Package' }}
 						</div>
 
 						<div class="mt-1 font-bold text-gray-900">
@@ -79,7 +81,7 @@
 
 					<div class="rounded-xl bg-gray-50 p-4">
 						<div class="text-xs text-gray-500">
-							Agreed Amount
+							{{ item.quotation.quotation_status === 'accepted' ? 'Agreed Amount' : 'Offer Amount' }}
 						</div>
 
 						<div class="mt-1 font-bold text-primary-700">
@@ -106,48 +108,46 @@
 					</div>
 				</div>
 
-				<div v-if="item.event" class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-					<div>
+				<div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+					<div class="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
 						<div class="text-sm text-gray-500">
 							Expected Guests
 						</div>
 
 						<div class="mt-1 text-2xl font-extrabold text-gray-900">
 							{{
-								item.event.expected_guests ??
+								item.event?.expected_guests ?? item.quotation?.inquiry?.expected_guests ??
 								0
 							}}
 						</div>
 					</div>
 
-					<div>
+					<div class="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
 						<div class="text-sm text-gray-500">
 							Start Time
 						</div>
 
 						<div class="mt-1 text-2xl font-extrabold text-gray-900">
 							{{
-								item.event.start_time ||
-								'—'
+								formatTime(item.startTime)
 							}}
 						</div>
 					</div>
 
-					<div>
+					<div class="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
 						<div class="text-sm text-gray-500">
 							End Time
 						</div>
 
 						<div class="mt-1 text-2xl font-extrabold text-gray-900">
 							{{
-								item.event.end_time ||
-								'—'
+								formatTime(item.endTime)
 							}}
 						</div>
 					</div>
 				</div>
 
-				<div class="mt-5">
+				<div v-if="item.event || item.quotation?.quotation_status === 'accepted'" class="mt-5">
 					<div class="mb-1 flex items-center justify-between text-sm">
 						<span class="font-semibold text-gray-900">
 							Event Readiness
@@ -182,8 +182,9 @@
 						@click.stop="
 							openPlanningItem(item)
 							">
-						View Details
+						{{ item.quotation?.quotation_status === 'pending' && !item.event ? 'View Offer' : 'View Details' }}
 					</button>
+				</div>
 				</div>
 			</article>
 		</div>
@@ -234,6 +235,8 @@ interface OfferInquiry {
 	event_type: string
 
 	event_date: string
+	start_time: string | null
+	end_time: string | null
 	location: string
 
 	expected_guests?: number
@@ -277,6 +280,8 @@ interface PlanningItem {
 	name: string
 
 	eventDate: string | null
+	startTime: string | null
+	endTime: string | null
 
 	location: string | null
 
@@ -386,6 +391,9 @@ const planningItems =
 				eventDate:
 					event.event_date,
 
+				startTime: event.start_time,
+				endTime: event.end_time,
+
 				location:
 					event.location,
 
@@ -398,10 +406,7 @@ const planningItems =
 			const quotation of
 			quotations.value
 		) {
-			if (
-				quotation.quotation_status !==
-				'accepted'
-			) {
+			if (['rejected', 'withdrawn'].includes(quotation.quotation_status)) {
 				continue
 			}
 
@@ -430,7 +435,10 @@ const planningItems =
 				eventDate:
 					quotation.inquiry
 						?.event_date ??
-					null,
+					 null,
+
+				startTime: quotation.inquiry?.start_time ?? null,
+				endTime: quotation.inquiry?.end_time ?? null,
 
 				location:
 					quotation.inquiry
@@ -491,6 +499,13 @@ function formatDate(
 			year: 'numeric',
 		},
 	)
+}
+
+function formatTime(value: string | null): string {
+	if (!value) return 'Not set'
+	const [hours, minutes] = value.substring(0, 5).split(':').map(Number)
+	return new Intl.DateTimeFormat('en-PH', { hour: 'numeric', minute: '2-digit' })
+		.format(new Date(2000, 0, 1, hours, minutes))
 }
 
 function formatCurrency(
@@ -723,6 +738,11 @@ async function openPlanningItem(
 		return
 	}
 	if (!item.quotation) {
+		return
+	}
+
+	if (item.quotation.quotation_status === 'pending') {
+		await navigateTo('/organizer/inquiries/offers')
 		return
 	}
 

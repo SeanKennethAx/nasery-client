@@ -41,9 +41,9 @@
 					<button type="button"
 						class="mb-1 flex w-full items-center gap-3 rounded-lg p-1.5 text-left hover:bg-gray-50"
 						@click="openProfilePanel">
-						<div
-							class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-700 text-sm font-bold text-white">
-							{{ sidebarInitials }}
+						<div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-700 text-sm font-bold text-white">
+							<img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-full w-full object-cover" />
+							<span v-else>{{ sidebarInitials }}</span>
 						</div>
 
 						<div class="min-w-0">
@@ -101,35 +101,38 @@
 
 		<Transition name="slide">
 			<div v-if="showProfilePanel"
-				class="fixed inset-y-0 right-0 z-50 flex w-full max-w-xl flex-col overflow-y-auto bg-white shadow-2xl">
-				<div class="relative shrink-0 pb-9">
-					<div class="h-16" :style="{ backgroundColor: draftProfile.bannerColor }" />
-					<button type="button" class="absolute right-4 top-4 text-white/80 hover:text-white"
+				class="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col overflow-hidden bg-white shadow-2xl"
+				role="dialog" aria-modal="true" aria-labelledby="client-profile-title">
+				<div class="relative shrink-0 pb-11">
+					<div class="h-28 bg-gradient-to-br from-primary-700 to-primary-900" :style="{ backgroundColor: draftProfile.bannerColor }"><img v-if="user?.cover_url" :src="user.cover_url" alt="" class="h-full w-full object-cover" /></div>
+					<div aria-hidden="true" class="absolute right-20 top-5 h-20 w-20 rounded-full border border-white/10" />
+					<button type="button" aria-label="Close profile" class="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-gray-900/20 text-white backdrop-blur-sm transition hover:bg-gray-900/35"
 						@click="closeProfilePanel">
 						<IconBase name="x" class="h-5 w-5" />
 					</button>
-					<div
-						class="absolute -bottom-1 left-6 flex h-16 w-16 items-center justify-center rounded-2xl border-4 border-white bg-white text-lg font-bold text-primary-700 shadow-sm">
-						{{ panelInitials }}
+					<div class="absolute -bottom-1 left-6 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-primary-50 text-xl font-extrabold text-primary-700 shadow-md">
+						<img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-full w-full object-cover" />
+						<span v-else>{{ panelInitials }}</span>
 					</div>
 				</div>
 
-				<div class="px-6 pb-4">
-					<h2 class="text-lg font-bold text-gray-900">{{ draftProfile.fullName }}</h2>
-					<p class="text-sm text-gray-500">{{ draftProfile.clientType }} Client</p>
+				<div class="shrink-0 px-6 pb-5">
+					<p class="mb-1 text-[10px] font-extrabold uppercase tracking-[.18em] text-primary-700">Client profile</p>
+					<h2 id="client-profile-title" class="truncate text-xl font-extrabold text-gray-900">{{ draftProfile.fullName }}</h2>
+					<p class="mt-0.5 text-sm text-gray-500">Manage what organizers see about you.</p>
 				</div>
 
-				<div class="flex scroll-px-6 scroll-smooth gap-5 overflow-x-auto border-b border-gray-200 px-6">
-					<button v-for="tab in profileTabs" :key="tab.label" :ref="(el) => setProfileTabRef(tab.label, el)"
-						type="button" class="flex shrink-0 items-center gap-1.5 border-b-2 pb-3 text-sm font-semibold"
-						:class="activeProfileTab === tab.label ? 'border-primary-700 text-primary-700' : 'border-transparent text-gray-400 hover:text-gray-600'"
+				<div class="flex shrink-0 scroll-px-6 scroll-smooth gap-2 overflow-x-auto overscroll-x-contain border-y border-gray-100 bg-gray-50/80 px-6 py-3">
+					<button v-for="tab in profileTabs" :key="tab.label"
+						type="button" class="flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-bold transition"
+						:class="activeProfileTab === tab.label ? 'border-primary-200 bg-white text-primary-700 shadow-sm' : 'border-transparent text-gray-400 hover:bg-white hover:text-gray-600'"
 						@click="activeProfileTab = tab.label">
 						<IconBase :name="tab.icon" class="h-4 w-4" />
 						{{ tab.label }}
 					</button>
 				</div>
 
-				<div class="flex-1 px-6 py-5">
+				<div class="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-white px-6 py-6">
 					<div v-if="activeProfileTab === 'Identity'">
 						<div class="mb-5 flex items-center gap-3">
 							<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
@@ -145,10 +148,7 @@
 						<FormsTextField v-model="draftProfile.fullName" />
 
 						<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Client Type</label>
-						<select v-model="draftProfile.clientType"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15">
-							<option v-for="type in clientTypes" :key="type" :value="type">{{ type }}</option>
-						</select>
+						<FormsSelect v-model="draftProfile.clientType" :options="clientTypes" :can-clear="false" />
 
 						<div class="mt-4">
 							<FormsLabel text="Location / City" />
@@ -253,6 +253,7 @@
 					</div>
 
 					<div v-else-if="activeProfileTab === 'Appearance'">
+						<ProfileMediaEditor class="mb-6" />
 						<div class="mb-5 flex items-center gap-3">
 							<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
 								<IconBase name="settings" class="h-4 w-4" />
@@ -271,7 +272,7 @@
 					</div>
 				</div>
 
-				<div class="flex shrink-0 gap-3 border-t border-gray-200 px-6 py-4">
+				<div class="flex shrink-0 gap-3 border-t border-gray-200 bg-white px-6 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.04)]">
 					<FormsButton variant="secondary" class="flex-1" @click="closeProfilePanel">
 						Cancel
 					</FormsButton>
@@ -305,6 +306,11 @@ const navItems = [
 		icon: 'home',
 	},
 	{
+		label: 'Post Event Inquiry',
+		to: '/client/post-event',
+		icon: 'send',
+	},
+	{
 		label: 'Event Details',
 		to: '/client/event-details',
 		icon: 'calendar',
@@ -318,6 +324,16 @@ const navItems = [
 		label: 'Activity Timeline',
 		to: '/client/activity-timeline',
 		icon: 'activity',
+	},
+	{
+		label: 'Event Marketplace',
+		to: '/marketplace',
+		icon: 'calendar',
+	},
+	{
+		label: 'Browse Organizers',
+		to: '/organizers',
+		icon: 'users',
 	},
 ]
 
@@ -490,39 +506,6 @@ watch(
 	},
 	{
 		immediate: true,
-	}
-)
-
-const profileTabButtonRefs: Record<
-	string,
-	HTMLElement
-> = {}
-
-function setProfileTabRef(
-	label: string,
-	el: any
-) {
-	if (!el) {
-		return
-	}
-
-	profileTabButtonRefs[label] =
-		el instanceof HTMLElement
-			? el
-			: el.$el
-}
-
-watch(
-	activeProfileTab,
-	(label) => {
-		nextTick(() => {
-			profileTabButtonRefs[label]
-				?.scrollIntoView({
-					behavior: 'smooth',
-					inline: 'nearest',
-					block: 'nearest',
-				})
-		})
 	}
 )
 

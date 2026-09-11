@@ -10,7 +10,9 @@
 		</div>
 
 		<div v-else-if="offers.length" class="space-y-5">
-			<article v-for="offer in offers" :key="offer.id" class="rounded-2xl border border-gray-200 bg-white p-6">
+			<article v-for="offer in offers" :key="offer.id" class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition hover:border-primary-200 hover:shadow-md">
+				<div class="h-1" :class="offer.quotation_status === 'accepted' ? 'bg-emerald-500' : offer.quotation_status === 'rejected' ? 'bg-rose-400' : 'bg-amber-400'" />
+				<div class="p-6">
 				<div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 					<div>
 						<h3 class="text-lg font-bold text-gray-900">
@@ -26,6 +28,12 @@
 						:class="statusBadgeClass(offer.quotation_status)">
 						{{ statusLabel(offer.quotation_status) }}
 					</span>
+				</div>
+
+				<div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-primary-100 bg-primary-50/60 px-4 py-3 text-sm">
+					<span class="flex items-center gap-2 font-semibold text-gray-800"><IconBase name="calendar" class="h-4 w-4 text-primary-700" />{{ formatEventDate(offer.inquiry?.event_date) }}</span>
+					<span class="flex items-center gap-2 font-semibold text-primary-800"><IconBase name="clock" class="h-4 w-4" />{{ formatSchedule(offer.inquiry?.start_time, offer.inquiry?.end_time) }}</span>
+					<span v-if="offer.inquiry?.location" class="flex min-w-0 items-center gap-2 text-gray-500"><IconBase name="map-pin" class="h-4 w-4 shrink-0" /><span class="truncate">{{ offer.inquiry.location }}</span></span>
 				</div>
 
 				<div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -122,6 +130,7 @@
 						View Full Proposal
 					</button>
 				</div>
+				</div>
 			</article>
 		</div>
 
@@ -156,6 +165,8 @@ interface OfferInquiry {
 	event_title: string | null
 	event_type: string
 	event_date: string
+	start_time: string | null
+	end_time: string | null
 	location: string
 }
 
@@ -235,6 +246,22 @@ function formatDate(dateString: string): string {
 		day: 'numeric',
 		year: 'numeric',
 	})
+}
+
+function formatEventDate(value?: string): string {
+	return value ? formatDate(value) : 'Date not set'
+}
+
+function formatTime(value?: string | null): string {
+	if (!value) return 'Not set'
+	const [hours, minutes] = value.substring(0, 5).split(':').map(Number)
+	return new Intl.DateTimeFormat('en-PH', { hour: 'numeric', minute: '2-digit' })
+		.format(new Date(2000, 0, 1, hours, minutes))
+}
+
+function formatSchedule(start?: string | null, end?: string | null): string {
+	if (!start && !end) return 'Time not set'
+	return `${formatTime(start)} – ${formatTime(end)}`
 }
 
 async function loadOffers() {

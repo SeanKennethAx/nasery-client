@@ -14,16 +14,23 @@ export const authService = {
         const config = useRuntimeConfig()
 
         const body: RegisterPayload = {
-            firstname: payload.firstname,
+            ...payload,
+
+            firstname:
+                payload.firstname
+                    .trim(),
 
             ...(payload.middlename
                 ? {
                     middlename:
-                        payload.middlename,
+                        payload.middlename
+                            .trim(),
                 }
                 : {}),
 
-            lastname: payload.lastname,
+            lastname:
+                payload.lastname
+                    .trim(),
 
             email:
                 payload.email
@@ -31,16 +38,41 @@ export const authService = {
                     .toLowerCase(),
 
             phone:
-                payload.phone.trim(),
+                payload.phone
+                    .trim(),
 
             address:
-                payload.address.trim(),
+                payload.address
+                    .trim(),
 
             password:
                 payload.password,
 
             role:
                 payload.role,
+
+            ...(payload.role === 'organizer'
+                ? {
+                    location:
+                        payload.location
+                            ?.trim()
+                        || payload.address.trim(),
+
+                    google_place_id:
+                        payload.google_place_id
+                        || undefined,
+
+                    latitude:
+                        payload.latitude,
+
+                    longitude:
+                        payload.longitude,
+
+                    service_radius_km:
+                        payload.service_radius_km
+                        ?? 25,
+                }
+                : {}),
         }
 
         console.log(
@@ -54,7 +86,9 @@ export const authService = {
                 method: 'POST',
 
                 headers: {
-                    Accept: 'application/json',
+                    Accept:
+                        'application/json',
+
                     'Content-Type':
                         'application/json',
                 },
@@ -76,7 +110,9 @@ export const authService = {
                 method: 'POST',
 
                 headers: {
-                    Accept: 'application/json',
+                    Accept:
+                        'application/json',
+
                     'Content-Type':
                         'application/json',
                 },
@@ -98,7 +134,8 @@ export const authService = {
                 method: 'GET',
 
                 headers: {
-                    Accept: 'application/json',
+                    Accept:
+                        'application/json',
 
                     Authorization:
                         `Bearer ${token}`,

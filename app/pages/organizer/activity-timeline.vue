@@ -382,20 +382,7 @@
 								Category
 							</label>
 
-							<select v-model="activityForm.category"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15">
-								<option value="">
-									Select category
-								</option>
-								<option value="Planning">Planning</option>
-								<option value="Venue">Venue</option>
-								<option value="Catering">Catering</option>
-								<option value="Staff">Staff</option>
-								<option value="Logistics">Logistics</option>
-								<option value="Marketing">Marketing</option>
-								<option value="Registration">Registration</option>
-								<option value="Other">Other</option>
-							</select>
+							<FormsSelect v-model="activityForm.category" :options="['Planning', 'Venue', 'Catering', 'Staff', 'Logistics', 'Marketing', 'Registration', 'Other']" placeholder="Select category" />
 						</div>
 
 						<div>
@@ -403,16 +390,7 @@
 								Tag
 							</label>
 
-							<select v-model="activityForm.tag"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15">
-								<option value="">
-									Select tag
-								</option>
-								<option value="Milestone">Milestone</option>
-								<option value="Update">Update</option>
-								<option value="Action">Action</option>
-								<option value="Reminder">Reminder</option>
-							</select>
+							<FormsSelect v-model="activityForm.tag" :options="['Milestone', 'Update', 'Action', 'Reminder']" placeholder="Select tag" />
 						</div>
 					</div>
 
@@ -428,19 +406,14 @@
 								Status
 							</label>
 
-							<select v-model="activityForm.status"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15">
-								<option value="pending">Pending</option>
-								<option value="in_progress">In Progress</option>
-								<option value="completed">Completed</option>
-							</select>
+							<FormsSelect v-model="activityForm.status" :options="[{ value: 'pending', label: 'Pending' }, { value: 'in_progress', label: 'In Progress' }, { value: 'completed', label: 'Completed' }]" :can-clear="false" :searchable="false" />
 						</div>
 
 						<div>
 							<FormsLabel text="Date & Time" />
 
-							<input v-model="activityForm.activityAt" type="datetime-local"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+							<FormsDateTimeField v-model="activityForm.activityAt" name="activity_at"
+								placeholder="Choose date and time" />
 						</div>
 					</div>
 				</div>

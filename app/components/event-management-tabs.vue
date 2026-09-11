@@ -75,11 +75,7 @@
 
 						<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Event Type <span
 								class="text-rose-500">*</span></label>
-						<select v-model="eventForm.eventType"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15">
-							<option value="" disabled>Select event type</option>
-							<option v-for="type in eventTypes" :key="type" :value="type">{{ type }}</option>
-						</select>
+						<FormsSelect v-model="eventForm.eventType" :options="eventTypes" placeholder="Select event type" :can-clear="false" />
 
 						<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">Description</label>
 						<textarea v-model="eventForm.description" rows="4"
@@ -89,25 +85,22 @@
 						<div class="mt-4 grid grid-cols-2 gap-3">
 							<div>
 								<FormsLabel text="Event Date" required />
-								<FormsTextField v-model="eventForm.eventDate" type="date" />
+								<FormsDateField v-model="eventForm.eventDate" name="event_date" placeholder="Choose event date" />
 							</div>
 							<div>
 								<label class="mb-1.5 block text-sm font-semibold text-gray-700">Status</label>
-								<select v-model="eventForm.status"
-									class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15">
-									<option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
-								</select>
+								<FormsSelect v-model="eventForm.status" :options="statusOptions" :can-clear="false" />
 							</div>
 						</div>
 
 						<div class="mt-4 grid grid-cols-2 gap-3">
 							<div>
 								<FormsLabel text="Start Time" />
-								<FormsTextField v-model="eventForm.startTime" type="time" />
+								<FormsTimeField v-model="eventForm.startTime" name="start_time" placeholder="Select start time" />
 							</div>
 							<div>
 								<FormsLabel text="End Time" />
-								<FormsTextField v-model="eventForm.endTime" type="time" />
+								<FormsTimeField v-model="eventForm.endTime" name="end_time" placeholder="Select end time" :min-time="eventForm.startTime || undefined" />
 							</div>
 						</div>
 
@@ -674,6 +667,33 @@ async function createEvent() {
 
 						status:
 							eventForm.status.toLowerCase(),
+
+						ticket_types:
+							eventForm.zones
+								.filter(zone => zone.name.trim())
+								.map(zone => ({
+									name: zone.name.trim(),
+									price: Number(zone.price || 0),
+									capacity: Number(zone.capacity || 0),
+								})),
+
+						public_registration:
+							eventForm.publicRegistration,
+
+						require_approval:
+							eventForm.requireApproval,
+
+						waitlist_enabled:
+							eventForm.waitlistEnabled,
+
+						contact_name:
+							eventForm.contactName.trim() || null,
+
+						contact_email:
+							eventForm.contactEmail.trim() || null,
+
+						contact_phone:
+							eventForm.contactPhone.trim() || null,
 					},
 				},
 			)

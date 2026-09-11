@@ -53,7 +53,7 @@
 		<!-- Matching Inquiries -->
 		<div v-else-if="inquiries.length" class="space-y-4">
 			<article v-for="inquiry in inquiries" :key="inquiry.id"
-				class="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-md">
+				class="group overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-md">
 				<div class="p-5 sm:p-6">
 					<div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
 						<div class="min-w-0">
@@ -133,6 +133,10 @@
 
 							<div class="mt-2 text-sm font-bold text-gray-900">
 								{{ formatDate(inquiry.event_date) }}
+							</div>
+							<div class="mt-1 flex items-center gap-1.5 text-xs font-semibold text-primary-700">
+								<IconBase name="clock" class="h-3.5 w-3.5" />
+								{{ formatSchedule(inquiry.start_time, inquiry.end_time) }}
 							</div>
 						</div>
 
@@ -227,10 +231,6 @@
 			<div v-if="showOfferForm" class="fixed inset-0 z-40 bg-gray-900/40" @click="closeOfferForm" />
 		</Transition>
 
-		<Transition name="fade">
-			<div v-if="showOfferForm" class="fixed inset-0 z-40 bg-gray-900/40" @click="closeOfferForm" />
-		</Transition>
-
 		<Transition name="slide">
 			<div v-if="showOfferForm"
 				class="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-white shadow-2xl">
@@ -310,7 +310,7 @@
 						<div>
 							<FormsLabel text="Event Date" />
 
-							<FormsTextField v-model="offerForm.eventDate" type="date" disabled />
+							<FormsDateField v-model="offerForm.eventDate" name="event_date" placeholder="Event date" disabled />
 						</div>
 					</div>
 
@@ -431,6 +431,8 @@ interface MatchingInquiry {
 	event_title: string | null
 	event_type: string
 	event_date: string
+	start_time: string | null
+	end_time: string | null
 	location: string
 	expected_guests: number
 	budget_range: string
@@ -550,11 +552,8 @@ async function loadMatchingInquiries() {
 	errorMessage.value = ''
 
 	try {
-		const [
-			matchingResponse,
-			offersResponse,
-		] = await Promise.all([
-			$fetch<MatchingInquiryResponse>(
+		const matchingResponse =
+			await $fetch<MatchingInquiryResponse>(
 				`${config.public.apiBaseURL}/organizer/inquiries/matching`,
 				{
 					method: 'GET',
@@ -567,23 +566,7 @@ async function loadMatchingInquiries() {
 							`Bearer ${token.value}`,
 					},
 				},
-			),
-
-			$fetch<OrganizerOffersResponse>(
-				`${config.public.apiBaseURL}/organizer/quotations`,
-				{
-					method: 'GET',
-
-					headers: {
-						Accept:
-							'application/json',
-
-						Authorization:
-							`Bearer ${token.value}`,
-					},
-				},
-			),
-		])
+			)
 
 		/*
 		 * Matching inquiries
@@ -594,11 +577,33 @@ async function loadMatchingInquiries() {
 		matchingInquiryCount.value =
 			matchingResponse.data?.length ?? 0
 
-		/*
-		 * My Offers
-		 */
-		myOffersCount.value =
-			offersResponse.data?.length ?? 0
+		try {
+			const offersResponse =
+				await $fetch<OrganizerOffersResponse>(
+					`${config.public.apiBaseURL}/organizer/quotations`,
+					{
+						method: 'GET',
+
+						headers: {
+							Accept:
+								'application/json',
+
+							Authorization:
+								`Bearer ${token.value}`,
+						},
+					},
+				)
+
+			myOffersCount.value =
+				offersResponse.data?.length ?? 0
+		} catch (offersError: unknown) {
+			console.error(
+				'Failed to load organizer offer count:',
+				offersError,
+			)
+
+			myOffersCount.value = 0
+		}
 
 	} catch (error: unknown) {
 		console.error(
@@ -622,12 +627,8 @@ async function loadMatchingInquiries() {
 					}
 				}
 
-			if (
-				apiError.data?.message
-			) {
-				errorMessage.value =
-					apiError.data.message
-
+			if (apiError.data?.message && !apiError.data.message.includes('SQLSTATE')) {
+				errorMessage.value = apiError.data.message
 				return
 			}
 		}
@@ -701,6 +702,18 @@ function formatDate(
 			year: 'numeric',
 		},
 	)
+}
+
+function formatTime(value: string | null): string {
+	if (!value) return 'Not set'
+	const [hours, minutes] = value.substring(0, 5).split(':').map(Number)
+	return new Intl.DateTimeFormat('en-PH', { hour: 'numeric', minute: '2-digit' })
+		.format(new Date(2000, 0, 1, hours, minutes))
+}
+
+function formatSchedule(start: string | null, end: string | null): string {
+	if (!start && !end) return 'Time not set'
+	return `${formatTime(start)} – ${formatTime(end)}`
 }
 
 function openOfferForm(

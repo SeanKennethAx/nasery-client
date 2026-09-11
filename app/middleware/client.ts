@@ -1,4 +1,4 @@
-export default defineNuxtRouteMiddleware(() => {
+export default defineNuxtRouteMiddleware((to) => {
     const {
         user,
         token,
@@ -8,7 +8,7 @@ export default defineNuxtRouteMiddleware(() => {
         !token.value ||
         !user.value
     ) {
-        return navigateTo('/login')
+        return navigateTo({ path: '/login', query: inquiryRedirect(to.path) ? { redirect: to.path } : {} })
     }
 
     if (

@@ -33,8 +33,6 @@
 		<AuthSocialButtons mode="register" @continue="handleSocialContinue" />
 
 		<form @submit.prevent="handleSubmit">
-
-			<!-- Full Name -->
 			<div class="mb-5">
 				<FormsLabel text="Full Name" required />
 
@@ -49,9 +47,6 @@
 					</template>
 				</FormsTextField>
 			</div>
-
-
-			<!-- Email -->
 			<div class="mb-5">
 				<FormsLabel text="Email Address" required />
 
@@ -65,9 +60,6 @@
 					</template>
 				</FormsTextField>
 			</div>
-
-
-			<!-- Password -->
 			<div class="mb-5">
 				<FormsLabel text="Password" required />
 
@@ -81,9 +73,6 @@
 					</template>
 				</FormsPasswordField>
 			</div>
-
-
-			<!-- Phone -->
 			<div class="mb-5">
 				<FormsLabel text="Phone No" required />
 
@@ -99,19 +88,130 @@
 			</div>
 
 
-			<!-- Address -->
-			<div class="mb-6">
+			<div v-if="role === 'organizer'" class="mb-6 rounded-2xl border border-primary-200 bg-primary-50/30 p-4">
+				<div class="mb-4">
+					<p class="text-sm font-bold text-gray-800">
+						Organizer Service Details
+					</p>
+
+					<p class="mt-1 text-xs leading-relaxed text-gray-500">
+						Select your real service address so clients can find you based on distance.
+					</p>
+				</div>
+
+				<div class="mb-4">
+					<FormsLabel text="Service Address" required />
+
+					<div class="relative">
+						<FormsTextField v-model="form.organizerLocation" type="text"
+							placeholder="Search your service address" size="lg" autocomplete="off" required>
+							<template #icon>
+								<svg viewBox="0 0 20 20"
+									class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-primary-600">
+									<path fill="currentColor"
+										d="M10 1.5a6 6 0 0 0-6 6c0 4.5 6 11 6 11s6-6.5 6-11a6 6 0 0 0-6-6Zm0 8.2a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Z" />
+								</svg>
+							</template>
+						</FormsTextField>
+
+						<div v-if="isSearchingAddress"
+							class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+							Searching...
+						</div>
+
+						<div v-if="showAddressSuggestions"
+							class="absolute z-50 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-xl">
+							<button v-for="place in addressSuggestions" :key="placeKey(place)" type="button"
+								class="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-gray-50"
+								@click="selectAddress(place)">
+								<svg viewBox="0 0 20 20" class="mt-0.5 h-4 w-4 shrink-0 text-primary-600">
+									<path fill="currentColor"
+										d="M10 1.5a6 6 0 0 0-6 6c0 4.5 6 11 6 11s6-6.5 6-11a6 6 0 0 0-6-6Zm0 8.2a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Z" />
+								</svg>
+
+								<span class="min-w-0">
+									<span class="block text-sm font-semibold text-gray-800">
+										{{ place.display_place || place.display_name }}
+									</span>
+
+									<span class="mt-0.5 block text-xs leading-relaxed text-gray-500">
+										{{ place.display_name }}
+									</span>
+								</span>
+							</button>
+						</div>
+					</div>
+
+					<p v-if="addressSearchError" class="mt-2 text-xs text-red-600">
+						{{ addressSearchError }}
+					</p>
+
+					<p v-else-if="hasSelectedOrganizerLocation" class="mt-2 text-xs font-medium text-green-600">
+						Location selected successfully.
+					</p>
+				</div>
+
+				<div>
+					<FormsLabel text="Service Radius" required />
+
+					<FormsSelect v-model="form.serviceRadiusKm" :options="serviceRadiusSelectOptions" :can-clear="false" :searchable="false" />
+
+					<p class="mt-1.5 text-xs text-gray-400">
+						Clients whose event is inside this distance can discover you as a nearby organizer.
+					</p>
+				</div>
+			</div>
+
+			<div v-else class="mb-6">
 				<FormsLabel text="Address" required />
 
-				<FormsTextField v-model="form.address" type="text" placeholder="Enter your address" size="lg" required>
-					<template #icon>
-						<svg viewBox="0 0 20 20"
-							class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
-							<path fill="currentColor"
-								d="M10 1.5a6 6 0 0 0-6 6c0 4.5 6 11 6 11s6-6.5 6-11a6 6 0 0 0-6-6Zm0 8.2a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Z" />
-						</svg>
-					</template>
-				</FormsTextField>
+				<div class="relative">
+					<FormsTextField v-model="form.clientAddress" type="text" placeholder="Search your address" size="lg"
+						autocomplete="off" required>
+						<template #icon>
+							<svg viewBox="0 0 20 20"
+								class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-primary-600">
+								<path fill="currentColor"
+									d="M10 1.5a6 6 0 0 0-6 6c0 4.5 6 11 6 11s6-6.5 6-11a6 6 0 0 0-6-6Zm0 8.2a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Z" />
+							</svg>
+						</template>
+					</FormsTextField>
+
+					<div v-if="isSearchingAddress"
+						class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+						Searching...
+					</div>
+
+					<div v-if="showAddressSuggestions"
+						class="absolute z-50 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-xl">
+						<button v-for="place in addressSuggestions" :key="placeKey(place)" type="button"
+							class="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-gray-50"
+							@click="selectAddress(place)">
+							<svg viewBox="0 0 20 20" class="mt-0.5 h-4 w-4 shrink-0 text-primary-600">
+								<path fill="currentColor"
+									d="M10 1.5a6 6 0 0 0-6 6c0 4.5 6 11 6 11s6-6.5 6-11a6 6 0 0 0-6-6Zm0 8.2a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Z" />
+							</svg>
+
+							<span class="min-w-0">
+								<span class="block text-sm font-semibold text-gray-800">
+									{{ place.display_place || place.display_name }}
+								</span>
+
+								<span class="mt-0.5 block text-xs leading-relaxed text-gray-500">
+									{{ place.display_name }}
+								</span>
+							</span>
+						</button>
+					</div>
+				</div>
+
+				<p v-if="addressSearchError" class="mt-2 text-xs text-red-600">
+					{{ addressSearchError }}
+				</p>
+
+				<p v-else-if="hasSelectedClientLocation" class="mt-2 text-xs font-medium text-green-600">
+					Location selected successfully.
+				</p>
 			</div>
 
 
@@ -156,7 +256,7 @@
 		<p class="mt-5 text-center text-sm text-gray-500">
 			Already have an account?
 
-			<NuxtLink to="/login" class="font-bold text-primary-600">
+			<NuxtLink :to="loginLocation" class="font-bold text-primary-600">
 				Sign in
 			</NuxtLink>
 		</p>
@@ -207,25 +307,47 @@
 </template>
 
 <script setup lang="ts">
-import type { UserRole } from '~/types/auth'
+const authRoute = useRoute()
+useSeoMeta({ title: 'Create an account | NaSeRy' })
+const loginLocation = computed(() => {
+	const redirect = inquiryRedirect(authRoute.query.redirect)
+	return { path: '/login', query: redirect ? { redirect } : {} }
+})
+import type {
+	RegisterPayload,
+	UserRole,
+} from '~/types/auth'
 
 definePageMeta({
 	layout: 'auth',
 })
 
-const role = ref<UserRole>('organizer')
+interface LocationIqPlace {
+	place_id?: string | number | null
+	osm_id?: string | number | null
+	osm_type?: string | null
+	display_name: string
+	display_place?: string
+	lat: string
+	lon: string
+}
+
+interface SelectedLocation {
+	address: string
+	providerId: string
+	latitude: number
+	longitude: number
+}
+
+const role = ref<UserRole>(inquiryRedirect(authRoute.query.redirect) ? 'client' : 'organizer')
+const config = useRuntimeConfig()
+
+const locationIqApiKey = computed(() =>
+	String(config.public.locationIqApiKey || '')
+)
 
 const showSuccessModal = ref(false)
-
 const registeredContact = ref('')
-
-const form = reactive({
-	fullName: '',
-	email: '',
-	password: '',
-	phone: '',
-	address: '',
-})
 
 const {
 	register,
@@ -233,18 +355,410 @@ const {
 	errorMessage,
 } = useAuth()
 
-
-const successContactLabel = computed(() => {
-	return 'Registered email'
+const form = reactive({
+	fullName: '',
+	email: '',
+	password: '',
+	phone: '',
+	clientAddress: '',
+	organizerLocation: '',
+	serviceRadiusKm: 25,
 })
 
+const serviceRadiusOptions = [
+	5,
+	10,
+	15,
+	25,
+	50,
+	75,
+	100,
+	150,
+	200,
+]
 
-const successLoginMessage = computed(() => {
-	return 'Please sign in using your email and password to access your new account.'
+const serviceRadiusSelectOptions = serviceRadiusOptions.map(radius => ({
+	value: radius,
+	label: `${radius} km`,
+}))
+
+const selectedOrganizerLocation =
+	ref<SelectedLocation | null>(null)
+
+const selectedClientLocation =
+	ref<SelectedLocation | null>(null)
+
+const addressSuggestions =
+	ref<LocationIqPlace[]>([])
+
+const isSearchingAddress = ref(false)
+const addressSearchError = ref('')
+
+let addressSearchTimer:
+	ReturnType<typeof setTimeout> | null = null
+
+let addressSearchRequestId = 0
+let isApplyingSelectedAddress = false
+
+const hasSelectedOrganizerLocation = computed(() => {
+	const selected = selectedOrganizerLocation.value
+
+	return Boolean(
+		selected &&
+		selected.address &&
+		selected.providerId &&
+		Number.isFinite(selected.latitude) &&
+		Number.isFinite(selected.longitude)
+	)
 })
 
+const hasSelectedClientLocation = computed(() => {
+	const selected = selectedClientLocation.value
 
-function parseFullName(fullName: string) {
+	return Boolean(
+		selected &&
+		selected.address &&
+		selected.providerId &&
+		Number.isFinite(selected.latitude) &&
+		Number.isFinite(selected.longitude)
+	)
+})
+
+const hasSelectedAddressForRole = computed(() =>
+	role.value === 'organizer'
+		? hasSelectedOrganizerLocation.value
+		: hasSelectedClientLocation.value
+)
+
+const showAddressSuggestions = computed(() =>
+	addressSuggestions.value.length > 0 &&
+	!hasSelectedAddressForRole.value
+)
+
+watch(
+	role,
+	() => {
+		errorMessage.value = ''
+		addressSearchError.value = ''
+		addressSuggestions.value = []
+
+		if (addressSearchTimer) {
+			clearTimeout(addressSearchTimer)
+			addressSearchTimer = null
+		}
+	}
+)
+
+watch(
+	() => form.organizerLocation,
+	(value) => {
+		if (role.value !== 'organizer') {
+			return
+		}
+
+		if (isApplyingSelectedAddress) {
+			return
+		}
+
+		const selected =
+			selectedOrganizerLocation.value
+
+		if (
+			selected &&
+			value.trim() === selected.address
+		) {
+			return
+		}
+
+		selectedOrganizerLocation.value = null
+		addressSearchError.value = ''
+		errorMessage.value = ''
+
+		if (addressSearchTimer) {
+			clearTimeout(addressSearchTimer)
+			addressSearchTimer = null
+		}
+
+		const query = value.trim()
+
+		if (query.length < 3) {
+			addressSuggestions.value = []
+			isSearchingAddress.value = false
+			return
+		}
+
+		addressSearchTimer = setTimeout(() => {
+			searchAddress(query)
+		}, 400)
+	}
+)
+
+watch(
+	() => form.clientAddress,
+	(value) => {
+		if (role.value !== 'client') {
+			return
+		}
+
+		if (isApplyingSelectedAddress) {
+			return
+		}
+
+		const selected =
+			selectedClientLocation.value
+
+		if (
+			selected &&
+			value.trim() === selected.address
+		) {
+			return
+		}
+
+		selectedClientLocation.value = null
+		addressSearchError.value = ''
+		errorMessage.value = ''
+
+		if (addressSearchTimer) {
+			clearTimeout(addressSearchTimer)
+			addressSearchTimer = null
+		}
+
+		const query = value.trim()
+
+		if (query.length < 3) {
+			addressSuggestions.value = []
+			isSearchingAddress.value = false
+			return
+		}
+
+		addressSearchTimer = setTimeout(() => {
+			searchAddress(query)
+		}, 400)
+	}
+)
+
+onBeforeUnmount(() => {
+	if (addressSearchTimer) {
+		clearTimeout(addressSearchTimer)
+	}
+})
+
+function placeKey(
+	place: LocationIqPlace
+): string {
+	if (
+		place.place_id !== undefined &&
+		place.place_id !== null &&
+		String(place.place_id).trim()
+	) {
+		return `place:${String(place.place_id)}`
+	}
+
+	if (
+		place.osm_type &&
+		place.osm_id !== undefined &&
+		place.osm_id !== null
+	) {
+		return `osm:${place.osm_type}:${String(place.osm_id)}`
+	}
+
+	return `${place.lat}:${place.lon}:${place.display_name}`
+}
+
+function getProviderId(
+	place: LocationIqPlace
+): string {
+	if (
+		place.place_id !== undefined &&
+		place.place_id !== null &&
+		String(place.place_id).trim()
+	) {
+		return String(place.place_id)
+	}
+
+	if (
+		place.osm_type &&
+		place.osm_id !== undefined &&
+		place.osm_id !== null
+	) {
+		return `${place.osm_type}:${String(place.osm_id)}`
+	}
+
+	return `locationiq:${place.lat}:${place.lon}`
+}
+
+async function searchAddress(
+	query: string
+) {
+	if (!locationIqApiKey.value) {
+		addressSearchError.value =
+			'LocationIQ API key is not configured.'
+
+		return
+	}
+
+	const requestId =
+		++addressSearchRequestId
+
+	isSearchingAddress.value = true
+	addressSearchError.value = ''
+
+	try {
+		const results =
+			await $fetch<LocationIqPlace[]>(
+				'https://api.locationiq.com/v1/autocomplete',
+				{
+					query: {
+						key:
+							locationIqApiKey.value,
+
+						q:
+							query,
+
+						limit:
+							6,
+
+						countrycodes:
+							'ph',
+
+						normalizecity:
+							1,
+					},
+				}
+			)
+
+		if (
+			requestId !==
+			addressSearchRequestId
+		) {
+			return
+		}
+
+		addressSuggestions.value =
+			Array.isArray(results)
+				? results
+				: []
+
+		if (
+			addressSuggestions.value.length === 0
+		) {
+			addressSearchError.value =
+				'No matching locations found.'
+		}
+	} catch (error) {
+		console.error(
+			'LocationIQ address search failed:',
+			error
+		)
+
+		if (
+			requestId ===
+			addressSearchRequestId
+		) {
+			addressSuggestions.value = []
+
+			addressSearchError.value =
+				'Unable to search addresses. Please try again.'
+		}
+	} finally {
+		if (
+			requestId ===
+			addressSearchRequestId
+		) {
+			isSearchingAddress.value = false
+		}
+	}
+}
+
+function selectAddress(
+	place: LocationIqPlace
+) {
+	const latitude =
+		Number(place.lat)
+
+	const longitude =
+		Number(place.lon)
+
+	if (
+		!Number.isFinite(latitude) ||
+		!Number.isFinite(longitude)
+	) {
+		addressSearchError.value =
+			'The selected address does not contain valid coordinates.'
+
+		return
+	}
+
+	const address =
+		String(place.display_name || '').trim()
+
+	const providerId =
+		getProviderId(place)
+
+	if (
+		!address ||
+		!providerId
+	) {
+		addressSearchError.value =
+			'The selected location is incomplete. Please choose another suggestion.'
+
+		return
+	}
+
+	addressSearchRequestId++
+
+	if (addressSearchTimer) {
+		clearTimeout(addressSearchTimer)
+		addressSearchTimer = null
+	}
+
+	isApplyingSelectedAddress = true
+
+	if (role.value === 'organizer') {
+		form.organizerLocation =
+			address
+
+		selectedOrganizerLocation.value = {
+			address,
+			providerId,
+			latitude,
+			longitude,
+		}
+	} else {
+		form.clientAddress =
+			address
+
+		selectedClientLocation.value = {
+			address,
+			providerId,
+			latitude,
+			longitude,
+		}
+	}
+
+	nextTick(() => {
+		isApplyingSelectedAddress = false
+	})
+
+	addressSuggestions.value = []
+	addressSearchError.value = ''
+	errorMessage.value = ''
+	isSearchingAddress.value = false
+}
+
+const successContactLabel = computed(() =>
+	'Registered email'
+)
+
+const successLoginMessage = computed(() =>
+	role.value === 'organizer'
+		? 'Please sign in to complete your organizer profile and start receiving nearby event inquiries.'
+		: 'Please sign in using your email and password to access your new account.'
+)
+
+function parseFullName(
+	fullName: string
+) {
 	const parts = fullName
 		.trim()
 		.split(/\s+/)
@@ -260,248 +774,273 @@ function parseFullName(fullName: string) {
 
 	if (parts.length === 1) {
 		return {
-			firstname: parts[0] ?? '',
-			middlename: '',
-			lastname: '',
+			firstname:
+				parts[0] ?? '',
+
+			middlename:
+				'',
+
+			lastname:
+				'',
 		}
 	}
 
 	if (parts.length === 2) {
 		return {
-			firstname: parts[0] ?? '',
-			middlename: '',
-			lastname: parts[1] ?? '',
+			firstname:
+				parts[0] ?? '',
+
+			middlename:
+				'',
+
+			lastname:
+				parts[1] ?? '',
 		}
 	}
 
 	return {
-		firstname: parts[0] ?? '',
+		firstname:
+			parts[0] ?? '',
 
-		middlename: parts
-			.slice(1, -1)
-			.join(' '),
+		middlename:
+			parts
+				.slice(1, -1)
+				.join(' '),
 
 		lastname:
-			parts[parts.length - 1] ?? '',
+			parts[
+			parts.length - 1
+			] ?? '',
 	}
 }
 
-
-function normalizePhone(phone: string): string {
+function normalizePhone(
+	phone: string
+): string {
 	const normalized = phone
 		.trim()
 		.replace(/[\s\-()]+/g, '')
 
-	// +639123456789
-	if (/^\+639\d{9}$/.test(normalized)) {
+	if (
+		/^\+639\d{9}$/
+			.test(normalized)
+	) {
 		return normalized
 	}
 
-	// 639123456789
-	if (/^639\d{9}$/.test(normalized)) {
+	if (
+		/^639\d{9}$/
+			.test(normalized)
+	) {
 		return `+${normalized}`
 	}
 
-	// 09123456789
-	if (/^09\d{9}$/.test(normalized)) {
+	if (
+		/^09\d{9}$/
+			.test(normalized)
+	) {
 		return `+63${normalized.slice(1)}`
 	}
 
-	// 9123456789
-	if (/^9\d{9}$/.test(normalized)) {
+	if (
+		/^9\d{9}$/
+			.test(normalized)
+	) {
 		return `+63${normalized}`
 	}
 
 	return normalized
 }
 
-
 async function handleSubmit() {
 	errorMessage.value = ''
 
-	try {
-		const {
-			firstname,
-			middlename,
-			lastname,
-		} = parseFullName(form.fullName)
+	const {
+		firstname,
+		middlename,
+		lastname,
+	} = parseFullName(
+		form.fullName
+	)
 
+	if (
+		!firstname ||
+		!lastname
+	) {
+		errorMessage.value =
+			'Please enter your first name and last name.'
 
-		// Full name validation
-		if (!firstname || !lastname) {
-			errorMessage.value =
-				'Please enter your first name and last name.'
+		return
+	}
 
-			return
-		}
-
-
-		// Email validation
-		const email = form.email
+	const email =
+		form.email
 			.trim()
 			.toLowerCase()
 
-		if (!email) {
-			errorMessage.value =
-				'Email address is required.'
+	if (!email) {
+		errorMessage.value =
+			'Email address is required.'
 
-			return
-		}
+		return
+	}
 
-		const emailPattern =
-			/^[^\s@]+@[^\s@]+\.[^\s@]+$/
+	const emailPattern =
+		/^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-		if (!emailPattern.test(email)) {
-			errorMessage.value =
-				'Please enter a valid email address.'
+	if (
+		!emailPattern.test(email)
+	) {
+		errorMessage.value =
+			'Please enter a valid email address.'
 
-			return
-		}
+		return
+	}
 
+	if (!form.password) {
+		errorMessage.value =
+			'Password is required.'
 
-		// Password validation
-		if (!form.password) {
-			errorMessage.value =
-				'Password is required.'
+		return
+	}
 
-			return
-		}
+	if (
+		form.password.length < 8
+	) {
+		errorMessage.value =
+			'Password must be at least 8 characters.'
 
-		if (form.password.length < 8) {
-			errorMessage.value =
-				'Password must be at least 8 characters.'
+		return
+	}
 
-			return
-		}
-
-
-		// Phone validation
-		const phone = normalizePhone(
+	const phone =
+		normalizePhone(
 			form.phone
 		)
 
-		if (!phone) {
+	if (!phone) {
+		errorMessage.value =
+			'Phone number is required.'
+
+		return
+	}
+
+	if (
+		!/^\+639\d{9}$/
+			.test(phone)
+	) {
+		errorMessage.value =
+			'Please enter a valid Philippine mobile number.'
+
+		return
+	}
+
+	let address = ''
+	let organizerFields:
+		Partial<RegisterPayload> = {}
+
+	if (
+		role.value === 'organizer'
+	) {
+		const selected =
+			selectedOrganizerLocation.value
+
+		if (
+			!selected ||
+			!hasSelectedOrganizerLocation.value
+		) {
 			errorMessage.value =
-				'Phone number is required.'
+				'Please select your organizer service address from the location suggestions.'
 
 			return
 		}
 
-		if (!/^\+639\d{9}$/.test(phone)) {
+		address =
+			selected.address
+
+		organizerFields = {
+			location:
+				selected.address,
+
+			google_place_id:
+				selected.providerId,
+
+			latitude:
+				selected.latitude,
+
+			longitude:
+				selected.longitude,
+
+			service_radius_km:
+				Number(
+					form.serviceRadiusKm
+				),
+		}
+	} else {
+		const selected =
+			selectedClientLocation.value
+
+		if (
+			!selected ||
+			!hasSelectedClientLocation.value
+		) {
 			errorMessage.value =
-				'Please enter a valid Philippine mobile number.'
+				'Please select your address from the location suggestions.'
 
 			return
 		}
 
+		address =
+			selected.address
+	}
 
-		// Address validation
-		const address =
-			form.address.trim()
+	const registrationPayload:
+		RegisterPayload = {
+		firstname,
 
-		if (!address) {
-			errorMessage.value =
-				'Address is required.'
+		...(middlename
+			? { middlename }
+			: {}),
 
-			return
-		}
+		lastname,
 
+		email,
 
-		// Register account
-		await register({
-			firstname,
+		password:
+			form.password,
 
-			...(middlename
-				? { middlename }
-				: {}),
+		phone,
 
-			lastname,
+		address,
 
-			email,
+		role:
+			role.value,
 
-			password:
-				form.password,
+		...organizerFields,
+	}
 
-			phone,
-
-			address,
-
-			role:
-				role.value,
-		})
-
+	try {
+		await register(
+			registrationPayload
+		)
 
 		registeredContact.value =
 			email
 
 		showSuccessModal.value =
 			true
-
 	} catch (error: unknown) {
 		console.error(
 			'Registration failed:',
 			error
 		)
-
-		if (
-			typeof error === 'object' &&
-			error !== null
-		) {
-			const apiError = error as {
-				data?: {
-					message?: string
-					errors?: Record<
-						string,
-						string[]
-					>
-				}
-			}
-
-			if (apiError.data?.errors) {
-				const firstError =
-					Object
-						.values(
-							apiError.data.errors
-						)
-						.flat()
-						.at(0)
-
-				if (firstError) {
-					errorMessage.value =
-						String(firstError)
-
-					return
-				}
-			}
-
-			if (apiError.data?.message) {
-				errorMessage.value =
-					apiError.data.message
-
-				return
-			}
-		}
-
-		if (error instanceof Error) {
-			errorMessage.value =
-				error.message
-
-			return
-		}
-
-		errorMessage.value =
-			'Registration failed. Please try again.'
 	}
 }
 
-
 async function goToLogin() {
-	showSuccessModal.value =
-		false
-
-	await navigateTo('/login')
+	showSuccessModal.value = false
+	await navigateTo(loginLocation.value)
 }
-
 
 function handleSocialContinue() {
 	errorMessage.value =

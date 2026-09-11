@@ -9,6 +9,7 @@ import { authService } from '~/services/authService'
 type AuthRole =
     | 'client'
     | 'organizer'
+    | 'team_member'
 
 export function useAuth(
     role?: AuthRole
@@ -100,6 +101,10 @@ export function useAuth(
             return 'Organizer'
         }
 
+        if (user.value?.role === 'team_member') {
+            return 'Team Member'
+        }
+
         return ''
     })
 
@@ -120,18 +125,23 @@ export function useAuth(
         try {
             const registrationPayload:
                 RegisterPayload = {
+                ...payload,
+
                 firstname:
-                    payload.firstname,
+                    payload.firstname
+                        .trim(),
 
                 ...(payload.middlename
                     ? {
                         middlename:
-                            payload.middlename,
+                            payload.middlename
+                                .trim(),
                     }
                     : {}),
 
                 lastname:
-                    payload.lastname,
+                    payload.lastname
+                        .trim(),
 
                 email:
                     payload.email
@@ -139,10 +149,12 @@ export function useAuth(
                         .toLowerCase(),
 
                 phone:
-                    payload.phone.trim(),
+                    payload.phone
+                        .trim(),
 
                 address:
-                    payload.address.trim(),
+                    payload.address
+                        .trim(),
 
                 password:
                     payload.password,
@@ -206,8 +218,10 @@ export function useAuth(
                     JSON.stringify({
                         role:
                             authenticatedUser.role,
+
                         userId:
                             authenticatedUser.id,
+
                         timestamp:
                             Date.now(),
                     })
@@ -248,6 +262,10 @@ export function useAuth(
             )
         }
 
+        if (authenticatedUser.role === 'team_member') {
+            return await navigateTo('/team/dashboard')
+        }
+
         throw new Error(
             'Invalid user role.'
         )
@@ -263,6 +281,7 @@ export function useAuth(
                 'auth_session_changed',
                 JSON.stringify({
                     role: null,
+
                     timestamp:
                         Date.now(),
                 })
@@ -286,11 +305,14 @@ export function useAuth(
         const apiError = error as {
             data?: {
                 message?: string
+
                 errors?: Record<
                     string,
                     string[]
                 >
             }
+
+            message?: string
         }
 
         if (
@@ -311,9 +333,21 @@ export function useAuth(
             }
         }
 
+        if (
+            apiError.data?.message
+        ) {
+            return apiError.data.message
+        }
+
+        if (
+            apiError.message
+        ) {
+            return apiError.message
+        }
+
         return (
-            apiError.data?.message ??
-            'Something went wrong. Please try again.'
+            'Something went wrong. ' +
+            'Please try again.'
         )
     }
 

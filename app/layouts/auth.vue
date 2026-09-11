@@ -1,6 +1,10 @@
 <script setup lang="ts">
 const route = useRoute()
 const activeTab = computed(() => (route.path === '/register' ? 'register' : 'signin'))
+const authQuery = computed(() => {
+	const redirect = inquiryRedirect(route.query.redirect)
+	return redirect ? { redirect } : {}
+})
 </script>
 
 <template>
@@ -48,14 +52,15 @@ const activeTab = computed(() => (route.path === '/register' ? 'register' : 'sig
 		</div>
 
 		<div class="flex w-full flex-1 flex-col overflow-y-auto px-4 py-8 sm:px-8 sm:py-10 lg:w-1/2 lg:px-12 lg:py-14">
+			<NuxtLink to="/organizers" class="mb-5 self-start text-sm font-semibold text-primary-700 hover:underline">← Browse organizers without signing in</NuxtLink>
 			<div class="mb-6 flex justify-center sm:mb-8 lg:justify-end">
 				<div class="inline-flex rounded-full border border-gray-200 bg-white p-1">
-					<NuxtLink to="/login"
+					<NuxtLink :to="{ path: '/login', query: authQuery }"
 						class="whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold sm:px-6"
 						:class="activeTab === 'signin' ? 'bg-primary-700 text-white' : 'text-gray-700'">
 						Sign In
 					</NuxtLink>
-					<NuxtLink to="/register"
+					<NuxtLink :to="{ path: '/register', query: authQuery }"
 						class="whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold sm:px-6"
 						:class="activeTab === 'register' ? 'bg-primary-700 text-white' : 'text-gray-700'">
 						Register

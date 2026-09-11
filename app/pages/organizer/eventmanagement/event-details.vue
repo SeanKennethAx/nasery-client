@@ -61,16 +61,7 @@
 						<span class="text-rose-500">*</span>
 					</label>
 
-					<select v-model="editForm.eventType"
-						class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15">
-						<option value="" disabled>
-							Select event type
-						</option>
-
-						<option v-for="type in eventTypes" :key="type" :value="type">
-							{{ type }}
-						</option>
-					</select>
+					<FormsSelect v-model="editForm.eventType" :options="eventTypes" placeholder="Select event type" :can-clear="false" />
 
 					<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">
 						Description
@@ -83,7 +74,7 @@
 						<div>
 							<FormsLabel text="Event Date" required />
 
-							<FormsTextField v-model="editForm.eventDate" type="date" />
+							<FormsDateField v-model="editForm.eventDate" name="event_date" placeholder="Choose event date" />
 						</div>
 
 						<div>
@@ -91,16 +82,7 @@
 								Status
 							</label>
 
-							<select v-model="editForm.status"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900">
-								<option value="draft">
-									Draft
-								</option>
-
-								<option value="published">
-									Published
-								</option>
-							</select>
+							<FormsSelect v-model="editForm.status" :options="[{ value: 'draft', label: 'Draft' }, { value: 'published', label: 'Published' }]" :can-clear="false" :searchable="false" />
 						</div>
 					</div>
 
@@ -108,13 +90,13 @@
 						<div>
 							<FormsLabel text="Start Time" />
 
-							<FormsTextField v-model="editForm.startTime" type="time" />
+							<FormsTimeField v-model="editForm.startTime" name="start_time" placeholder="Select start time" />
 						</div>
 
 						<div>
 							<FormsLabel text="End Time" />
 
-							<FormsTextField v-model="editForm.endTime" type="time" />
+							<FormsTimeField v-model="editForm.endTime" name="end_time" placeholder="Select end time" :min-time="editForm.startTime || undefined" />
 						</div>
 					</div>
 				</template>

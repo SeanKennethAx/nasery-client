@@ -9,6 +9,13 @@
 		</div>
 
 		<template v-else-if="event">
+			<div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#285F6b]/5 p-4">
+				<div><p class="text-sm font-bold text-[#285F6b]">Event Team</p><p class="text-xs text-gray-500">{{ teamMembers.length }} active member{{ teamMembers.length === 1 ? '' : 's' }} available for assignment</p></div>
+				<button class="rounded-xl border border-[#285F6b]/20 bg-white px-4 py-2 text-sm font-bold text-[#285F6b]" @click="showMemberForm=!showMemberForm">{{ showMemberForm ? 'Close' : '+ Add Team Member' }}</button>
+			</div>
+			<div v-if="showMemberForm" class="mb-6 grid gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:grid-cols-2">
+				<input v-model="memberForm.firstname" class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm" placeholder="First name"><input v-model="memberForm.lastname" class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm" placeholder="Last name"><input v-model="memberForm.email" type="email" class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm" placeholder="Email address"><input v-model="memberForm.position" class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm" placeholder="Role / position"><input v-model="memberForm.password" type="password" class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm" placeholder="Temporary password"><button class="rounded-xl bg-[#285F6b] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50" :disabled="creatingMember" @click="createTeamMember">{{ creatingMember?'Creating...':'Create Team Account' }}</button>
+			</div>
 			<div class="mb-6">
 				<h2 class="text-lg font-bold text-gray-900">
 					Dynamic Preparation Tracking
@@ -50,7 +57,7 @@
 
 			<div v-if="checklist.length" class="space-y-3">
 				<div v-for="item in checklist" :key="item.id"
-					class="flex w-full items-center gap-3 rounded-xl border border-gray-200 px-4 py-3.5 transition hover:bg-gray-50">
+					class="flex w-full items-start gap-3 rounded-xl border border-gray-200 px-4 py-3.5 transition hover:bg-gray-50">
 					<button type="button" class="flex flex-1 items-center gap-3 text-left" :disabled="updatingItemId === item.id
 						" @click="toggleItem(item)">
 						<IconBase v-if="item.is_completed" name="check-circle"
@@ -63,6 +70,8 @@
 							: 'text-gray-900'
 							">
 							{{ item.label }}
+							<span v-if="item.assigned_team_member" class="mt-1 block text-xs font-semibold text-[#285F6b]">Assigned to {{ memberName(item.assigned_team_member) }}</span>
+							<span v-if="item.completed_by" class="mt-1 block text-xs text-gray-500">Completed by {{ userName(item.completed_by) }}<template v-if="item.completion_note"> — {{ item.completion_note }}</template></span>
 						</span>
 
 						<IconBase v-if="
@@ -70,6 +79,11 @@
 							item.id
 						" name="refresh-cw" class="h-4 w-4 animate-spin text-gray-400" />
 					</button>
+					<div v-if="item.is_completed && item.review_status === 'pending'" class="flex gap-1">
+						<button class="rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs font-bold text-emerald-700" @click="reviewItem(item,'verified')">Verify</button>
+						<button class="rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-bold text-red-700" @click="reviewItem(item,'changes_requested')">Request changes</button>
+					</div>
+					<span v-else-if="item.is_completed" class="rounded-full px-2.5 py-1 text-xs font-bold" :class="item.review_status==='verified'?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-700'">{{ item.review_status==='verified'?'Verified':'Changes requested' }}</span>
 
 					<button type="button"
 						class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
@@ -120,6 +134,8 @@
 							addChecklistItem
 						" />
 
+					<FormsSelect v-model="newItemAssignee" class="mt-3" :options="[{ value: null, label: 'Unassigned' }, ...teamMembers.map(member => ({ value: member.id, label: `${memberName(member)} — ${member.position || 'Team member'}` }))]" placeholder="Select assignee" />
+
 					<div class="mt-3 flex justify-end gap-2">
 						<button type="button"
 							class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
@@ -167,9 +183,17 @@ interface PreparationItem {
 	event_id: number
 	label: string
 	is_completed: boolean
+	assigned_team_member_id: number | null
+	assigned_team_member?: TeamMember | null
+	completed_by?: TeamUser | null
+	completion_note?: string | null
+	review_status: 'pending' | 'verified' | 'changes_requested'
 	created_at?: string
 	updated_at?: string
 }
+
+interface TeamUser { firstname: string; lastname: string; email?: string }
+interface TeamMember { id: number; position: string | null; user: TeamUser }
 
 type EventResponse =
 	| OrganizerEvent
@@ -253,6 +277,12 @@ const showAddForm =
 
 const newItemLabel =
 	ref('')
+
+const newItemAssignee = ref<number | null>(null)
+const teamMembers = ref<TeamMember[]>([])
+const showMemberForm = ref(false)
+const creatingMember = ref(false)
+const memberForm = reactive({ firstname:'', lastname:'', email:'', position:'', password:'' })
 
 /*
  * ============================================================
@@ -370,6 +400,7 @@ async function loadPreparation() {
 		const [
 			eventResponse,
 			preparationResponse,
+			teamResponse,
 		] = await Promise.all([
 			$fetch<EventResponse>(
 				`${config.public.apiBaseURL}/organizer/events/${eventId.value}`,
@@ -402,6 +433,8 @@ async function loadPreparation() {
 					},
 				},
 			),
+
+			$fetch<{data:TeamMember[]}>(`${config.public.apiBaseURL}/organizer/team-members`, { headers:{Accept:'application/json',Authorization:`Bearer ${token.value}`} }),
 		])
 
 		event.value =
@@ -412,6 +445,8 @@ async function loadPreparation() {
 		checklist.value =
 			preparationResponse.data ??
 			[]
+
+		teamMembers.value = teamResponse.data ?? []
 
 	} catch (error: unknown) {
 		console.error(
@@ -562,6 +597,7 @@ async function addChecklistItem() {
 
 					body: {
 						label,
+						assigned_team_member_id: newItemAssignee.value,
 					},
 				},
 			)
@@ -603,9 +639,29 @@ function cancelAddItem() {
 
 	newItemLabel.value =
 		''
+	newItemAssignee.value = null
 
 	showAddForm.value =
 		false
+}
+
+function userName(user: TeamUser) { return `${user.firstname} ${user.lastname}`.trim() }
+function memberName(member: TeamMember) { return userName(member.user) }
+
+async function createTeamMember() {
+	creatingMember.value=true; errorMessage.value=''
+	try {
+		const response=await $fetch<{data:TeamMember}>(`${config.public.apiBaseURL}/organizer/team-members`,{method:'POST',headers:{Accept:'application/json',Authorization:`Bearer ${token.value}`},body:memberForm})
+		teamMembers.value.push(response.data); Object.assign(memberForm,{firstname:'',lastname:'',email:'',position:'',password:''}); showMemberForm.value=false
+	} catch(error:unknown) { errorMessage.value=getApiErrorMessage(error,'Unable to create team member.') } finally { creatingMember.value=false }
+}
+
+async function reviewItem(item:PreparationItem,status:'verified'|'changes_requested') {
+	if(!eventId.value) return
+	try {
+		const response=await $fetch<PreparationItemResponse>(`${config.public.apiBaseURL}/organizer/events/${eventId.value}/preparation-items/${item.id}`,{method:'PUT',headers:{Accept:'application/json',Authorization:`Bearer ${token.value}`},body:{review_status:status}})
+		const index=checklist.value.findIndex(value=>value.id===item.id); if(index>=0) checklist.value[index]=response.data
+	} catch(error:unknown) { errorMessage.value=getApiErrorMessage(error,'Unable to review completed work.') }
 }
 async function removeChecklistItem(
 	item: PreparationItem,

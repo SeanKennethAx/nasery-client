@@ -49,9 +49,9 @@
 					<button type="button"
 						class="mb-1 flex w-full items-center gap-3 rounded-lg p-1.5 text-left hover:bg-gray-50"
 						@click="openProfilePanel">
-						<div
-							class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-700 text-sm font-bold text-white">
-							{{ sidebarInitials }}
+						<div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-700 text-sm font-bold text-white">
+							<img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-full w-full object-cover" />
+							<span v-else>{{ sidebarInitials }}</span>
 						</div>
 
 						<div class="min-w-0">
@@ -134,7 +134,7 @@
 				<div class="flex min-h-0 flex-1 flex-col overflow-hidden">
 					<!-- Banner -->
 					<div class="relative shrink-0 pb-10">
-						<div class="h-24" :style="{ backgroundColor: draftProfile.bannerColor }" />
+						<div class="h-24" :style="{ backgroundColor: draftProfile.bannerColor }"><img v-if="user?.cover_url" :src="user.cover_url" alt="" class="h-full w-full object-cover" /></div>
 
 						<button type="button"
 							class="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white transition hover:bg-black/30"
@@ -142,9 +142,9 @@
 							<IconBase name="x" class="h-5 w-5" />
 						</button>
 
-						<div
-							class="absolute -bottom-1 left-6 flex h-16 w-16 items-center justify-center rounded-2xl border-4 border-white bg-primary-700 text-lg font-bold text-white shadow-md">
-							{{ panelInitials || 'O' }}
+						<div class="absolute -bottom-1 left-6 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-primary-700 text-lg font-bold text-white shadow-md">
+							<img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-full w-full object-cover" />
+							<span v-else>{{ panelInitials || 'O' }}</span>
 						</div>
 					</div>
 
@@ -180,18 +180,17 @@
 					</div>
 
 					<!-- Tabs -->
-					<div
-						class="flex shrink-0 scroll-px-6 scroll-smooth gap-5 overflow-x-auto border-b border-gray-200 px-6">
+					<div class="grid shrink-0 grid-cols-3 gap-1 border-y border-gray-200 bg-gray-50/70 px-4 py-2">
 						<button v-for="tab in profileTabs" :key="tab.label"
 							:ref="(el) => setProfileTabRef(tab.label, el as Element | null)" type="button"
-							class="flex shrink-0 items-center gap-1.5 border-b-2 pb-3 text-sm font-semibold transition"
+							class="flex min-w-0 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs font-semibold transition sm:text-sm"
 							:class="activeProfileTab === tab.label
-								? 'border-primary-700 text-primary-700'
-								: 'border-transparent text-gray-400 hover:text-gray-600'
+								? 'bg-white text-primary-700 shadow-sm ring-1 ring-gray-200'
+								: 'text-gray-400 hover:bg-white/70 hover:text-gray-600'
 								" @click="activeProfileTab = tab.label">
-							<IconBase :name="tab.icon" class="h-4 w-4" />
+							<IconBase :name="tab.icon" class="h-4 w-4 shrink-0" />
 
-							{{ tab.label }}
+							<span class="truncate">{{ tab.label }}</span>
 						</button>
 					</div>
 
@@ -228,26 +227,72 @@
 
 							<div class="mb-5">
 								<FormsLabel text="Years of Experience" />
-								<select v-model="draftProfile.yearsExperience"
-									class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm text-gray-900 outline-none transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/15">
-									<option value="" disabled>
-										Select range
-									</option>
-									<option v-for="range in experienceRanges" :key="range" :value="range">
-										{{ range }}
-									</option>
-								</select>
+								<FormsSelect v-model="draftProfile.yearsExperience" :options="experienceRanges" placeholder="Select range" :can-clear="false" />
 							</div>
 
 							<div>
 								<FormsLabel text="Location / Service Area" />
-								<FormsTextField v-model="draftProfile.location" placeholder="e.g. Metro Manila"
-									size="lg">
-									<template #icon>
-										<IconBase name="map-pin"
-											class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-primary-600" />
-									</template>
-								</FormsTextField>
+
+								<div class="relative">
+									<FormsTextField v-model="draftProfile.location"
+										placeholder="Search your service location" size="lg" autocomplete="off">
+										<template #icon>
+											<IconBase name="map-pin"
+												class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-primary-600" />
+										</template>
+									</FormsTextField>
+
+									<div v-if="isSearchingLocation"
+										class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+										Searching...
+									</div>
+
+									<div v-if="showLocationSuggestions"
+										class="absolute z-[70] mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-xl">
+										<button v-for="place in locationSuggestions" :key="String(place.place_id)"
+											type="button"
+											class="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-gray-50"
+											@click="selectProfileLocation(place)">
+											<IconBase name="map-pin" class="mt-0.5 h-4 w-4 shrink-0 text-primary-600" />
+
+											<span class="min-w-0">
+												<span class="block text-sm font-semibold text-gray-800">
+													{{ place.display_place || place.display_name }}
+												</span>
+												<span class="mt-0.5 block text-xs leading-relaxed text-gray-500">
+													{{ place.display_name }}
+												</span>
+											</span>
+										</button>
+									</div>
+								</div>
+
+								<p v-if="locationSearchError" class="mt-2 text-xs text-red-600">
+									{{ locationSearchError }}
+								</p>
+
+								<p v-else-if="draftProfile.latitude !== null && draftProfile.longitude !== null"
+									class="mt-2 text-xs font-medium text-green-600">
+									Location selected and coordinates are ready to save.
+								</p>
+							</div>
+
+							<div class="mt-5">
+								<FormsLabel text="Service Radius" />
+
+								<div class="relative">
+									<input v-model.number="draftProfile.serviceRadiusKm" type="number" min="1" max="200"
+										class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 pr-14 text-sm text-gray-900 outline-none transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/15" />
+
+									<span
+										class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+										km
+									</span>
+								</div>
+
+								<p class="mt-2 text-xs text-gray-400">
+									Clients within this distance from your selected location can find you.
+								</p>
 							</div>
 						</div>
 
@@ -380,6 +425,7 @@
 
 						<!-- Appearance -->
 						<div v-else-if="activeProfileTab === 'Appearance'">
+							<ProfileMediaEditor class="mb-6" />
 							<div class="mb-6 flex items-center gap-3 border-b border-gray-100 pb-5">
 								<div
 									class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
@@ -444,6 +490,10 @@ const {
 } = useAuth()
 
 const config = useRuntimeConfig()
+
+const locationIqApiKey = computed(() =>
+	String(config.public.locationIqApiKey || '')
+)
 
 const sidebarOpen = ref(true)
 
@@ -632,17 +682,6 @@ const experienceRanges = [
 	'5–10 years',
 	'10+ years',
 ]
-
-/*
- * IMPORTANT: these values must exactly match the
- * backend validation list in
- * OrganizerController::updateProfile
- * ('in:Wedding,Corporate,Birthday,Debut,Concert,
- *   Conference,Reunion,Seminar')
- * and must match Inquiry.event_type values used
- * when clients post inquiries, otherwise matching
- * will silently return nothing.
- */
 const eventTypeOptions = [
 	'Wedding',
 	'Corporate',
@@ -679,6 +718,10 @@ function defaultProfile() {
 		company: '',
 		yearsExperience: '',
 		location: '',
+		locationIqPlaceId: '',
+		latitude: null as number | null,
+		longitude: null as number | null,
+		serviceRadiusKm: 25,
 		bio: '',
 		tags: [] as string[],
 		specialties: [] as string[],
@@ -707,12 +750,36 @@ const isProfileLoading = ref(false)
 const isSavingProfile = ref(false)
 const profileSaveError = ref('')
 
+interface LocationIqPlace {
+	place_id: string | number
+	display_name: string
+	display_place?: string
+	lat: string
+	lon: string
+}
+
+const locationSuggestions = ref<LocationIqPlace[]>([])
+const isSearchingLocation = ref(false)
+const locationSearchError = ref('')
+const selectedProfileLocation = ref('')
+let locationSearchTimer: ReturnType<typeof setTimeout> | null = null
+let locationSearchRequestId = 0
+
+const showLocationSuggestions = computed(() =>
+	locationSuggestions.value.length > 0 &&
+	draftProfile.location.trim() !== selectedProfileLocation.value
+)
+
 interface OrganizerProfileData {
 	id: number
 	user_id: number
 	company_name: string | null
 	years_experience: string | null
 	location: string | null
+	google_place_id: string | null
+	latitude: number | string | null
+	longitude: number | string | null
+	service_radius_km: number | string | null
 	bio: string | null
 	tags: string[] | null
 	specialties: string[] | null
@@ -739,9 +806,6 @@ function syncProfileFromUser() {
 	profile.phone =
 		user.value.phone ?? ''
 
-	// Don't overwrite location if it was
-	// already loaded from the organizer
-	// profile endpoint.
 	if (!profile.location) {
 		profile.location =
 			user.value.address ?? ''
@@ -750,12 +814,6 @@ function syncProfileFromUser() {
 	syncDraftProfile()
 }
 
-/*
- * Fetches the organizer's saved profile
- * (company name, tags, specialties, etc.)
- * from the backend and merges it into the
- * local `profile` state.
- */
 async function loadOrganizerProfile() {
 	if (!token.value) {
 		return
@@ -787,6 +845,27 @@ async function loadOrganizerProfile() {
 		if (data.location) {
 			profile.location = data.location
 		}
+
+		profile.locationIqPlaceId =
+			data.google_place_id ?? ''
+
+		profile.latitude =
+			data.latitude !== null
+				? Number(data.latitude)
+				: null
+
+		profile.longitude =
+			data.longitude !== null
+				? Number(data.longitude)
+				: null
+
+		profile.serviceRadiusKm =
+			data.service_radius_km !== null
+				? Number(data.service_radius_km)
+				: 25
+
+		selectedProfileLocation.value =
+			profile.location
 
 		profile.bio = data.bio ?? ''
 
@@ -836,6 +915,101 @@ function syncDraftProfile() {
 }
 
 watch(
+	() => draftProfile.location,
+	(value) => {
+		if (value === selectedProfileLocation.value) {
+			return
+		}
+
+		draftProfile.locationIqPlaceId = ''
+		draftProfile.latitude = null
+		draftProfile.longitude = null
+		locationSearchError.value = ''
+
+		if (locationSearchTimer) {
+			clearTimeout(locationSearchTimer)
+		}
+
+		const query = value.trim()
+
+		if (query.length < 3) {
+			locationSuggestions.value = []
+			return
+		}
+
+		locationSearchTimer = setTimeout(() => {
+			searchProfileLocation(query)
+		}, 400)
+	}
+)
+
+async function searchProfileLocation(query: string) {
+	if (!locationIqApiKey.value) {
+		locationSearchError.value =
+			'LocationIQ API key is not configured.'
+		return
+	}
+
+	const requestId = ++locationSearchRequestId
+	isSearchingLocation.value = true
+	locationSearchError.value = ''
+
+	try {
+		const results = await $fetch<LocationIqPlace[]>(
+			'https://api.locationiq.com/v1/autocomplete',
+			{
+				query: {
+					key: locationIqApiKey.value,
+					q: query,
+					limit: 6,
+					countrycodes: 'ph',
+					normalizecity: 1,
+				},
+			}
+		)
+
+		if (requestId !== locationSearchRequestId) {
+			return
+		}
+
+		locationSuggestions.value = Array.isArray(results)
+			? results
+			: []
+	} catch (error) {
+		console.error('LocationIQ profile search failed:', error)
+
+		if (requestId === locationSearchRequestId) {
+			locationSuggestions.value = []
+			locationSearchError.value =
+				'Unable to search locations. Please try again.'
+		}
+	} finally {
+		if (requestId === locationSearchRequestId) {
+			isSearchingLocation.value = false
+		}
+	}
+}
+
+function selectProfileLocation(place: LocationIqPlace) {
+	const latitude = Number(place.lat)
+	const longitude = Number(place.lon)
+
+	if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+		locationSearchError.value =
+			'The selected location does not contain valid coordinates.'
+		return
+	}
+
+	selectedProfileLocation.value = place.display_name
+	draftProfile.location = place.display_name
+	draftProfile.locationIqPlaceId = String(place.place_id || '')
+	draftProfile.latitude = latitude
+	draftProfile.longitude = longitude
+	locationSuggestions.value = []
+	locationSearchError.value = ''
+}
+
+watch(
 	() => [
 		user.value?.id,
 		user.value?.firstname,
@@ -855,6 +1029,12 @@ watch(
 
 onMounted(() => {
 	loadOrganizerProfile()
+})
+
+onBeforeUnmount(() => {
+	if (locationSearchTimer) {
+		clearTimeout(locationSearchTimer)
+	}
 })
 
 const profileTabButtonRefs:
@@ -921,15 +1101,16 @@ async function openProfilePanel() {
 	profileSaveError.value = ''
 
 	syncDraftProfile()
+	selectedProfileLocation.value =
+		draftProfile.location
+	locationSuggestions.value = []
+	locationSearchError.value = ''
 
 	activeProfileTab.value =
 		'Identity'
 
 	showProfilePanel.value = true
 
-	// Refresh from the server each time
-	// the panel opens, in case it changed
-	// elsewhere.
 	await loadOrganizerProfile()
 }
 
@@ -942,12 +1123,6 @@ function closeProfilePanel() {
 	profileSaveError.value = ''
 }
 
-/*
- * Persists the draft profile (identity,
- * about, tags, specialties, contact,
- * appearance) to the backend via
- * PUT /organizer/profile.
- */
 async function saveProfile() {
 	if (!token.value) {
 		profileSaveError.value =
@@ -957,6 +1132,30 @@ async function saveProfile() {
 	}
 
 	profileSaveError.value = ''
+
+	if (draftProfile.location.trim()) {
+		if (
+			draftProfile.latitude === null ||
+			draftProfile.longitude === null
+		) {
+			profileSaveError.value =
+				'Please select your location from the LocationIQ suggestions.'
+			activeProfileTab.value = 'Identity'
+			return
+		}
+	}
+
+	if (
+		!Number.isFinite(Number(draftProfile.serviceRadiusKm)) ||
+		Number(draftProfile.serviceRadiusKm) < 1 ||
+		Number(draftProfile.serviceRadiusKm) > 200
+	) {
+		profileSaveError.value =
+			'Service radius must be between 1 and 200 km.'
+		activeProfileTab.value = 'Identity'
+		return
+	}
+
 	isSavingProfile.value = true
 
 	try {
@@ -978,6 +1177,18 @@ async function saveProfile() {
 
 					location:
 						draftProfile.location || null,
+
+					google_place_id:
+						draftProfile.locationIqPlaceId || null,
+
+					latitude:
+						draftProfile.latitude,
+
+					longitude:
+						draftProfile.longitude,
+
+					service_radius_km:
+						Number(draftProfile.serviceRadiusKm),
 
 					bio: draftProfile.bio || null,
 
@@ -1014,6 +1225,9 @@ async function saveProfile() {
 		profile.specialties = [
 			...draftProfile.specialties,
 		]
+
+		selectedProfileLocation.value =
+			draftProfile.location
 
 		showProfilePanel.value = false
 	} catch (error: unknown) {
