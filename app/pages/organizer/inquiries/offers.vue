@@ -10,126 +10,138 @@
 		</div>
 
 		<div v-else-if="offers.length" class="space-y-5">
-			<article v-for="offer in offers" :key="offer.id" class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition hover:border-primary-200 hover:shadow-md">
-				<div class="h-1" :class="offer.quotation_status === 'accepted' ? 'bg-emerald-500' : offer.quotation_status === 'rejected' ? 'bg-rose-400' : 'bg-amber-400'" />
+			<article v-for="offer in offers" :key="offer.id"
+				class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition hover:border-primary-200 hover:shadow-md">
+				<div class="h-1"
+					:class="offer.quotation_status === 'accepted' ? 'bg-emerald-500' : offer.quotation_status === 'rejected' ? 'bg-rose-400' : 'bg-amber-400'" />
 				<div class="p-6">
-				<div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-					<div>
-						<h3 class="text-lg font-bold text-gray-900">
-							{{ offer.inquiry?.event_title || `${offer.inquiry?.event_type || 'Event'} Inquiry` }}
-						</h3>
+					<div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+						<div>
+							<h3 class="text-lg font-bold text-gray-900">
+								{{ offer.inquiry?.event_title || `${offer.inquiry?.event_type || 'Event'} Inquiry` }}
+							</h3>
 
-						<p class="mt-1 text-sm text-gray-500">
-							{{ offer.package_name || 'Custom quotation' }}
-						</p>
-					</div>
-
-					<span class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold"
-						:class="statusBadgeClass(offer.quotation_status)">
-						{{ statusLabel(offer.quotation_status) }}
-					</span>
-				</div>
-
-				<div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-primary-100 bg-primary-50/60 px-4 py-3 text-sm">
-					<span class="flex items-center gap-2 font-semibold text-gray-800"><IconBase name="calendar" class="h-4 w-4 text-primary-700" />{{ formatEventDate(offer.inquiry?.event_date) }}</span>
-					<span class="flex items-center gap-2 font-semibold text-primary-800"><IconBase name="clock" class="h-4 w-4" />{{ formatSchedule(offer.inquiry?.start_time, offer.inquiry?.end_time) }}</span>
-					<span v-if="offer.inquiry?.location" class="flex min-w-0 items-center gap-2 text-gray-500"><IconBase name="map-pin" class="h-4 w-4 shrink-0" /><span class="truncate">{{ offer.inquiry.location }}</span></span>
-				</div>
-
-				<div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-					<div class="rounded-lg bg-gray-50 p-3">
-						<div class="text-xs text-gray-500">
-							Offer Amount
+							<p class="mt-1 text-sm text-gray-500">
+								{{ offer.package_name || 'Custom quotation' }}
+							</p>
 						</div>
 
-						<div class="mt-1 text-lg font-bold text-primary-700">
-							{{ formatCurrency(offer.quotation_amount) }}
-						</div>
-					</div>
-
-					<div class="rounded-lg bg-gray-50 p-3">
-						<div class="text-xs text-gray-500">
-							Submitted
-						</div>
-
-						<div class="mt-1 text-sm font-bold text-gray-900">
-							{{ formatDate(offer.created_at) }}
-						</div>
-					</div>
-
-					<div class="rounded-lg bg-gray-50 p-3">
-						<div class="text-xs text-gray-500">
-							Status
-						</div>
-
-						<div class="mt-1 text-sm font-bold" :class="statusTextClass(offer.quotation_status)">
+						<span class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold"
+							:class="statusBadgeClass(offer.quotation_status)">
 							{{ statusLabel(offer.quotation_status) }}
+						</span>
+					</div>
+
+					<div
+						class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-primary-100 bg-primary-50/60 px-4 py-3 text-sm">
+						<span class="flex items-center gap-2 font-semibold text-gray-800">
+							<IconBase name="calendar" class="h-4 w-4 text-primary-700" />{{
+								formatEventDate(offer.inquiry?.event_date) }}
+						</span>
+						<span class="flex items-center gap-2 font-semibold text-primary-800">
+							<IconBase name="clock" class="h-4 w-4" />{{ formatSchedule(offer.inquiry?.start_time,
+								offer.inquiry?.end_time) }}
+						</span>
+						<span v-if="offer.inquiry?.location" class="flex min-w-0 items-center gap-2 text-gray-500">
+							<IconBase name="map-pin" class="h-4 w-4 shrink-0" /><span class="truncate">{{
+								offer.inquiry.location }}</span>
+						</span>
+					</div>
+
+					<div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+						<div class="rounded-lg bg-gray-50 p-3">
+							<div class="text-xs text-gray-500">
+								Offer Amount
+							</div>
+
+							<div class="mt-1 text-lg font-bold text-primary-700">
+								{{ formatCurrency(offer.quotation_amount) }}
+							</div>
+						</div>
+
+						<div class="rounded-lg bg-gray-50 p-3">
+							<div class="text-xs text-gray-500">
+								Submitted
+							</div>
+
+							<div class="mt-1 text-sm font-bold text-gray-900">
+								{{ formatDate(offer.created_at) }}
+							</div>
+						</div>
+
+						<div class="rounded-lg bg-gray-50 p-3">
+							<div class="text-xs text-gray-500">
+								Status
+							</div>
+
+							<div class="mt-1 text-sm font-bold" :class="statusTextClass(offer.quotation_status)">
+								{{ statusLabel(offer.quotation_status) }}
+							</div>
 						</div>
 					</div>
-				</div>
 
-				<div v-if="offer.timeline || offer.quotation_details" class="mt-4 grid gap-3 sm:grid-cols-2">
-					<div v-if="offer.timeline" class="rounded-lg border border-gray-100 p-3">
-						<div class="text-xs font-semibold uppercase tracking-wide text-gray-400">
-							Timeline
+					<div v-if="offer.timeline || offer.quotation_details" class="mt-4 grid gap-3 sm:grid-cols-2">
+						<div v-if="offer.timeline" class="rounded-lg border border-gray-100 p-3">
+							<div class="text-xs font-semibold uppercase tracking-wide text-gray-400">
+								Timeline
+							</div>
+
+							<p class="mt-1 text-sm text-gray-700">
+								{{ offer.timeline }}
+							</p>
 						</div>
 
-						<p class="mt-1 text-sm text-gray-700">
-							{{ offer.timeline }}
-						</p>
+						<div v-if="offer.quotation_details" class="rounded-lg border border-gray-100 p-3">
+							<div class="text-xs font-semibold uppercase tracking-wide text-gray-400">
+								Pitch
+							</div>
+
+							<p class="mt-1 text-sm leading-6 text-gray-700">
+								{{ offer.quotation_details }}
+							</p>
+						</div>
 					</div>
 
-					<div v-if="offer.quotation_details" class="rounded-lg border border-gray-100 p-3">
-						<div class="text-xs font-semibold uppercase tracking-wide text-gray-400">
-							Pitch
+					<div v-if="offer.inclusions?.length" class="mt-4">
+						<div class="mb-2 text-xs font-semibold tracking-wide text-gray-400">
+							INCLUSIONS
 						</div>
 
-						<p class="mt-1 text-sm leading-6 text-gray-700">
-							{{ offer.quotation_details }}
-						</p>
-					</div>
-				</div>
-
-				<div v-if="offer.inclusions?.length" class="mt-4">
-					<div class="mb-2 text-xs font-semibold tracking-wide text-gray-400">
-						INCLUSIONS
+						<ul class="space-y-2">
+							<li v-for="inclusion in offer.inclusions" :key="inclusion.id"
+								class="flex items-start gap-2 text-sm text-gray-600">
+								<span class="mt-0.5 text-primary-700">✓</span>
+								<span>{{ inclusion.description }}</span>
+							</li>
+						</ul>
 					</div>
 
-					<ul class="space-y-2">
-						<li v-for="inclusion in offer.inclusions" :key="inclusion.id"
-							class="flex items-start gap-2 text-sm text-gray-600">
-							<span class="mt-0.5 text-primary-700">✓</span>
-							<span>{{ inclusion.description }}</span>
-						</li>
-					</ul>
-				</div>
+					<div class="mt-5 flex flex-wrap gap-3">
+						<button v-if="offer.quotation_status === 'accepted'" type="button"
+							class="flex items-center gap-2 rounded-xl bg-primary-700 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-500 disabled:cursor-not-allowed disabled:opacity-60"
+							:disabled="startingPlanningId === offer.id" @click="startEventPlanning(offer)">
+							<IconBase name="arrow-right" class="h-4 w-4" />
 
-				<div class="mt-5 flex flex-wrap gap-3">
-					<button v-if="offer.quotation_status === 'accepted'" type="button"
-						class="flex items-center gap-2 rounded-xl bg-primary-700 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-500 disabled:cursor-not-allowed disabled:opacity-60"
-						:disabled="startingPlanningId === offer.id" @click="startEventPlanning(offer)">
-						<IconBase name="arrow-right" class="h-4 w-4" />
+							{{
+								startingPlanningId === offer.id
+									? 'Starting...'
+									: offer.event
+										? 'Open Event'
+										: 'Start Event Planning'
+							}}
+						</button>
 
-						{{
-							startingPlanningId === offer.id
-								? 'Starting...'
-								: offer.event
-									? 'Open Event'
-									: 'Start Event Planning'
-						}}
-					</button>
+						<button v-else-if="offer.quotation_status === 'pending'" type="button"
+							class="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+							<IconBase name="message" class="h-4 w-4" />
+							Message Client
+						</button>
 
-					<button v-else-if="offer.quotation_status === 'pending'" type="button"
-						class="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
-						<IconBase name="message" class="h-4 w-4" />
-						Message Client
-					</button>
-
-					<button type="button"
-						class="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
-						View Full Proposal
-					</button>
-				</div>
+						<button type="button"
+							class="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+							View Full Proposal
+						</button>
+					</div>
 				</div>
 			</article>
 		</div>

@@ -382,7 +382,9 @@
 								Category
 							</label>
 
-							<FormsSelect v-model="activityForm.category" :options="['Planning', 'Venue', 'Catering', 'Staff', 'Logistics', 'Marketing', 'Registration', 'Other']" placeholder="Select category" />
+							<FormsSelect v-model="activityForm.category"
+								:options="['Planning', 'Venue', 'Catering', 'Staff', 'Logistics', 'Marketing', 'Registration', 'Other']"
+								placeholder="Select category" />
 						</div>
 
 						<div>
@@ -390,7 +392,8 @@
 								Tag
 							</label>
 
-							<FormsSelect v-model="activityForm.tag" :options="['Milestone', 'Update', 'Action', 'Reminder']" placeholder="Select tag" />
+							<FormsSelect v-model="activityForm.tag"
+								:options="['Milestone', 'Update', 'Action', 'Reminder']" placeholder="Select tag" />
 						</div>
 					</div>
 
@@ -406,7 +409,9 @@
 								Status
 							</label>
 
-							<FormsSelect v-model="activityForm.status" :options="[{ value: 'pending', label: 'Pending' }, { value: 'in_progress', label: 'In Progress' }, { value: 'completed', label: 'Completed' }]" :can-clear="false" :searchable="false" />
+							<FormsSelect v-model="activityForm.status"
+								:options="[{ value: 'pending', label: 'Pending' }, { value: 'in_progress', label: 'In Progress' }, { value: 'completed', label: 'Completed' }]"
+								:can-clear="false" :searchable="false" />
 						</div>
 
 						<div>

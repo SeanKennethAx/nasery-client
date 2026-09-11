@@ -7,7 +7,11 @@
 		</h2>
 
 		<p class="mb-6 text-sm text-gray-500">
-			{{ nextInquiry ? 'Sign in as a client to continue posting your event inquiry.' : 'Sign in to manage your events and bids' }}
+			{{
+				nextInquiry ?
+					'Sign in as a client to continue posting your event inquiry.' :
+					'Sign in to manage your events and bids'
+			}}
 		</p>
 
 		<AuthSocialButtons mode="login" @continue="handleSocialContinue" />
@@ -93,12 +97,14 @@
 		<p class="mt-5 text-center text-sm text-gray-500">
 			New to NaSeRy?
 
-			<NuxtLink :to="{ path: '/register', query: nextInquiry ? { redirect: nextInquiry } : {} }" class="font-bold text-primary-600">
+			<NuxtLink :to="{ path: '/register', query: nextInquiry ? { redirect: nextInquiry } : {} }"
+				class="font-bold text-primary-600">
 				Create account
 			</NuxtLink>
 		</p>
 	</div>
 </template>
+
 <script setup lang="ts">
 import type { User } from '~/types/auth'
 

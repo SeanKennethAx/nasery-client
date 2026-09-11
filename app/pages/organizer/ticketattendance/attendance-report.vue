@@ -370,7 +370,8 @@
                                 </td>
 
                                 <td class="px-5 py-3.5">
-                                    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold" :class="categoryClass(attendee.attendee_category)">
+                                    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+                                        :class="categoryClass(attendee.attendee_category)">
                                         {{ formatCategory(attendee.attendee_category) }}
                                     </span>
                                 </td>

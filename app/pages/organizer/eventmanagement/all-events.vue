@@ -25,166 +25,175 @@
 						? 'ring-2 ring-primary-500/30'
 						: '',
 				]" @click="openPlanningItem(item)">
-				<div class="h-1" :class="item.event ? 'bg-primary-700' : item.quotation?.quotation_status === 'accepted' ? 'bg-emerald-500' : 'bg-amber-400'" />
+				<div class="h-1"
+					:class="item.event ? 'bg-primary-700' : item.quotation?.quotation_status === 'accepted' ? 'bg-emerald-500' : 'bg-amber-400'" />
 				<div class="p-6">
-				<div class="flex flex-wrap items-start justify-between gap-4">
-					<div>
-						<div v-if="!item.event"
-							class="mb-2 text-xs font-semibold uppercase tracking-wide" :class="item.quotation?.quotation_status === 'accepted' ? 'text-green-600' : 'text-amber-600'">
-							{{ item.quotation?.quotation_status === 'accepted' ? 'Client awarded your bid' : 'Offer awaiting client decision' }}
+					<div class="flex flex-wrap items-start justify-between gap-4">
+						<div>
+							<div v-if="!item.event" class="mb-2 text-xs font-semibold uppercase tracking-wide"
+								:class="item.quotation?.quotation_status === 'accepted' ? 'text-green-600' : 'text-amber-600'">
+								{{
+									item.quotation?.quotation_status === 'accepted' ?
+										'Client awarded your bid' :
+										'Offer awaiting client decision'
+								}}
+							</div>
+
+							<h3 class="text-lg font-bold text-gray-900">
+								{{ item.name }}
+							</h3>
+
+							<p class="mt-1 text-sm text-gray-500">
+								{{ formatDate(item.eventDate) }}
+
+								<template v-if="item.location">
+									&bull;
+									{{ item.location }}
+								</template>
+							</p>
 						</div>
 
-						<h3 class="text-lg font-bold text-gray-900">
-							{{ item.name }}
-						</h3>
-
-						<p class="mt-1 text-sm text-gray-500">
-							{{ formatDate(item.eventDate) }}
-
-							<template v-if="item.location">
-								&bull;
-								{{ item.location }}
-							</template>
-						</p>
-					</div>
-
-					<span v-if="item.event" class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold" :class="item.event.status === 'published'
-						? 'bg-gray-900 text-white'
-						: 'border border-gray-200 bg-white text-gray-600'
-						">
-						{{
-							formatEventStatus(
-								item.event.status,
-							)
-						}}
-					</span>
-
-					<span v-else class="shrink-0 rounded-full border px-3 py-1 text-xs font-semibold"
-						:class="item.quotation?.quotation_status === 'accepted' ? 'border-green-200 bg-green-50 text-green-700' : 'border-amber-200 bg-amber-50 text-amber-700'">
-						{{ item.quotation?.quotation_status === 'accepted' ? 'Awarded' : 'Pending offer' }}
-					</span>
-				</div>
-
-				<div v-if="item.quotation" class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-					<div class="rounded-xl bg-gray-50 p-4">
-						<div class="text-xs text-gray-500">
-							{{ item.quotation.quotation_status === 'accepted' ? 'Accepted Package' : 'Proposed Package' }}
-						</div>
-
-						<div class="mt-1 font-bold text-gray-900">
+						<span v-if="item.event" class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold" :class="item.event.status === 'published'
+							? 'bg-gray-900 text-white'
+							: 'border border-gray-200 bg-white text-gray-600'
+							">
 							{{
-								item.quotation.package_name ||
-								'Custom Package'
+								formatEventStatus(item.event.status,)
 							}}
-						</div>
-					</div>
-
-					<div class="rounded-xl bg-gray-50 p-4">
-						<div class="text-xs text-gray-500">
-							{{ item.quotation.quotation_status === 'accepted' ? 'Agreed Amount' : 'Offer Amount' }}
-						</div>
-
-						<div class="mt-1 font-bold text-primary-700">
-							{{
-								formatCurrency(
-									item.quotation
-										.quotation_amount,
-								)
-							}}
-						</div>
-					</div>
-
-					<div class="rounded-xl bg-gray-50 p-4">
-						<div class="text-xs text-gray-500">
-							Timeline
-						</div>
-
-						<div class="mt-1 font-bold text-gray-900">
-							{{
-								item.quotation.timeline ||
-								'Not specified'
-							}}
-						</div>
-					</div>
-				</div>
-
-				<div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-					<div class="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
-						<div class="text-sm text-gray-500">
-							Expected Guests
-						</div>
-
-						<div class="mt-1 text-2xl font-extrabold text-gray-900">
-							{{
-								item.event?.expected_guests ?? item.quotation?.inquiry?.expected_guests ??
-								0
-							}}
-						</div>
-					</div>
-
-					<div class="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
-						<div class="text-sm text-gray-500">
-							Start Time
-						</div>
-
-						<div class="mt-1 text-2xl font-extrabold text-gray-900">
-							{{
-								formatTime(item.startTime)
-							}}
-						</div>
-					</div>
-
-					<div class="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
-						<div class="text-sm text-gray-500">
-							End Time
-						</div>
-
-						<div class="mt-1 text-2xl font-extrabold text-gray-900">
-							{{
-								formatTime(item.endTime)
-							}}
-						</div>
-					</div>
-				</div>
-
-				<div v-if="item.event || item.quotation?.quotation_status === 'accepted'" class="mt-5">
-					<div class="mb-1 flex items-center justify-between text-sm">
-						<span class="font-semibold text-gray-900">
-							Event Readiness
 						</span>
 
-						<span class="text-gray-500">
-							{{ readiness(item) }}%
+						<span v-else class="shrink-0 rounded-full border px-3 py-1 text-xs font-semibold"
+							:class="item.quotation?.quotation_status === 'accepted' ? 'border-green-200 bg-green-50 text-green-700' : 'border-amber-200 bg-amber-50 text-amber-700'">
+							{{ item.quotation?.quotation_status === 'accepted' ? 'Awarded' : 'Pending offer' }}
 						</span>
 					</div>
 
-					<div class="h-2.5 w-full overflow-hidden rounded-full bg-gray-100">
-						<div class="h-full rounded-full bg-[#285F6b] transition-all" :style="{
-							width:
-								`${readiness(item)}%`,
-						}" />
+					<div v-if="item.quotation" class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+						<div class="rounded-xl bg-gray-50 p-4">
+							<div class="text-xs text-gray-500">
+								{{
+									item.quotation.quotation_status === 'accepted' ?
+										'Accepted Package' :
+										'Proposed Package' }}
+							</div>
+
+							<div class="mt-1 font-bold text-gray-900">
+								{{
+									item.quotation.package_name ||
+									'Custom Package'
+								}}
+							</div>
+						</div>
+
+						<div class="rounded-xl bg-gray-50 p-4">
+							<div class="text-xs text-gray-500">
+								{{ item.quotation.quotation_status === 'accepted' ? 'Agreed Amount' : 'Offer Amount' }}
+							</div>
+
+							<div class="mt-1 font-bold text-primary-700">
+								{{
+									formatCurrency(
+										item.quotation
+											.quotation_amount,
+									)
+								}}
+							</div>
+						</div>
+
+						<div class="rounded-xl bg-gray-50 p-4">
+							<div class="text-xs text-gray-500">
+								Timeline
+							</div>
+
+							<div class="mt-1 font-bold text-gray-900">
+								{{
+									item.quotation.timeline ||
+									'Not specified'
+								}}
+							</div>
+						</div>
 					</div>
-				</div>
 
-				<div class="mt-5 flex flex-wrap gap-3">
-					<button v-if="item.event" type="button"
-						class="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-						@click.stop="
-							editEvent(item.event)
-							">
-						<IconBase name="edit" class="h-4 w-4" />
+					<div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+						<div class="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
+							<div class="text-sm text-gray-500">
+								Expected Guests
+							</div>
 
-						Edit
-					</button>
+							<div class="mt-1 text-2xl font-extrabold text-gray-900">
+								{{
+									item.event?.expected_guests ?? item.quotation?.inquiry?.expected_guests ??
+									0
+								}}
+							</div>
+						</div>
 
-					<button type="button"
-						class="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-						@click.stop="
-							openPlanningItem(item)
-							">
-						{{ item.quotation?.quotation_status === 'pending' && !item.event ? 'View Offer' : 'View Details' }}
-					</button>
-				</div>
+						<div class="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
+							<div class="text-sm text-gray-500">
+								Start Time
+							</div>
+
+							<div class="mt-1 text-2xl font-extrabold text-gray-900">
+								{{
+									formatTime(item.startTime)
+								}}
+							</div>
+						</div>
+
+						<div class="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
+							<div class="text-sm text-gray-500">
+								End Time
+							</div>
+
+							<div class="mt-1 text-2xl font-extrabold text-gray-900">
+								{{
+									formatTime(item.endTime)
+								}}
+							</div>
+						</div>
+					</div>
+
+					<div v-if="item.event || item.quotation?.quotation_status === 'accepted'" class="mt-5">
+						<div class="mb-1 flex items-center justify-between text-sm">
+							<span class="font-semibold text-gray-900">
+								Event Readiness
+							</span>
+
+							<span class="text-gray-500">
+								{{ readiness(item) }}%
+							</span>
+						</div>
+
+						<div class="h-2.5 w-full overflow-hidden rounded-full bg-gray-100">
+							<div class="h-full rounded-full bg-[#285F6b] transition-all" :style="{
+								width:
+									`${readiness(item)}%`,
+							}" />
+						</div>
+					</div>
+
+					<div class="mt-5 flex flex-wrap gap-3">
+						<button v-if="item.event" type="button"
+							class="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+							@click.stop="
+								editEvent(item.event)
+								">
+							<IconBase name="edit" class="h-4 w-4" />
+
+							Edit
+						</button>
+
+						<button type="button"
+							class="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+							@click.stop="
+								openPlanningItem(item)
+								">
+							{{
+								item.quotation?.quotation_status === 'pending' && !item.event ?
+									'View Offer' :
+									'View Details' }}
+						</button>
+					</div>
 				</div>
 			</article>
 		</div>
@@ -435,7 +444,7 @@ const planningItems =
 				eventDate:
 					quotation.inquiry
 						?.event_date ??
-					 null,
+					null,
 
 				startTime: quotation.inquiry?.start_time ?? null,
 				endTime: quotation.inquiry?.end_time ?? null,

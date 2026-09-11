@@ -51,7 +51,8 @@
 		</div>
 
 		<div class="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-			<div v-for="s in statusSummary" :key="s.label" class="rounded-2xl border border-gray-200 bg-white p-3.5 sm:p-4">
+			<div v-for="s in statusSummary" :key="s.label"
+				class="rounded-2xl border border-gray-200 bg-white p-3.5 sm:p-4">
 				<div class="flex items-center gap-2">
 					<div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" :class="s.iconBg">
 						<IconBase :name="s.icon" class="h-3.5 w-3.5" :class="s.iconColor" />
@@ -64,7 +65,8 @@
 
 		<div class="mb-6 divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white">
 			<div v-for="cat in categories" :key="cat.id">
-				<button type="button" class="flex w-full items-center gap-3 px-4 py-4 text-left hover:bg-gray-50 sm:gap-4 sm:px-6"
+				<button type="button"
+					class="flex w-full items-center gap-3 px-4 py-4 text-left hover:bg-gray-50 sm:gap-4 sm:px-6"
 					@click="toggleCategory(cat.id)">
 					<div
 						class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
@@ -75,7 +77,7 @@
 							<span class="truncate text-sm font-bold text-gray-900">{{ cat.label }}</span>
 							<span class="shrink-0 text-xs font-semibold text-gray-500">{{ doneIn(cat) }}/{{
 								cat.tasks.length
-								}}</span>
+							}}</span>
 						</div>
 						<div class="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
 							<div class="h-full rounded-full bg-[#285F6b]" :style="{ width: percentOf(cat) + '%' }" />

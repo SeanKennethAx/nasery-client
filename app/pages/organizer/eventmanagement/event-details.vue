@@ -61,7 +61,8 @@
 						<span class="text-rose-500">*</span>
 					</label>
 
-					<FormsSelect v-model="editForm.eventType" :options="eventTypes" placeholder="Select event type" :can-clear="false" />
+					<FormsSelect v-model="editForm.eventType" :options="eventTypes" placeholder="Select event type"
+						:can-clear="false" />
 
 					<label class="mb-1.5 mt-4 block text-sm font-semibold text-gray-700">
 						Description
@@ -74,7 +75,8 @@
 						<div>
 							<FormsLabel text="Event Date" required />
 
-							<FormsDateField v-model="editForm.eventDate" name="event_date" placeholder="Choose event date" />
+							<FormsDateField v-model="editForm.eventDate" name="event_date"
+								placeholder="Choose event date" />
 						</div>
 
 						<div>
@@ -82,7 +84,9 @@
 								Status
 							</label>
 
-							<FormsSelect v-model="editForm.status" :options="[{ value: 'draft', label: 'Draft' }, { value: 'published', label: 'Published' }]" :can-clear="false" :searchable="false" />
+							<FormsSelect v-model="editForm.status"
+								:options="[{ value: 'draft', label: 'Draft' }, { value: 'published', label: 'Published' }]"
+								:can-clear="false" :searchable="false" />
 						</div>
 					</div>
 
@@ -90,13 +94,15 @@
 						<div>
 							<FormsLabel text="Start Time" />
 
-							<FormsTimeField v-model="editForm.startTime" name="start_time" placeholder="Select start time" />
+							<FormsTimeField v-model="editForm.startTime" name="start_time"
+								placeholder="Select start time" />
 						</div>
 
 						<div>
 							<FormsLabel text="End Time" />
 
-							<FormsTimeField v-model="editForm.endTime" name="end_time" placeholder="Select end time" :min-time="editForm.startTime || undefined" />
+							<FormsTimeField v-model="editForm.endTime" name="end_time" placeholder="Select end time"
+								:min-time="editForm.startTime || undefined" />
 						</div>
 					</div>
 				</template>

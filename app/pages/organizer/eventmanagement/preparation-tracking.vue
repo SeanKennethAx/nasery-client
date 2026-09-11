@@ -10,11 +10,40 @@
 
 		<template v-else-if="event">
 			<div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#285F6b]/5 p-4">
-				<div><p class="text-sm font-bold text-[#285F6b]">Event Team</p><p class="text-xs text-gray-500">{{ teamMembers.length }} active member{{ teamMembers.length === 1 ? '' : 's' }} available for assignment</p></div>
-				<button class="rounded-xl border border-[#285F6b]/20 bg-white px-4 py-2 text-sm font-bold text-[#285F6b]" @click="showMemberForm=!showMemberForm">{{ showMemberForm ? 'Close' : '+ Add Team Member' }}</button>
+				<div>
+					<p class="text-sm font-bold text-[#285F6b]">Event Team</p>
+					<p class="text-xs text-gray-500">
+						{{ teamMembers.length }} active member{{ teamMembers.length === 1 ?
+							'' : 's' }} available for assignment
+					</p>
+				</div>
+				<button
+					class="rounded-xl border border-[#285F6b]/20 bg-white px-4 py-2 text-sm font-bold text-[#285F6b]"
+					@click="showMemberForm = !showMemberForm">
+					{{ showMemberForm ? 'Close' : '+ Add Team Member' }}
+				</button>
 			</div>
-			<div v-if="showMemberForm" class="mb-6 grid gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:grid-cols-2">
-				<input v-model="memberForm.firstname" class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm" placeholder="First name"><input v-model="memberForm.lastname" class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm" placeholder="Last name"><input v-model="memberForm.email" type="email" class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm" placeholder="Email address"><input v-model="memberForm.position" class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm" placeholder="Role / position"><input v-model="memberForm.password" type="password" class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm" placeholder="Temporary password"><button class="rounded-xl bg-[#285F6b] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50" :disabled="creatingMember" @click="createTeamMember">{{ creatingMember?'Creating...':'Create Team Account' }}</button>
+			<div v-if="showMemberForm"
+				class="mb-6 grid gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:grid-cols-2">
+				<input v-model="memberForm.firstname"
+					class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm" placeholder="First name">
+				<input v-model="memberForm.lastname"
+					class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm" placeholder="Last name">
+				<input v-model="memberForm.email" type="email"
+					class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm" placeholder="Email address">
+				<input v-model="memberForm.position"
+					class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm"
+					placeholder="Role / position">
+				<input v-model="memberForm.password" type="password"
+					class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm"
+					placeholder="Temporary password">
+				<button class="rounded-xl bg-[#285F6b] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+					:disabled="creatingMember" @click="createTeamMember">
+					{{
+						creatingMember ?
+							'Creating...' : 'Create Team Account'
+					}}
+				</button>
 			</div>
 			<div class="mb-6">
 				<h2 class="text-lg font-bold text-gray-900">
@@ -70,8 +99,18 @@
 							: 'text-gray-900'
 							">
 							{{ item.label }}
-							<span v-if="item.assigned_team_member" class="mt-1 block text-xs font-semibold text-[#285F6b]">Assigned to {{ memberName(item.assigned_team_member) }}</span>
-							<span v-if="item.completed_by" class="mt-1 block text-xs text-gray-500">Completed by {{ userName(item.completed_by) }}<template v-if="item.completion_note"> — {{ item.completion_note }}</template></span>
+							<span v-if="item.assigned_team_member"
+								class="mt-1 block text-xs font-semibold text-[#285F6b]">
+								Assigned to {{ memberName(item.assigned_team_member) }}
+							</span>
+							<span v-if="item.completed_by" class="mt-1 block text-xs text-gray-500">
+								Completed by {{ userName(item.completed_by) }}
+								<template v-if="item.completion_note"> —
+									{{
+										item.completion_note
+									}}
+								</template>
+							</span>
 						</span>
 
 						<IconBase v-if="
@@ -80,10 +119,21 @@
 						" name="refresh-cw" class="h-4 w-4 animate-spin text-gray-400" />
 					</button>
 					<div v-if="item.is_completed && item.review_status === 'pending'" class="flex gap-1">
-						<button class="rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs font-bold text-emerald-700" @click="reviewItem(item,'verified')">Verify</button>
-						<button class="rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-bold text-red-700" @click="reviewItem(item,'changes_requested')">Request changes</button>
+						<button class="rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs font-bold text-emerald-700"
+							@click="reviewItem(item, 'verified')">
+							Verify
+						</button>
+						<button class="rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-bold text-red-700"
+							@click="reviewItem(item, 'changes_requested')">
+							Request changes
+						</button>
 					</div>
-					<span v-else-if="item.is_completed" class="rounded-full px-2.5 py-1 text-xs font-bold" :class="item.review_status==='verified'?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-700'">{{ item.review_status==='verified'?'Verified':'Changes requested' }}</span>
+					<span v-else-if="item.is_completed" class="rounded-full px-2.5 py-1 text-xs font-bold"
+						:class="item.review_status === 'verified' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'">
+						{{
+							item.review_status === 'verified' ? 'Verified' : 'Changes requested'
+						}}
+					</span>
 
 					<button type="button"
 						class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
@@ -134,7 +184,9 @@
 							addChecklistItem
 						" />
 
-					<FormsSelect v-model="newItemAssignee" class="mt-3" :options="[{ value: null, label: 'Unassigned' }, ...teamMembers.map(member => ({ value: member.id, label: `${memberName(member)} — ${member.position || 'Team member'}` }))]" placeholder="Select assignee" />
+					<FormsSelect v-model="newItemAssignee" class="mt-3"
+						:options="[{ value: null, label: 'Unassigned' }, ...teamMembers.map(member => ({ value: member.id, label: `${memberName(member)} — ${member.position || 'Team member'}` }))]"
+						placeholder="Select assignee" />
 
 					<div class="mt-3 flex justify-end gap-2">
 						<button type="button"
@@ -282,7 +334,7 @@ const newItemAssignee = ref<number | null>(null)
 const teamMembers = ref<TeamMember[]>([])
 const showMemberForm = ref(false)
 const creatingMember = ref(false)
-const memberForm = reactive({ firstname:'', lastname:'', email:'', position:'', password:'' })
+const memberForm = reactive({ firstname: '', lastname: '', email: '', position: '', password: '' })
 
 /*
  * ============================================================
@@ -434,7 +486,7 @@ async function loadPreparation() {
 				},
 			),
 
-			$fetch<{data:TeamMember[]}>(`${config.public.apiBaseURL}/organizer/team-members`, { headers:{Accept:'application/json',Authorization:`Bearer ${token.value}`} }),
+			$fetch<{ data: TeamMember[] }>(`${config.public.apiBaseURL}/organizer/team-members`, { headers: { Accept: 'application/json', Authorization: `Bearer ${token.value}` } }),
 		])
 
 		event.value =
@@ -649,19 +701,19 @@ function userName(user: TeamUser) { return `${user.firstname} ${user.lastname}`.
 function memberName(member: TeamMember) { return userName(member.user) }
 
 async function createTeamMember() {
-	creatingMember.value=true; errorMessage.value=''
+	creatingMember.value = true; errorMessage.value = ''
 	try {
-		const response=await $fetch<{data:TeamMember}>(`${config.public.apiBaseURL}/organizer/team-members`,{method:'POST',headers:{Accept:'application/json',Authorization:`Bearer ${token.value}`},body:memberForm})
-		teamMembers.value.push(response.data); Object.assign(memberForm,{firstname:'',lastname:'',email:'',position:'',password:''}); showMemberForm.value=false
-	} catch(error:unknown) { errorMessage.value=getApiErrorMessage(error,'Unable to create team member.') } finally { creatingMember.value=false }
+		const response = await $fetch<{ data: TeamMember }>(`${config.public.apiBaseURL}/organizer/team-members`, { method: 'POST', headers: { Accept: 'application/json', Authorization: `Bearer ${token.value}` }, body: memberForm })
+		teamMembers.value.push(response.data); Object.assign(memberForm, { firstname: '', lastname: '', email: '', position: '', password: '' }); showMemberForm.value = false
+	} catch (error: unknown) { errorMessage.value = getApiErrorMessage(error, 'Unable to create team member.') } finally { creatingMember.value = false }
 }
 
-async function reviewItem(item:PreparationItem,status:'verified'|'changes_requested') {
-	if(!eventId.value) return
+async function reviewItem(item: PreparationItem, status: 'verified' | 'changes_requested') {
+	if (!eventId.value) return
 	try {
-		const response=await $fetch<PreparationItemResponse>(`${config.public.apiBaseURL}/organizer/events/${eventId.value}/preparation-items/${item.id}`,{method:'PUT',headers:{Accept:'application/json',Authorization:`Bearer ${token.value}`},body:{review_status:status}})
-		const index=checklist.value.findIndex(value=>value.id===item.id); if(index>=0) checklist.value[index]=response.data
-	} catch(error:unknown) { errorMessage.value=getApiErrorMessage(error,'Unable to review completed work.') }
+		const response = await $fetch<PreparationItemResponse>(`${config.public.apiBaseURL}/organizer/events/${eventId.value}/preparation-items/${item.id}`, { method: 'PUT', headers: { Accept: 'application/json', Authorization: `Bearer ${token.value}` }, body: { review_status: status } })
+		const index = checklist.value.findIndex(value => value.id === item.id); if (index >= 0) checklist.value[index] = response.data
+	} catch (error: unknown) { errorMessage.value = getApiErrorMessage(error, 'Unable to review completed work.') }
 }
 async function removeChecklistItem(
 	item: PreparationItem,

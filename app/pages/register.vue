@@ -154,7 +154,8 @@
 				<div>
 					<FormsLabel text="Service Radius" required />
 
-					<FormsSelect v-model="form.serviceRadiusKm" :options="serviceRadiusSelectOptions" :can-clear="false" :searchable="false" />
+					<FormsSelect v-model="form.serviceRadiusKm" :options="serviceRadiusSelectOptions" :can-clear="false"
+						:searchable="false" />
 
 					<p class="mt-1.5 text-xs text-gray-400">
 						Clients whose event is inside this distance can discover you as a nearby organizer.

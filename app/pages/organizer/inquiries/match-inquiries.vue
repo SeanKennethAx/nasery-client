@@ -310,7 +310,8 @@
 						<div>
 							<FormsLabel text="Event Date" />
 
-							<FormsDateField v-model="offerForm.eventDate" name="event_date" placeholder="Event date" disabled />
+							<FormsDateField v-model="offerForm.eventDate" name="event_date" placeholder="Event date"
+								disabled />
 						</div>
 					</div>
 

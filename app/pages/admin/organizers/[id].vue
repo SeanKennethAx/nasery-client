@@ -1,6 +1,7 @@
 <template>
 	<div v-if="organizer">
-		<button type="button" class="mb-4 flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-700"
+		<button type="button"
+			class="mb-4 flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-700"
 			@click="navigateTo('/admin/organizers')">
 			<IconBase name="arrow-left" class="h-4 w-4" />
 			Back to Organizers
@@ -98,7 +99,8 @@
 			<div v-if="organizer.events.length" class="overflow-x-auto">
 				<table class="w-full text-left text-sm">
 					<thead>
-						<tr class="border-b border-gray-100 text-xs font-semibold uppercase tracking-wide text-gray-400">
+						<tr
+							class="border-b border-gray-100 text-xs font-semibold uppercase tracking-wide text-gray-400">
 							<th class="pb-3 pr-4">Event</th>
 							<th class="pb-3 pr-4">Client</th>
 							<th class="pb-3 pr-4">Date</th>
@@ -131,7 +133,8 @@
 	</div>
 	<div v-else class="rounded-2xl border border-gray-200 bg-white px-6 py-24 text-center">
 		<p class="text-sm text-gray-500">Organizer not found.</p>
-		<button type="button" class="mt-3 text-sm font-semibold text-primary-600" @click="navigateTo('/admin/organizers')">
+		<button type="button" class="mt-3 text-sm font-semibold text-primary-600"
+			@click="navigateTo('/admin/organizers')">
 			Back to Organizers
 		</button>
 	</div>

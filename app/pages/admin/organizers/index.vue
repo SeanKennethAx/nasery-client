@@ -71,8 +71,9 @@
 			<div class="mb-5 flex flex-wrap items-center justify-between gap-3">
 				<div>
 					<h2 class="text-lg font-bold text-gray-900">Organizer Directory</h2>
-					<p class="mt-1 text-sm text-gray-500">All organizers and their platform activity. Click a row for full
-						details.</p>
+					<p class="mt-1 text-sm text-gray-500">
+						All organizers and their platform activity. Click a row for full details.
+					</p>
 				</div>
 			</div>
 
@@ -83,7 +84,8 @@
 			<div class="overflow-x-auto">
 				<table class="w-full text-left text-sm">
 					<thead>
-						<tr class="border-b border-gray-100 text-xs font-semibold uppercase tracking-wide text-gray-400">
+						<tr
+							class="border-b border-gray-100 text-xs font-semibold uppercase tracking-wide text-gray-400">
 							<th class="pb-3 pr-4">Organizer</th>
 							<th class="pb-3 pr-4">Email</th>
 							<th class="pb-3 pr-4">Events</th>

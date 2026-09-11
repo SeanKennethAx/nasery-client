@@ -765,7 +765,9 @@
 							</span>
 						</label>
 
-						<FormsSelect v-model="registrationForm.ticketTypeId" :options="availableTicketTypes.map(ticketType => ({ value: ticketType.id, label: `${ticketType.name} — ${formatCurrency(ticketType.price)}` }))" placeholder="Select ticket type" :can-clear="false" />
+						<FormsSelect v-model="registrationForm.ticketTypeId"
+							:options="availableTicketTypes.map(ticketType => ({ value: ticketType.id, label: `${ticketType.name} — ${formatCurrency(ticketType.price)}` }))"
+							placeholder="Select ticket type" :can-clear="false" />
 					</div>
 
 					<div v-if="selectedRegistrationTicketType"

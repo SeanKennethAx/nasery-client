@@ -1,8 +1,8 @@
 <template>
     <Multiselect :close-on-select="true" :searchable="props.searchable" :options="props.options"
         :can-clear="props.canClear" :append-to-body="props.appendToBody" :close-on-scroll="props.closeOnScroll"
-        :placeholder="props.placeholder" :disabled="props.disabled"
-        no-options-text="This list is empty" noResultsText="No result found" :modelValue="props.modelValue"
+        :placeholder="props.placeholder" :disabled="props.disabled" no-options-text="This list is empty"
+        noResultsText="No result found" :modelValue="props.modelValue"
         @update:modelValue="$emit('update:modelValue', $event)" />
 </template>
 

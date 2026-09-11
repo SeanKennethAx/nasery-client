@@ -221,7 +221,9 @@
                         Ticket Type *
                     </label>
 
-                    <FormsSelect v-model="walkInForm.ticketTypeId" :options="ticketTiers.map(tier => ({ value: tier.id, label: `${tier.name} — ${formatCurrency(tier.price)}` }))" placeholder="Select ticket type" :can-clear="false" />
+                    <FormsSelect v-model="walkInForm.ticketTypeId"
+                        :options="ticketTiers.map(tier => ({ value: tier.id, label: `${tier.name} — ${formatCurrency(tier.price)}` }))"
+                        placeholder="Select ticket type" :can-clear="false" />
 
                     <div v-if="!ticketTiers.length"
                         class="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
