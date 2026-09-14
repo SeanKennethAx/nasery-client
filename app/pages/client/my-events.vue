@@ -117,7 +117,7 @@
 					<div class="mt-6 flex justify-end">
 						<button v-if="quotation.quotation_status === 'pending'" type="button"
 							class="flex items-center gap-2 rounded-xl bg-[#285F6b] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f4a54] disabled:cursor-not-allowed disabled:opacity-60"
-							:disabled="acceptingQuotationId === quotation.id" @click="acceptQuotation(quotation)">
+							:disabled="acceptingQuotationId === quotation.id" @click="requestQuotationAcceptance(quotation)">
 							<IconBase name="award" class="h-4 w-4" />
 
 							{{
@@ -167,39 +167,49 @@
 		<!-- ===================================================== -->
 		<div v-else>
 			<!-- Notifications -->
-			<div v-if="notifications.length"
-				class="mb-6 overflow-hidden rounded-2xl border border-blue-100 bg-blue-50/70">
-				<div class="flex items-center justify-between gap-3 border-b border-blue-100 px-4 py-3 sm:px-5">
+			<section v-if="notifications.length || unreadNotificationCount || isLoadingNotifications || notificationFilter === 'unread'"
+				class="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+				<div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-4 py-4 sm:px-5">
 					<div class="flex items-center gap-2">
-						<IconBase name="bell" class="h-4 w-4 text-blue-700" />
-
-						<span class="text-sm font-bold text-gray-900">
-							Notifications
+						<span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
+							<IconBase name="bell" class="h-4 w-4" />
 						</span>
 
-						<span v-if="unreadNotificationCount > 0"
-							class="rounded-full bg-blue-700 px-2 py-0.5 text-xs font-bold text-white">
-							{{ unreadNotificationCount }}
-						</span>
+						<div>
+							<h2 class="text-sm font-bold text-gray-900">Notifications</h2>
+							<p class="text-xs text-gray-500">Updates about your events and quotations</p>
+						</div>
 					</div>
 
-					<button v-if="unreadNotificationCount > 0" type="button"
-						class="text-xs font-semibold text-blue-700 hover:text-blue-900"
-						@click="markAllNotificationsAsRead">
-						Mark all as read
-					</button>
+					<div class="flex items-center gap-2">
+						<button v-for="filter in notificationFilters" :key="filter.value" type="button"
+							class="rounded-lg px-3 py-1.5 text-xs font-semibold transition"
+							:class="notificationFilter === filter.value
+								? 'bg-primary-700 text-white'
+								: 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+							@click="setNotificationFilter(filter.value)">
+							{{ filter.label }}
+							<span v-if="filter.value === 'unread'">{{ unreadNotificationCount }}</span>
+						</button>
+
+						<button v-if="unreadNotificationCount > 0" type="button"
+							class="rounded-lg px-2 py-1.5 text-xs font-semibold text-primary-700 hover:bg-primary-50"
+							@click="markAllNotificationsAsRead">
+							Mark all read
+						</button>
+					</div>
 				</div>
 
-				<div class="max-h-72 overflow-y-auto">
-					<button v-for="notification in notifications" :key="notification.id" type="button"
-						class="flex w-full items-start gap-3 border-b border-blue-100/70 px-4 py-3 text-left last:border-b-0 hover:bg-blue-50 sm:px-5"
-						:class="{ 'bg-white/70': !notification.read_at }" @click="openNotification(notification)">
+				<div class="max-h-[28rem] overflow-y-auto overscroll-contain">
+					<article v-for="notification in notifications" :key="notification.id"
+						class="group flex items-start gap-3 border-b border-gray-100 px-4 py-3.5 last:border-b-0 hover:bg-gray-50 sm:px-5"
+						:class="{ 'bg-primary-50/40': !notification.read_at }">
 						<span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" :class="notification.read_at
 							? 'bg-gray-300'
-							: 'bg-blue-600'
+							: 'bg-primary-600'
 							"></span>
 
-						<div class="min-w-0 flex-1">
+						<button type="button" class="min-w-0 flex-1 text-left" @click="openNotification(notification)">
 							<p class="text-sm font-semibold text-gray-900">
 								{{
 									notification.data.message ||
@@ -219,14 +229,45 @@
 									}}
 								</span>
 							</p>
-						</div>
+						</button>
 
-						<span class="shrink-0 text-xs text-gray-400">
-							{{ formatRelativeTime(notification.created_at) }}
-						</span>
+						<div class="flex shrink-0 items-center gap-1">
+							<span class="mr-1 hidden text-xs text-gray-400 sm:inline">
+								{{ formatRelativeTime(notification.created_at) }}
+							</span>
+
+							<button type="button"
+								class="rounded-lg p-2 text-gray-400 hover:bg-white hover:text-primary-700"
+								:disabled="notificationActionId === notification.id"
+								:title="notification.read_at ? 'Mark as unread' : 'Mark as read'"
+								@click="toggleNotificationRead(notification)">
+								<IconBase :name="notification.read_at ? 'mail' : 'check'" class="h-4 w-4" />
+							</button>
+
+							<button type="button"
+								class="rounded-lg border border-transparent p-2 text-gray-500 transition hover:border-red-100 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-200"
+								:disabled="notificationActionId === notification.id" title="Remove notification"
+								aria-label="Delete notification"
+								@click="removeNotification(notification.id)">
+								<IconBase name="trash" class="h-4 w-4" />
+							</button>
+						</div>
+					</article>
+
+					<div v-if="!notifications.length && !isLoadingNotifications" class="px-6 py-10 text-center">
+						<p class="text-sm font-semibold text-gray-700">No unread notifications</p>
+						<p class="mt-1 text-xs text-gray-500">You are all caught up.</p>
+					</div>
+				</div>
+
+				<div v-if="notificationPage < notificationLastPage"
+					class="border-t border-gray-100 bg-gray-50/70 px-4 py-3 text-center">
+					<button type="button" class="text-xs font-bold text-primary-700 hover:text-primary-900"
+						:disabled="isLoadingNotifications" @click="loadMoreNotifications">
+						{{ isLoadingNotifications ? 'Loading…' : 'Load older notifications' }}
 					</button>
 				</div>
-			</div>
+			</section>
 
 			<!-- Header -->
 			<div class="mb-6 flex flex-wrap items-start justify-between gap-3">
@@ -410,6 +451,54 @@
 				</button>
 			</div>
 		</div>
+
+		<Teleport to="body">
+			<Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
+				enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in"
+				leave-from-class="opacity-100" leave-to-class="opacity-0">
+				<div v-if="confirmationQuotation" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm"
+					role="dialog" aria-modal="true" aria-labelledby="accept-quotation-title" @click.self="closeQuotationConfirmation">
+					<div class="w-full max-w-md overflow-hidden rounded-3xl border border-white/70 bg-white shadow-2xl">
+						<div class="relative bg-gradient-to-br from-[#285F6b] to-[#173d45] px-6 pb-7 pt-6 text-white">
+							<button type="button" aria-label="Close confirmation"
+								class="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+								:disabled="acceptingQuotationId !== null" @click="closeQuotationConfirmation">
+								<IconBase name="x" class="h-4 w-4" />
+							</button>
+							<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
+								<IconBase name="award" class="h-6 w-6" />
+							</div>
+							<p class="mt-5 text-xs font-bold uppercase tracking-[0.18em] text-white/65">Final selection</p>
+							<h2 id="accept-quotation-title" class="mt-1 text-2xl font-extrabold tracking-tight">Accept this quotation?</h2>
+							<p class="mt-2 text-sm leading-6 text-white/75">This organizer will be awarded your event and the other quotations will be closed.</p>
+						</div>
+
+						<div class="p-6">
+							<div class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+								<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#285F6b]/10 font-bold text-[#285F6b]">
+									{{ organizerInitials(confirmationQuotation) }}
+								</div>
+								<div class="min-w-0 flex-1">
+									<p class="truncate font-bold text-gray-900">{{ organizerName(confirmationQuotation) }}</p>
+									<p class="mt-0.5 text-xs text-gray-500">{{ confirmationQuotation.package_name || 'Custom Package' }}</p>
+								</div>
+								<p class="shrink-0 text-lg font-extrabold text-[#285F6b]">{{ formatQuotationCurrency(confirmationQuotation.quotation_amount) }}</p>
+							</div>
+
+							<div class="mt-6 grid grid-cols-2 gap-3">
+								<button type="button" class="h-12 rounded-xl border border-gray-200 bg-white text-sm font-bold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+									:disabled="acceptingQuotationId !== null" @click="closeQuotationConfirmation">Keep reviewing</button>
+								<button type="button" class="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#285F6b] text-sm font-bold text-white shadow-lg shadow-[#285F6b]/20 transition hover:bg-[#1f4a54] disabled:cursor-wait disabled:opacity-60"
+									:disabled="acceptingQuotationId !== null" @click="acceptQuotation(confirmationQuotation)">
+									<IconBase :name="acceptingQuotationId !== null ? 'refresh-cw' : 'check-circle'" :class="['h-4 w-4', acceptingQuotationId !== null && 'animate-spin']" />
+									{{ acceptingQuotationId !== null ? 'Accepting...' : 'Yes, accept offer' }}
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</Transition>
+		</Teleport>
 	</div>
 </template>
 
@@ -461,7 +550,14 @@ interface ClientNotification {
 interface NotificationResponse {
 	data: ClientNotification[]
 	unread_count: number
+	meta: {
+		current_page: number
+		last_page: number
+		total: number
+	}
 }
+
+type NotificationFilter = 'all' | 'unread'
 
 interface QuotationInclusion {
 	id: number
@@ -528,6 +624,15 @@ const clientName = computed(() => {
 const clientEvents = ref<ClientInquiry[]>([])
 const notifications = ref<ClientNotification[]>([])
 const unreadNotificationCount = ref(0)
+const notificationFilter = ref<NotificationFilter>('all')
+const notificationPage = ref(1)
+const notificationLastPage = ref(1)
+const isLoadingNotifications = ref(false)
+const notificationActionId = ref<string | null>(null)
+const notificationFilters: Array<{ label: string; value: NotificationFilter }> = [
+	{ label: 'All', value: 'all' },
+	{ label: 'Unread', value: 'unread' },
+]
 
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -539,6 +644,7 @@ const quotations = ref<Quotation[]>([])
 const isLoadingQuotations = ref(false)
 const quotationError = ref('')
 const acceptingQuotationId = ref<number | null>(null)
+const confirmationQuotation = ref<Quotation | null>(null)
 
 const eventTypeIcons: Record<string, string> = {
 	Wedding: 'heart',
@@ -744,10 +850,15 @@ function statusClass(
 	}
 }
 
-async function loadNotifications() {
+async function loadNotifications(
+	page = 1,
+	append = false,
+) {
 	if (!token.value) {
 		return
 	}
+
+	isLoadingNotifications.value = true
 
 	try {
 		const response =
@@ -755,6 +866,11 @@ async function loadNotifications() {
 				`${config.public.apiBaseURL}/notifications`,
 				{
 					method: 'GET',
+					query: {
+						filter: notificationFilter.value,
+						page,
+						per_page: 10,
+					},
 					headers: {
 						Accept:
 							'application/json',
@@ -764,17 +880,51 @@ async function loadNotifications() {
 				},
 			)
 
-		notifications.value =
-			response.data ?? []
+		notifications.value = append
+			? [...notifications.value, ...(response.data ?? [])]
+			: response.data ?? []
 
 		unreadNotificationCount.value =
 			response.unread_count ?? 0
+
+		notificationPage.value =
+			response.meta?.current_page ?? page
+
+		notificationLastPage.value =
+			response.meta?.last_page ?? 1
 	} catch (error) {
 		console.error(
 			'Failed to load notifications:',
 			error,
 		)
+	} finally {
+		isLoadingNotifications.value = false
 	}
+}
+
+async function setNotificationFilter(
+	filter: NotificationFilter,
+) {
+	if (notificationFilter.value === filter) {
+		return
+	}
+
+	notificationFilter.value = filter
+	await loadNotifications()
+}
+
+async function loadMoreNotifications() {
+	if (
+		isLoadingNotifications.value ||
+		notificationPage.value >= notificationLastPage.value
+	) {
+		return
+	}
+
+	await loadNotifications(
+		notificationPage.value + 1,
+		true,
+	)
 }
 
 async function markNotificationAsRead(
@@ -796,6 +946,64 @@ async function markNotificationAsRead(
 			},
 		},
 	)
+}
+
+async function toggleNotificationRead(
+	notification: ClientNotification,
+) {
+	if (!token.value || notificationActionId.value) {
+		return
+	}
+
+	notificationActionId.value = notification.id
+
+	try {
+		await $fetch(
+			`${config.public.apiBaseURL}/notifications/${notification.id}/${notification.read_at ? 'unread' : 'read'}`,
+			{
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					Authorization: `Bearer ${token.value}`,
+				},
+			},
+		)
+
+		await loadNotifications()
+	} catch (error) {
+		console.error('Failed to update notification:', error)
+	} finally {
+		notificationActionId.value = null
+	}
+}
+
+async function removeNotification(
+	notificationId: string,
+) {
+	if (!token.value || notificationActionId.value) {
+		return
+	}
+
+	notificationActionId.value = notificationId
+
+	try {
+		await $fetch(
+			`${config.public.apiBaseURL}/notifications/${notificationId}`,
+			{
+				method: 'DELETE',
+				headers: {
+					Accept: 'application/json',
+					Authorization: `Bearer ${token.value}`,
+				},
+			},
+		)
+
+		await loadNotifications()
+	} catch (error) {
+		console.error('Failed to remove notification:', error)
+	} finally {
+		notificationActionId.value = null
+	}
 }
 
 async function markAllNotificationsAsRead() {
@@ -963,6 +1171,19 @@ function backToMyEvents() {
 	quotations.value = []
 	quotationError.value = ''
 	acceptingQuotationId.value = null
+	confirmationQuotation.value = null
+}
+
+function requestQuotationAcceptance(quotation: Quotation) {
+	confirmationQuotation.value = quotation
+}
+
+function closeQuotationConfirmation() {
+	if (acceptingQuotationId.value !== null) {
+		return
+	}
+
+	confirmationQuotation.value = null
 }
 
 async function acceptQuotation(
@@ -973,19 +1194,6 @@ async function acceptQuotation(
 			'Your session has expired. Please log in again.',
 		)
 
-		return
-	}
-
-	const confirmed =
-		window.confirm(
-			`Accept the quotation from ${organizerName(
-				quotation,
-			)} for ${formatQuotationCurrency(
-				quotation.quotation_amount,
-			)}?`,
-		)
-
-	if (!confirmed) {
 		return
 	}
 
@@ -1011,6 +1219,8 @@ async function acceptQuotation(
 			loadQuotations(),
 			loadClientInquiries(),
 		])
+
+		confirmationQuotation.value = null
 
 		if (selectedEvent.value) {
 			const selectedEventId =

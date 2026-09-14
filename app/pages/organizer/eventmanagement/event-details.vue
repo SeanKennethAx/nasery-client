@@ -663,6 +663,7 @@ interface StartPlanningResponse {
 }
 
 interface TicketTypeForm {
+	id?: number
 	name: string
 	price: string
 	capacity: string
@@ -914,8 +915,17 @@ function fillEditForm() {
 
 	editForm.ticketTypes =
 		event.value.ticket_types?.length
-			? event.value.ticket_types.map(
+			? Array.from(
+				new Map(
+					event.value.ticket_types.map(type => [
+						`${type.name.trim().toLowerCase()}|${Number(type.price).toFixed(2)}|${type.capacity}`,
+						type,
+					]),
+				).values(),
+			).map(
 				type => ({
+					id: type.id,
+
 					name:
 						type.name ?? '',
 
@@ -1343,6 +1353,8 @@ async function saveEvent() {
 								)
 								.map(
 									type => ({
+										id: type.id,
+
 										name:
 											type.name.trim(),
 

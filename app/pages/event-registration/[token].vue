@@ -1,33 +1,37 @@
 <template>
-    <div class="min-h-screen bg-[#f6f8f8]">
-        <header class="border-b border-gray-200 bg-white">
-            <div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
+    <div class="relative min-h-screen overflow-hidden bg-[#f4f7f7]">
+        <div class="pointer-events-none absolute inset-x-0 top-0 h-[430px] bg-gradient-to-br from-[#173d45] via-[#285F6b] to-[#3f7b87]" />
+        <div class="pointer-events-none absolute -right-24 top-20 h-80 w-80 rounded-full border border-white/10" />
+        <div class="pointer-events-none absolute -left-32 top-52 h-72 w-72 rounded-full bg-white/5 blur-2xl" />
+
+        <header class="relative z-10 border-b border-white/10 bg-[#173d45]/40 text-white backdrop-blur-xl">
+            <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                 <div class="flex items-center gap-3">
                     <div
-                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#285F6b] text-sm font-bold text-white">
+                        class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-sm font-black text-[#285F6b] shadow-lg shadow-black/10">
                         N
                     </div>
 
                     <div>
-                        <p class="font-bold text-gray-900">
+                        <p class="font-extrabold tracking-tight text-white">
                             NaSeRy
                         </p>
 
-                        <p class="text-xs text-gray-500">
-                            Event Registration
+                        <p class="text-xs text-white/60">
+                            Secure event registration
                         </p>
                     </div>
                 </div>
 
                 <span v-if="eventData?.public_registration"
-                    class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-bold text-white shadow-sm backdrop-blur">
+                    <span class="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_0_4px_rgba(110,231,183,0.15)]" />
                     Registration Open
                 </span>
             </div>
         </header>
 
-        <main class="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+        <main class="relative z-[1] mx-auto max-w-6xl px-4 pb-14 pt-8 sm:px-6 sm:pb-20 sm:pt-10 lg:px-8">
             <div v-if="loading" class="rounded-2xl border border-gray-200 bg-white p-10 text-center shadow-sm">
                 <svg class="mx-auto h-6 w-6 animate-spin text-[#285F6b]" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24">
@@ -60,67 +64,88 @@
                 </p>
             </div>
 
-            <div v-else-if="eventData" class="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+            <div v-else-if="eventData" class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
                 <section class="space-y-5">
-                    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-                        <div class="h-2 bg-[#285F6b]" />
+                    <div class="relative isolate overflow-hidden rounded-3xl bg-gradient-to-br from-[#285F6b] via-[#245661] to-[#173d45] text-white shadow-2xl shadow-[#173d45]/25 ring-1 ring-white/10">
+                        <div class="pointer-events-none absolute -right-16 -top-20 -z-10 h-64 w-64 rounded-full border-[36px] border-white/[0.04]" />
+                        <div class="pointer-events-none absolute -bottom-24 left-1/3 -z-10 h-48 w-48 rounded-full bg-white/[0.04] blur-2xl" />
 
-                        <div class="p-6 sm:p-7">
-                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-[#285F6b]">
-                                Attendee Registration
-                            </p>
+                        <div class="p-6 sm:p-8">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/75 ring-1 ring-white/10">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                                    Registration open
+                                </span>
+                                <span class="text-xs font-medium text-white/50">Official NaSeRy event form</span>
+                            </div>
 
-                            <h1 class="mt-3 text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
+                            <h1 class="mt-5 text-3xl font-black tracking-tight text-white sm:text-4xl">
                                 {{ eventData.name }}
                             </h1>
 
-                            <p v-if="eventData.description" class="mt-3 text-sm leading-6 text-gray-600">
+                            <p v-if="eventData.description" class="mt-2 max-w-2xl text-sm leading-6 text-white/65">
                                 {{ eventData.description }}
                             </p>
 
-                            <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                <div class="rounded-xl bg-gray-50 p-4">
-                                    <p class="text-xs font-medium text-gray-500">
-                                        Date & Time
-                                    </p>
-
-                                    <p class="mt-1 text-sm font-semibold text-gray-900">
-                                        {{ eventSchedule }}
-                                    </p>
+                            <div class="mt-7 divide-y divide-white/10 overflow-hidden rounded-2xl bg-black/10 ring-1 ring-white/10 sm:grid sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+                                <div class="flex items-start gap-3 p-4 sm:p-5">
+                                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-white/10">
+                                        <IconBase name="calendar" class="h-5 w-5" />
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-white/50">Schedule</p>
+                                        <p class="mt-1 text-sm font-bold leading-5 text-white">{{ eventSchedule }}</p>
+                                    </div>
                                 </div>
 
-                                <div class="rounded-xl bg-gray-50 p-4">
-                                    <p class="text-xs font-medium text-gray-500">
-                                        Location
-                                    </p>
-
-                                    <p class="mt-1 text-sm font-semibold text-gray-900">
-                                        {{ eventData.location || 'Location not specified' }}
-                                    </p>
+                                <div class="flex items-start gap-3 p-4 sm:p-5">
+                                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-white/10">
+                                        <IconBase name="map-pin" class="h-5 w-5" />
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-white/50">Venue</p>
+                                        <p class="mt-1 text-sm font-semibold leading-5 text-white/90">{{ eventData.location || 'Location not specified' }}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div v-if="registeredTickets.length"
-                        class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm sm:p-7">
+                    <RegistrationPayMongoCheckoutCard v-if="pendingPayment" :amount="pendingPayment.amount"
+                        :currency="pendingPayment.currency" @checkout="openPayMongoCheckout" />
+
+                    <div v-else-if="registeredTickets.length || pendingApprovalCount"
+                        :class="pendingApprovalCount ? 'border-amber-200' : 'border-emerald-200'"
+                        class="rounded-3xl border bg-white p-6 shadow-xl shadow-slate-900/5 sm:p-7">
                         <div class="flex items-start gap-3">
                             <div
-                                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                                :class="pendingApprovalCount ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'"
+                                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                                     stroke="currentColor" stroke-width="2" class="h-5 w-5">
-                                    <path d="M20 6 9 17l-5-5" />
+                                    <path v-if="pendingApprovalCount" d="M12 6v6l4 2" />
+                                    <circle v-if="pendingApprovalCount" cx="12" cy="12" r="9" />
+                                    <path v-else d="M20 6 9 17l-5-5" />
                                 </svg>
                             </div>
 
                             <div>
                                 <h2 class="text-xl font-bold text-gray-900">
-                                    Registration successful
+                                    {{ pendingApprovalCount ? 'Registration sent for approval' : 'Registration successful' }}
                                 </h2>
 
                                 <p class="mt-1 text-sm text-gray-500">
                                     {{ successMessage }}
                                 </p>
+                            </div>
+                        </div>
+
+                        <div v-if="pendingApprovalCount" class="mt-6 rounded-2xl border border-amber-100 bg-amber-50 p-5">
+                            <p class="font-bold text-amber-900">What happens next</p>
+                            <p class="mt-1 text-sm leading-6 text-amber-800">The organizer will review your registration. Once approved, your active QR ticket will be sent to your verified email address.</p>
+                            <div class="mt-4 flex items-center gap-2 text-xs font-semibold text-amber-700">
+                                <IconBase name="mail" class="h-4 w-4" />
+                                You may safely close this page.
                             </div>
                         </div>
 
@@ -192,8 +217,24 @@
                         </button>
                     </div>
 
-                    <form v-else class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-7"
+                    <form v-else class="rounded-3xl border border-gray-200/80 bg-white p-5 shadow-xl shadow-slate-900/5 sm:p-8"
                         @submit.prevent="submitRegistration">
+                        <div class="mb-7 flex items-center gap-2 rounded-2xl border border-[#285F6b]/10 bg-[#285F6b]/5 p-2">
+                            <div class="flex flex-1 items-center gap-2 rounded-xl bg-white px-3 py-2.5 shadow-sm">
+                                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#285F6b] text-[11px] font-bold text-white">1</span>
+                                <span class="text-xs font-bold text-gray-800">Attendee details</span>
+                            </div>
+                            <div class="hidden flex-1 items-center gap-2 px-3 py-2.5 sm:flex">
+                                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-white text-[11px] font-bold text-[#285F6b]">2</span>
+                                <span class="text-xs font-semibold text-gray-500">Email verification</span>
+                            </div>
+                            <div class="hidden flex-1 items-center gap-2 px-3 py-2.5 md:flex">
+                                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-white text-[11px] font-bold text-[#285F6b]">3</span>
+                                <span class="text-xs font-semibold text-gray-500">
+                                    {{ hasPaidAttendees ? 'Secure payment' : 'Get QR ticket' }}
+                                </span>
+                            </div>
+                        </div>
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                             <div>
                                 <h2 class="text-xl font-bold text-gray-900">
@@ -220,7 +261,7 @@
 
                         <div class="mt-6 space-y-5">
                             <div v-for="(attendee, index) in form.attendees" :key="index"
-                                class="rounded-2xl border border-gray-200 bg-gray-50/60 p-5">
+                                class="rounded-2xl border border-gray-200 bg-gradient-to-b from-gray-50/80 to-white p-5 shadow-sm sm:p-6">
                                 <div class="flex items-center justify-between gap-3">
                                     <div>
                                         <p class="text-sm font-bold text-gray-900">
@@ -523,6 +564,19 @@
 
                                 <div class="mt-4">
                                     <label class="mb-1.5 block text-sm font-semibold text-gray-700">
+                                        Attendee Category <span class="text-red-500">*</span>
+                                    </label>
+
+                                    <FormsSelect v-model="attendee.attendee_category"
+                                        :options="attendeeCategoryOptions" placeholder="Choose category"
+                                        :can-clear="false" />
+                                    <p class="mt-2 text-xs leading-5 text-gray-400">
+                                        {{ categoryHelp(attendee.attendee_category) }}
+                                    </p>
+                                </div>
+
+                                <div class="mt-4">
+                                    <label class="mb-1.5 block text-sm font-semibold text-gray-700">
                                         Contact Number
                                         <span class="text-xs font-normal text-gray-400">(optional)</span>
                                     </label>
@@ -545,7 +599,7 @@
                             </div>
                         </div>
 
-                        <div class="mt-6 rounded-2xl bg-[#285F6b]/5 p-4">
+                        <div class="mt-6 rounded-2xl border border-[#285F6b]/10 bg-gradient-to-r from-[#285F6b]/5 to-[#4b8792]/10 p-5">
                             <div class="flex items-center justify-between gap-4">
                                 <div>
                                     <p class="text-xs font-medium text-gray-500">
@@ -569,17 +623,19 @@
                         </div>
 
                         <button type="submit"
-                            class="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#285F6b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#1f4a54] disabled:cursor-not-allowed disabled:opacity-50"
+                            class="mt-5 inline-flex h-13 w-full items-center justify-center rounded-2xl bg-[#285F6b] px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#285F6b]/20 transition hover:-translate-y-0.5 hover:bg-[#1f4a54] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
                             :disabled="submitting ||
                                 !registrationAvailable ||
                                 !allEmailsVerified
                                 ">
                             {{
                                 submitting
-                                    ? 'Generating QR Ticket...'
+                                    ? 'Saving Registration...'
                                     : !allEmailsVerified
                                         ? 'Verify All Emails to Continue'
-                                        : 'Submit Registration'
+                                        : totalAmount > 0
+                                            ? 'Continue to Payment'
+                                            : 'Submit Registration'
                             }}
                         </button>
 
@@ -590,14 +646,14 @@
                 </section>
 
                 <aside class="space-y-4 lg:sticky lg:top-6 lg:self-start">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                        <h3 class="text-sm font-bold text-gray-900">
+                    <div class="rounded-3xl border border-gray-200/80 bg-white p-5 shadow-xl shadow-slate-900/5">
+                        <div class="flex items-center justify-between gap-3"><h3 class="text-sm font-bold text-gray-900">
                             Available Tickets
-                        </h3>
+                        </h3><span class="rounded-full bg-[#285F6b]/10 px-2.5 py-1 text-[11px] font-bold text-[#285F6b]">{{ availableTicketTypes.length }} types</span></div>
 
                         <div v-if="availableTicketTypes.length" class="mt-4 space-y-3">
                             <div v-for="ticketType in availableTicketTypes" :key="ticketType.id"
-                                class="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                                class="group rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-[#285F6b]/20 hover:bg-[#285F6b]/5">
                                 <div class="flex items-start justify-between gap-3">
                                     <div>
                                         <p class="font-semibold text-gray-900">
@@ -625,7 +681,7 @@
                         </p>
                     </div>
 
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <div class="rounded-3xl border border-gray-200/80 bg-white p-5 shadow-xl shadow-slate-900/5">
                         <h3 class="text-sm font-bold text-gray-900">
                             What happens next?
                         </h3>
@@ -751,6 +807,10 @@ const eventData =
 const registeredTickets =
     ref<RegisteredTicket[]>([])
 
+const pendingApprovalCount = ref(0)
+
+const pendingPayment = ref<PublicRegistrationSubmitResponse['data']['payment'] | null>(null)
+
 const emailSendingTicketId =
     ref<number | null>(null)
 
@@ -762,6 +822,18 @@ const emailErrorTicketId =
 
 const emailErrorMessages =
     reactive<Record<number, string>>({})
+
+const attendeeCategoryOptions = [
+    { value: 'invited', label: 'Invited — organizer guest' },
+    { value: 'free', label: 'Free — no payment required' },
+    { value: 'paid', label: 'Paid — PayMongo payment' },
+]
+
+const categoryHelp = (category: string) => ({
+    invited: 'For a guest attending through an organizer invitation.',
+    free: 'A complimentary registration with no payment.',
+    paid: 'Continue to secure payment after registration.',
+}[category] ?? '')
 
 const createVerificationState =
     (): VerificationState => ({
@@ -784,6 +856,7 @@ const form = reactive({
             name: '',
             email: '',
             contact_no: '',
+            attendee_category: 'paid',
             event_ticket_type_id: null,
         },
     ] as AttendeeFormWithContact[],
@@ -871,11 +944,16 @@ const totalAmount = computed(() =>
 
             return (
                 total +
-                Number(ticketType?.price ?? 0)
+                Number(ticketType?.price ?? 0) *
+                (attendee.attendee_category === 'paid' ? 1 : 0)
             )
         },
         0
     )
+)
+
+const hasPaidAttendees = computed(() =>
+    form.attendees.some(attendee => attendee.attendee_category === 'paid')
 )
 
 const formatCurrency = (
@@ -1114,6 +1192,7 @@ const addAttendee = () => {
         name: '',
         email: '',
         contact_no: '',
+        attendee_category: 'paid',
         event_ticket_type_id:
             defaultTicketTypeId,
     })
@@ -1576,6 +1655,9 @@ const submitRegistration =
                                                 ?.trim() ||
                                             null,
 
+                                        attendee_category:
+                                            attendee.attendee_category,
+
                                         event_ticket_type_id:
                                             attendee.event_ticket_type_id,
 
@@ -1594,6 +1676,13 @@ const submitRegistration =
                 response.data.tickets ??
                 []
 
+            pendingPayment.value = response.data.payment ?? null
+
+            pendingApprovalCount.value =
+                response.data.approval_required
+                    ? Number(response.data.pending_count ?? form.attendees.length)
+                    : 0
+
             successMessage.value =
                 response.message ??
                 (
@@ -1601,6 +1690,10 @@ const submitRegistration =
                         ? 'Registration successful. Your QR tickets are ready.'
                         : 'Registration successful. Your QR ticket is ready.'
                 )
+
+            if (pendingPayment.value) {
+                successMessage.value = 'Your attendee details are saved. Complete payment to unlock ticket delivery.'
+            }
 
             await loadEvent()
 
@@ -1619,6 +1712,12 @@ const submitRegistration =
                 false
         }
     }
+
+const openPayMongoCheckout = () => {
+    if (pendingPayment.value?.checkout_url) {
+        window.location.assign(pendingPayment.value.checkout_url)
+    }
+}
 
 const downloadTicket = (
     ticket: RegisteredTicket
@@ -1746,6 +1845,8 @@ const sendTicketEmail =
 
 const registerMore = () => {
     registeredTickets.value = []
+    pendingApprovalCount.value = 0
+    pendingPayment.value = null
 
     successMessage.value = ''
     errorMessage.value = ''
@@ -1771,6 +1872,7 @@ const registerMore = () => {
             name: '',
             email: '',
             contact_no: '',
+            attendee_category: 'paid',
             event_ticket_type_id:
                 getDefaultTicketTypeId(),
         }

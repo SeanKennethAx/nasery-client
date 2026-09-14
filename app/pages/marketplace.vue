@@ -44,19 +44,21 @@
 						Search events
 					</label>
 					<input id="event-search" v-model="search" type="search" placeholder="Event, organizer, or venue…"
-						class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-sm">
+						class="marketplace-search h-11 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm transition-colors placeholder:text-gray-400 focus:border-primary-500 focus:ring-0">
 				</div>
 				<div>
 					<label class="mb-2 block text-xs font-semibold text-gray-600">
 						Event type
 					</label>
-					<FormsSelect v-model="eventType" :options="eventTypes" placeholder="All event types" />
+					<FormsSelect v-model="eventType" class="marketplace-select" :options="eventTypes"
+						placeholder="All event types" />
 				</div>
 				<div>
 					<label class="mb-2 block text-xs font-semibold text-gray-600">
 						Location
 					</label>
-					<FormsSelect v-model="location" :options="locations" placeholder="All locations" />
+					<FormsSelect v-model="location" class="marketplace-select" :options="locations"
+						placeholder="All locations" />
 				</div>
 			</div>
 
@@ -182,6 +184,22 @@
 		</section>
 	</div>
 </template>
+
+<style scoped>
+.marketplace-search:focus-visible {
+	outline: none !important;
+}
+
+:deep(.marketplace-select .multiselect-search:focus-visible) {
+	outline: none !important;
+}
+
+:deep(.marketplace-select.multiselect.is-active) {
+	border-width: 1px !important;
+	border-color: #417f88 !important;
+	box-shadow: none !important;
+}
+</style>
 
 <script setup lang="ts">
 import { useEventMarketplace } from '~/services/eventMarketplaceService'

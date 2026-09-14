@@ -25,6 +25,8 @@ export interface AttendeeForm {
 
     email: string
 
+    attendee_category: 'invited' | 'free' | 'paid'
+
     event_ticket_type_id: number | null
 }
 
@@ -59,5 +61,17 @@ export interface PublicRegistrationSubmitResponse {
         }
 
         tickets: RegisteredTicket[]
+
+        approval_required?: boolean
+
+        pending_count?: number
+
+        payment?: {
+            reference: string
+            amount: string | number
+            currency: string
+            status: string
+            checkout_url: string
+        }
     }
 }

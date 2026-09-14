@@ -58,7 +58,7 @@
         <div class="my-8 flex flex-col items-center">
             <div
                 class="relative h-64 w-64 overflow-hidden rounded-2xl border-2 border-dashed border-gray-300 bg-gray-950">
-                <video id="qr-scanner-video" class="h-full w-full object-cover" muted playsinline />
+                <video ref="scannerVideo" class="h-full w-full object-cover" autoplay muted playsinline />
 
                 <div v-if="!isScanning"
                     class="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 px-6 text-center">
@@ -448,6 +448,11 @@ const scannerControls =
         null,
     )
 
+const scannerVideo =
+    ref<HTMLVideoElement | null>(
+        null,
+    )
+
 const isScanning =
     ref(false)
 
@@ -603,61 +608,128 @@ async function startScanner() {
     lastScannedTicket.value =
         null
 
+    if (
+        !window.isSecureContext ||
+        !navigator.mediaDevices?.getUserMedia
+    ) {
+        scannerResultType.value =
+            'error'
+
+        scannerMessage.value =
+            'Camera scanning requires a secure browser connection. Open this page on HTTPS or localhost and try again.'
+
+        return
+    }
+
     try {
         stopScanner()
+
+        await nextTick()
+
+        const video =
+            scannerVideo.value
+
+        if (!video) {
+            throw new Error(
+                'Scanner video is unavailable.',
+            )
+        }
 
         const codeReader =
             new BrowserQRCodeReader()
 
-        isScanning.value =
-            true
+        const onResult =
+            async (result: { getText: () => string } | undefined) => {
+                if (
+                    !result ||
+                    isProcessingScan.value
+                ) {
+                    return
+                }
 
-        scannerControls.value =
-            await codeReader.decodeFromConstraints(
-                {
+                const text =
+                    result.getText()
+
+                const now =
+                    Date.now()
+
+                if (
+                    text ===
+                    lastScannedValue.value &&
+                    now -
+                    lastScannedAt.value <
+                    2000
+                ) {
+                    return
+                }
+
+                lastScannedValue.value =
+                    text
+
+                lastScannedAt.value =
+                    now
+
+                await handleScannedCode(
+                    text,
+                )
+            }
+
+        let stream: MediaStream
+
+        try {
+            stream =
+                await navigator.mediaDevices.getUserMedia({
+                    audio: false,
                     video: {
                         facingMode: {
                             ideal:
                                 'environment',
                         },
+                        width: {
+                            ideal: 1280,
+                        },
+                        height: {
+                            ideal: 720,
+                        },
                     },
-                },
-                'qr-scanner-video',
-                async result => {
-                    if (
-                        !result ||
-                        isProcessingScan.value
-                    ) {
-                        return
-                    }
+                })
+        } catch (error: unknown) {
+            const errorName =
+                error instanceof DOMException
+                    ? error.name
+                    : ''
 
-                    const text =
-                        result.getText()
+            if (
+                errorName !== 'OverconstrainedError' &&
+                errorName !== 'ConstraintNotSatisfiedError'
+            ) {
+                throw error
+            }
 
-                    const now =
-                        Date.now()
+            stream =
+                await navigator.mediaDevices.getUserMedia({
+                    audio: false,
+                    video: true,
+                })
+        }
 
-                    if (
-                        text ===
-                        lastScannedValue.value &&
-                        now -
-                        lastScannedAt.value <
-                        2000
-                    ) {
-                        return
-                    }
+        isScanning.value =
+            true
 
-                    lastScannedValue.value =
-                        text
+        try {
+            scannerControls.value =
+                await codeReader.decodeFromStream(
+                    stream,
+                    video,
+                    onResult,
+                )
+        } catch (error: unknown) {
+            stream
+                .getTracks()
+                .forEach(track => track.stop())
 
-                    lastScannedAt.value =
-                        now
-
-                    await handleScannedCode(
-                        text,
-                    )
-                },
-            )
+            throw error
+        }
 
     } catch (error: unknown) {
         console.error(
@@ -665,18 +737,48 @@ async function startScanner() {
             error,
         )
 
-        scannerControls.value =
-            null
-
-        isScanning.value =
-            false
+        stopScanner()
 
         scannerResultType.value =
             'error'
 
         scannerMessage.value =
-            'Unable to access the camera. Please allow camera permission and try again.'
+            getCameraErrorMessage(error)
     }
+}
+
+function getCameraErrorMessage(
+    error: unknown,
+): string {
+    const errorName =
+        error instanceof DOMException
+            ? error.name
+            : ''
+
+    if (
+        errorName === 'NotAllowedError' ||
+        errorName === 'PermissionDeniedError' ||
+        errorName === 'SecurityError'
+    ) {
+        return 'Brave has not granted this site camera access. Click the camera icon beside the address bar, set Camera to Allow for localhost, reload the page, then click Start Scanning.'
+    }
+
+    if (
+        errorName === 'NotFoundError' ||
+        errorName === 'DevicesNotFoundError'
+    ) {
+        return 'No camera was found on this device. Connect a camera or use Manual Entry.'
+    }
+
+    if (
+        errorName === 'NotReadableError' ||
+        errorName === 'TrackStartError' ||
+        errorName === 'AbortError'
+    ) {
+        return 'The camera is busy or unavailable. Close other apps using it, then try again.'
+    }
+
+    return 'The camera could not be started. Check browser and system camera permissions, then try again.'
 }
 
 function stopScanner() {
@@ -685,6 +787,19 @@ function stopScanner() {
 
     scannerControls.value =
         null
+
+    const stream =
+        scannerVideo.value
+            ?.srcObject as MediaStream | null
+
+    stream
+        ?.getTracks()
+        .forEach(track => track.stop())
+
+    if (scannerVideo.value) {
+        scannerVideo.value.srcObject =
+            null
+    }
 
     isScanning.value =
         false

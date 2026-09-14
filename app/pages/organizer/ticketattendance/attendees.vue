@@ -66,6 +66,13 @@
 		</div>
 
 		<template v-else>
+			<div v-if="pendingApprovalCount" class="mb-5 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+				<div class="flex items-start gap-3">
+					<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700"><IconBase name="clock" class="h-5 w-5" /></div>
+					<div><p class="text-sm font-bold text-amber-950">{{ pendingApprovalCount }} registration {{ pendingApprovalCount === 1 ? 'request needs' : 'requests need' }} review</p><p class="mt-0.5 text-xs text-amber-800">Approve a request to activate and email its QR ticket.</p></div>
+				</div>
+				<button type="button" class="rounded-xl bg-amber-900 px-4 py-2 text-xs font-bold text-white" @click="activeFilter = 'pending_approval'">Review requests</button>
+			</div>
 			<div v-if="successMessage" class="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
 				<div class="flex items-start justify-between gap-3">
 					<div class="flex items-start gap-3">
@@ -173,6 +180,8 @@
 							<th class="pb-3">
 								Payment
 							</th>
+
+							<th class="pb-3 pl-4 text-right">Actions</th>
 						</tr>
 					</thead>
 
@@ -257,11 +266,7 @@
 							<td class="py-3.5 pr-4">
 								<span
 									class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
-									:class="attendee.status ===
-										'checked_in'
-										? 'bg-gray-900 text-white'
-										: 'border border-gray-200 text-gray-600'
-										">
+									:class="statusClass(attendee.status)">
 									<IconBase v-if="
 										attendee.status ===
 										'checked_in'
@@ -286,6 +291,14 @@
 										)
 									}}
 								</span>
+							</td>
+
+							<td class="py-3.5 pl-4 text-right">
+								<div v-if="attendee.status === 'pending_approval'" class="flex justify-end gap-2">
+									<button type="button" class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-50" :disabled="processingApprovalId === attendee.id" @click="reviewRegistration(attendee, 'reject')">Reject</button>
+									<button type="button" class="rounded-lg bg-[#285F6b] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#1f4a54] disabled:opacity-50" :disabled="processingApprovalId === attendee.id" @click="reviewRegistration(attendee, 'approve')">{{ processingApprovalId === attendee.id ? 'Saving...' : 'Approve' }}</button>
+								</div>
+								<span v-else class="text-xs text-gray-300">—</span>
 							</td>
 						</tr>
 					</tbody>
@@ -770,6 +783,8 @@ interface Attendee {
 	status:
 	| 'registered'
 	| 'checked_in'
+	| 'pending_approval'
+	| 'rejected'
 
 	checked_in_at:
 	| string
@@ -829,6 +844,7 @@ interface ApiErrorResponse {
 
 type AttendeeFilter =
 	| 'all'
+	| 'pending_approval'
 	| 'registered'
 	| 'checked_in'
 	| 'online'
@@ -948,6 +964,8 @@ const registeredTicket =
 const registeredTicketQrDataUrl = ref('')
 const isGeneratingTicketQr = ref(false)
 const isEmailingTicket = ref(false)
+const processingApprovalId = ref<number | null>(null)
+const pendingApprovalCount = computed(() => attendees.value.filter(attendee => attendee.status === 'pending_approval').length)
 
 const filters: {
 	label: string
@@ -957,10 +975,14 @@ const filters: {
 			label: 'All',
 			value: 'all',
 		},
-		{
-			label: 'Registered',
-			value: 'registered',
-		},
+	{
+		label: 'Registered',
+		value: 'registered',
+	},
+	{
+		label: 'Needs approval',
+		value: 'pending_approval',
+	},
 		{
 			label: 'Checked-in',
 			value: 'checked_in',
@@ -1053,6 +1075,10 @@ const filteredAttendees =
 							'registered'
 						break
 
+					case 'pending_approval':
+						matchesFilter = attendee.status === 'pending_approval'
+						break
+
 					case 'checked_in':
 						matchesFilter =
 							attendee.status ===
@@ -1131,6 +1157,9 @@ function getFilterCount(
 					attendee.status ===
 					'registered',
 			).length
+
+		case 'pending_approval':
+			return attendees.value.filter(attendee => attendee.status === 'pending_approval').length
 
 		case 'checked_in':
 			return attendees.value.filter(
@@ -1247,6 +1276,34 @@ async function loadAttendees() {
 	} finally {
 		isLoading.value =
 			false
+	}
+}
+
+async function reviewRegistration(attendee: Attendee, action: 'approve' | 'reject') {
+	if (!token.value || !selectedEventId.value || processingApprovalId.value !== null) return
+
+	processingApprovalId.value = attendee.id
+	errorMessage.value = ''
+	successMessage.value = ''
+
+	try {
+		const response = await $fetch<{ message?: string }>(
+			`${config.public.apiBaseURL}/organizer/events/${selectedEventId.value}/attendees/${attendee.id}/${action}`,
+			{
+				method: 'POST',
+				headers: { Accept: 'application/json', Authorization: `Bearer ${token.value}` },
+			},
+		)
+
+		successMessage.value = response.message || (action === 'approve' ? 'Registration approved.' : 'Registration rejected.')
+		await Promise.all([
+			loadAttendees(),
+			refreshTopSummary(),
+		])
+	} catch (error: unknown) {
+		errorMessage.value = getApiErrorMessage(error, `Unable to ${action} this registration.`)
+	} finally {
+		processingApprovalId.value = null
 	}
 }
 
@@ -1579,7 +1636,22 @@ function formatStatus(
 		return 'Checked-in'
 	}
 
+	if (status === 'pending_approval') {
+		return 'Needs approval'
+	}
+
+	if (status === 'rejected') {
+		return 'Rejected'
+	}
+
 	return 'Registered'
+}
+
+function statusClass(status: Attendee['status']): string {
+	if (status === 'checked_in') return 'bg-gray-900 text-white'
+	if (status === 'pending_approval') return 'border border-amber-200 bg-amber-50 text-amber-700'
+	if (status === 'rejected') return 'border border-red-200 bg-red-50 text-red-600'
+	return 'border border-emerald-200 bg-emerald-50 text-emerald-700'
 }
 
 function formatSource(
