@@ -1,33 +1,36 @@
 <template>
 	<div>
-		<div class="mb-6 flex items-start justify-between">
+		<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 			<div>
-				<h1 class="text-2xl font-extrabold text-gray-900">Event Creation &amp; Management</h1>
-				<p class="mt-1 text-gray-500">Configure events and manage ticket tiers</p>
+				<p class="text-xs font-bold uppercase tracking-[0.16em] text-[#285F6b]">Organizer workspace</p>
+				<h1 class="mt-1 text-3xl font-black tracking-tight text-gray-900">Event management</h1>
+				<p class="mt-2 max-w-2xl text-sm leading-6 text-gray-500">Plan event details, control ticket inventory, and keep your team on schedule.</p>
 			</div>
 			<button type="button"
-				class="flex shrink-0 items-center gap-2 rounded-xl bg-[#285F6b] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1f4a54]"
+				class="flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#285F6b] px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#1f4a54] hover:shadow-md"
 				@click="openCreateEvent">
-				<IconBase name="plus" class="h-4 w-4" /> Create New Event
+				<IconBase name="plus" class="h-4 w-4" /> Create event
 			</button>
 		</div>
 
-		<div class="mb-6 inline-flex rounded-xl bg-gray-100 p-1">
+		<nav class="mb-6 flex w-full gap-1 overflow-x-auto rounded-2xl border border-gray-200 bg-white p-1.5 shadow-sm sm:w-fit" aria-label="Event management sections">
 			<template v-for="tab in tabs" :key="tab.label">
 				<NuxtLink v-if="!tab.disabled" :to="tab.to"
-					class="rounded-lg px-4 py-2 text-sm font-semibold transition" :class="route.path === tab.path
-						? 'bg-white text-gray-900 shadow-sm'
-						: 'bg-transparent text-gray-500 hover:bg-white/60 hover:text-gray-700'
+					class="inline-flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition" :class="route.path === tab.path
+						? 'bg-[#285F6b] text-white shadow-sm'
+						: 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
 						">
+					<IconBase :name="tab.icon" class="h-4 w-4" />
 					{{ tab.label }}
 				</NuxtLink>
 
 				<button v-else type="button" disabled
-					class="cursor-not-allowed rounded-lg px-4 py-2 text-sm font-semibold text-gray-400 opacity-60">
+					class="inline-flex shrink-0 cursor-not-allowed items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-300">
+					<IconBase :name="tab.icon" class="h-4 w-4" />
 					{{ tab.label }}
 				</button>
 			</template>
-		</div>
+		</nav>
 
 		<Transition name="fade">
 			<div v-if="showCreateEvent" class="fixed inset-0 z-40 bg-gray-900/40" @click="closeCreateEvent" />
@@ -304,6 +307,8 @@ const tabs =
 			label:
 				'All Events',
 
+			icon: 'calendar',
+
 			path:
 				'/organizer/eventmanagement/all-events',
 
@@ -319,6 +324,8 @@ const tabs =
 		{
 			label:
 				'Event Details',
+
+			icon: 'file-text',
 
 			path:
 				'/organizer/eventmanagement/event-details',
@@ -339,6 +346,8 @@ const tabs =
 			label:
 				'Ticket Tiers',
 
+			icon: 'tag',
+
 			path:
 				'/organizer/eventmanagement/ticket-tiers',
 
@@ -357,6 +366,8 @@ const tabs =
 		{
 			label:
 				'Preparation Tracking',
+
+			icon: 'clipboard-list',
 
 			path:
 				'/organizer/eventmanagement/preparation-tracking',

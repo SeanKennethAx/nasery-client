@@ -1,155 +1,118 @@
 <template>
-	<div>
-		<div v-if="isLoading" class="rounded-2xl border border-gray-200 bg-white p-10 text-center">
-			<p class="text-sm text-gray-500">
-				Loading ticket types...
-			</p>
+	<div class="space-y-6">
+		<div v-if="isLoading" class="rounded-3xl border border-gray-200 bg-white px-6 py-16 text-center shadow-sm">
+			<IconBase name="refresh-cw" class="mx-auto h-6 w-6 animate-spin text-[#285F6b]" />
+			<p class="mt-3 text-sm font-semibold text-gray-500">Loading ticket tiers...</p>
 		</div>
 
-		<div v-else-if="errorMessage" class="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+		<div v-else-if="errorMessage" class="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-semibold text-red-700">
 			{{ errorMessage }}
 		</div>
 
-		<div v-else-if="event">
-			<div class="mb-5 flex items-start justify-between gap-4">
-				<div>
-					<p class="text-sm text-gray-500">
-						Manage ticket types for
-						<span class="font-semibold text-gray-700">
-							{{ event.name }}
-						</span>
-					</p>
+		<template v-else-if="event">
+			<section class="overflow-hidden rounded-3xl border border-[#285F6b]/15 bg-white shadow-sm">
+				<div class="flex flex-col gap-5 bg-[#285F6b] px-6 py-6 text-white sm:flex-row sm:items-center sm:justify-between">
+					<div>
+						<p class="text-xs font-bold uppercase tracking-[0.16em] text-white/60">Ticket inventory</p>
+						<h2 class="mt-2 text-2xl font-black tracking-tight">{{ event.name }}</h2>
+						<p class="mt-1 text-sm text-white/70">Track sales, remaining capacity, and pricing for every admission type.</p>
+					</div>
+
+					<button type="button"
+						class="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-bold text-[#285F6b] shadow-sm transition hover:bg-gray-50"
+						@click="addTicketType">
+						<IconBase name="plus" class="h-4 w-4" />
+						Add ticket type
+					</button>
 				</div>
 
-				<button type="button"
-					class="flex shrink-0 items-center gap-2 rounded-xl bg-[#285F6b] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1f4a54]"
-					@click="addTicketType">
-					<IconBase name="plus" class="h-4 w-4" />
+				<div class="grid grid-cols-2 gap-px bg-gray-100 sm:grid-cols-4">
+					<div class="bg-white p-5">
+						<p class="text-xs font-bold uppercase tracking-[0.1em] text-gray-400">Ticket types</p>
+						<p class="mt-2 text-2xl font-black text-gray-900">{{ event.ticket_types?.length ?? 0 }}</p>
+					</div>
+					<div class="bg-white p-5">
+						<p class="text-xs font-bold uppercase tracking-[0.1em] text-gray-400">Issued</p>
+						<p class="mt-2 text-2xl font-black text-[#285F6b]">{{ totalSold }}</p>
+					</div>
+					<div class="bg-white p-5">
+						<p class="text-xs font-bold uppercase tracking-[0.1em] text-gray-400">Capacity</p>
+						<p class="mt-2 text-2xl font-black text-gray-900">{{ totalCapacity }}</p>
+					</div>
+					<div class="bg-white p-5">
+						<p class="text-xs font-bold uppercase tracking-[0.1em] text-gray-400">Available</p>
+						<p class="mt-2 text-2xl font-black text-emerald-700">{{ totalAvailable }}</p>
+					</div>
+				</div>
+			</section>
 
-					Add Ticket Type
+			<div v-if="!event.ticket_types?.length"
+				class="rounded-3xl border border-dashed border-gray-300 bg-white px-6 py-16 text-center shadow-sm">
+				<div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#285F6b]/10 text-[#285F6b]">
+					<IconBase name="tag" class="h-6 w-6" />
+				</div>
+				<h3 class="mt-5 text-lg font-extrabold text-gray-900">Create your first ticket type</h3>
+				<p class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">Add options such as VIP, Regular, Early Bird, or Student so attendees can choose the right admission.</p>
+				<button type="button" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#285F6b] px-4 py-2.5 text-sm font-bold text-white" @click="addTicketType">
+					<IconBase name="plus" class="h-4 w-4" /> Add ticket type
 				</button>
 			</div>
 
-			<!-- No Ticket Types -->
-			<div v-if="!event.ticket_types?.length"
-				class="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center">
-				<div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-500">
-					<IconBase name="tag" class="h-5 w-5" />
-				</div>
-
-				<h3 class="mt-4 font-bold text-gray-900">
-					No Ticket Types Yet
-				</h3>
-
-				<p class="mx-auto mt-1 max-w-md text-sm text-gray-500">
-					Add ticket types such as VIP,
-					Regular, Early Bird, or Student
-					for this event.
-				</p>
-			</div>
-
-			<!-- Ticket Types -->
-			<div v-else class="space-y-5">
-				<div v-for="ticket in event.ticket_types" :key="ticket.id"
-					class="rounded-2xl border border-gray-200 bg-white p-6">
-					<div class="flex items-start justify-between">
-						<div>
-							<h3 class="text-lg font-bold text-gray-900">
-								{{ ticket.name }}
-							</h3>
-
-							<p class="mt-1 text-sm text-gray-500">
-								{{ ticket.sold ?? 0 }}
-								/
-								{{ ticket.capacity }}
-								sold
-							</p>
+			<div v-else class="grid gap-5 xl:grid-cols-2">
+				<article v-for="ticket in event.ticket_types" :key="ticket.id"
+					class="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-[#285F6b]/25 hover:shadow-md sm:p-6">
+					<div class="flex items-start justify-between gap-4">
+						<div class="flex min-w-0 items-center gap-3">
+							<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#285F6b]/10 text-[#285F6b]">
+								<IconBase name="tag" class="h-5 w-5" />
+							</div>
+							<div class="min-w-0">
+								<h3 class="truncate text-lg font-extrabold text-gray-900">{{ ticket.name }}</h3>
+								<p class="mt-0.5 text-sm font-semibold text-[#285F6b]">{{ formatCurrency(ticket.price) }}</p>
+							</div>
 						</div>
 
 						<div class="flex shrink-0 gap-2">
-							<button type="button"
-								class="rounded-lg border border-gray-200 p-2 text-gray-600 hover:bg-gray-50" @click="
-									editTicketType(ticket)
-									">
+							<button type="button" :aria-label="`Edit ${ticket.name}`"
+								class="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-[#285F6b]/30 hover:bg-[#285F6b]/5 hover:text-[#285F6b]"
+								@click="editTicketType(ticket)">
 								<IconBase name="edit" class="h-4 w-4" />
 							</button>
-
-							<button type="button"
-								class="rounded-lg border border-gray-200 p-2 text-gray-600 hover:bg-gray-50" @click="
-									deleteTicketType(
-										ticket,
-									)
-									">
+							<button type="button" :aria-label="`Remove ${ticket.name}`"
+								class="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+								@click="deleteTicketType(ticket)">
 								<IconBase name="trash" class="h-4 w-4" />
 							</button>
 						</div>
 					</div>
 
-					<div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-						<div>
-							<div class="text-sm text-gray-500">
-								Price
-							</div>
-
-							<div class="mt-1 text-lg font-bold text-gray-900">
-								{{
-									formatCurrency(
-										ticket.price,
-									)
-								}}
-							</div>
+					<div class="mt-6 grid grid-cols-3 gap-3">
+						<div class="rounded-2xl bg-gray-50 p-4">
+							<p class="text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400">Issued</p>
+							<p class="mt-1.5 text-xl font-black text-gray-900">{{ ticket.sold ?? 0 }}</p>
 						</div>
-
-						<div>
-							<div class="text-sm text-gray-500">
-								Capacity
-							</div>
-
-							<div class="mt-1 text-lg font-bold text-gray-900">
-								{{ ticket.capacity }}
-							</div>
+						<div class="rounded-2xl bg-gray-50 p-4">
+							<p class="text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400">Capacity</p>
+							<p class="mt-1.5 text-xl font-black text-gray-900">{{ ticket.capacity }}</p>
 						</div>
-
-						<div>
-							<div class="text-sm text-gray-500">
-								Availability
-							</div>
-
-							<div class="mt-1 text-lg font-bold text-gray-900">
-								{{
-									getAvailability(
-										ticket,
-									)
-								}}
-							</div>
+						<div class="rounded-2xl bg-emerald-50 p-4">
+							<p class="text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-600">Available</p>
+							<p class="mt-1.5 text-xl font-black text-emerald-800">{{ getAvailability(ticket) }}</p>
 						</div>
 					</div>
 
-					<div class="mt-5">
-						<div class="mb-1 flex items-center justify-between text-sm">
-							<span class="font-semibold text-gray-900">
-								Tickets Sold
-							</span>
-
-							<span class="text-gray-500">
-								{{ ticket.sold ?? 0 }}
-								/
-								{{ ticket.capacity }}
-							</span>
+					<div class="mt-6">
+						<div class="mb-2 flex items-center justify-between text-xs font-semibold">
+							<span class="text-gray-500">{{ getSoldPercentage(ticket) }}% of inventory issued</span>
+							<span class="text-gray-700">{{ ticket.sold ?? 0 }} / {{ ticket.capacity }}</span>
 						</div>
-
 						<div class="h-2.5 w-full overflow-hidden rounded-full bg-gray-100">
-							<div class="h-full rounded-full bg-[#0ca30c]" :style="{
-								width:
-									getSoldPercentage(
-										ticket,
-									) + '%',
-							}" />
+							<div class="h-full rounded-full bg-[#285F6b] transition-all duration-300" :style="{ width: `${getSoldPercentage(ticket)}%` }" />
 						</div>
 					</div>
-				</div>
+				</article>
 			</div>
-		</div>
+		</template>
 	</div>
 </template>
 
@@ -202,6 +165,24 @@ const isLoading =
 
 const errorMessage =
 	ref('')
+
+const totalSold = computed(() =>
+	event.value?.ticket_types?.reduce(
+		(total, ticket) => total + (ticket.sold ?? 0),
+		0,
+	) ?? 0,
+)
+
+const totalCapacity = computed(() =>
+	event.value?.ticket_types?.reduce(
+		(total, ticket) => total + ticket.capacity,
+		0,
+	) ?? 0,
+)
+
+const totalAvailable = computed(() =>
+	Math.max(totalCapacity.value - totalSold.value, 0),
+)
 
 const eventId =
 	computed<number | null>(() => {
