@@ -26,7 +26,7 @@
 		</section>
 
 		<div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
-			<form class="space-y-5" @submit.prevent="submitInquiry">
+			<form class="space-y-5" @submit.prevent="requestInquirySubmission">
 				<section class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
 					<div
 						class="flex flex-col justify-between gap-4 border-b border-gray-100 bg-gradient-to-r from-primary-50/80 to-white px-5 py-5 sm:flex-row sm:items-center sm:px-7">
@@ -407,6 +407,31 @@
 				</div>
 			</aside>
 		</div>
+
+		<FormsConfirmationModal :open="showSubmitConfirmation" eyebrow="Ready to send"
+			title="Submit this event inquiry?"
+			description="Nearby organizers will be able to review these details and send you quotations. You can compare every offer before choosing one."
+			confirm-label="Yes, submit inquiry" cancel-label="Keep editing" loading-label="Submitting inquiry..."
+			:loading="isSubmitting" @cancel="showSubmitConfirmation = false" @confirm="submitInquiry">
+			<div class="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+				<p class="truncate font-extrabold text-gray-900">{{ form.title || `${form.eventType} event` }}</p>
+				<div class="mt-3 grid grid-cols-2 gap-3 text-xs">
+					<div><p class="text-gray-400">Schedule</p><p class="mt-1 font-bold text-gray-700">{{ formattedEventDate }}</p></div>
+					<div><p class="text-gray-400">Guests</p><p class="mt-1 font-bold text-gray-700">{{ form.guests }}</p></div>
+					<div class="col-span-2"><p class="text-gray-400">Venue</p><p class="mt-1 line-clamp-2 font-bold text-gray-700">{{ form.venueName || form.venueAddress }}</p></div>
+				</div>
+			</div>
+		</FormsConfirmationModal>
+
+		<FormsConfirmationModal :open="showSubmissionSuccess" variant="success" eyebrow="Inquiry submitted"
+			title="Your event is ready for matching"
+			description="Organizers can now review your inquiry and send quotations. Track new offers from My Events."
+			confirm-label="Go to My Events" :show-cancel="false" @cancel="goToMyEvents" @confirm="goToMyEvents">
+			<div class="flex items-start gap-3 rounded-2xl bg-emerald-50 p-4 text-emerald-800">
+				<IconBase name="check-circle" class="mt-0.5 h-5 w-5 shrink-0" />
+				<p class="text-sm font-semibold leading-6">Your inquiry was saved successfully. There is no booking commitment until you accept an organizer's quotation.</p>
+			</div>
+		</FormsConfirmationModal>
 	</div>
 </template>
 
@@ -453,6 +478,9 @@ const mapContainer =
 
 const isSubmitting =
 	ref(false)
+
+const showSubmitConfirmation = ref(false)
+const showSubmissionSuccess = ref(false)
 
 const errorMessage =
 	ref('')
@@ -1469,7 +1497,7 @@ function escapeHtml(
 		)
 }
 
-async function submitInquiry() {
+function requestInquirySubmission() {
 	if (!isValid.value) {
 		errorMessage.value =
 			'Please complete all required fields and select a valid location.'
@@ -1477,7 +1505,26 @@ async function submitInquiry() {
 		return
 	}
 
+	errorMessage.value = ''
+	showSubmitConfirmation.value = true
+}
+
+function goToMyEvents() {
+	showSubmissionSuccess.value = false
+	navigateTo('/client/my-events')
+}
+
+async function submitInquiry() {
+	if (!isValid.value) {
+		showSubmitConfirmation.value = false
+		errorMessage.value =
+			'Please complete all required fields and select a valid location.'
+
+		return
+	}
+
 	if (!token.value) {
+		showSubmitConfirmation.value = false
 		errorMessage.value =
 			'You are not authenticated.'
 
@@ -1488,6 +1535,7 @@ async function submitInquiry() {
 		form.latitude === null ||
 		form.longitude === null
 	) {
+		showSubmitConfirmation.value = false
 		errorMessage.value =
 			'Please select a valid location.'
 
@@ -1577,9 +1625,8 @@ async function submitInquiry() {
 			}
 		)
 
-		await navigateTo(
-			'/client/my-events'
-		)
+		showSubmitConfirmation.value = false
+		showSubmissionSuccess.value = true
 
 	} catch (error: unknown) {
 		console.error(

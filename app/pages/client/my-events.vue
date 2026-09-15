@@ -488,6 +488,22 @@
 				</div>
 			</Transition>
 		</Teleport>
+
+		<FormsConfirmationModal :open="quotationAccepted" variant="success" eyebrow="Organizer confirmed"
+			title="Quotation accepted successfully"
+			description="This organizer is now assigned to your event. You can open the event workspace now or stay here."
+			confirm-label="Open event details" cancel-label="Stay on My Events"
+			@cancel="quotationAccepted = false" @confirm="openAcceptedEvent">
+			<div v-if="selectedEvent" class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+				<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#285F6b]/10 text-[#285F6b]">
+					<IconBase name="calendar" class="h-5 w-5" />
+				</div>
+				<div class="min-w-0">
+					<p class="truncate font-extrabold text-gray-900">{{ selectedEvent.event_title || `${selectedEvent.event_type} event` }}</p>
+					<p class="mt-0.5 text-xs font-semibold text-emerald-700">Planning can begin</p>
+				</div>
+			</div>
+		</FormsConfirmationModal>
 	</div>
 </template>
 
@@ -647,6 +663,7 @@ const isLoadingQuotations = ref(false)
 const quotationError = ref('')
 const acceptingQuotationId = ref<number | null>(null)
 const confirmationQuotation = ref<Quotation | null>(null)
+const quotationAccepted = ref(false)
 
 const eventTypeIcons: Record<string, string> = {
 	Wedding: 'heart',
@@ -1250,13 +1267,23 @@ function closeQuotationConfirmation() {
 	confirmationQuotation.value = null
 }
 
+function openAcceptedEvent() {
+	quotationAccepted.value = false
+
+	if (!selectedEvent.value) return
+
+	navigateTo({
+		path: '/client/event-details',
+		query: { inquiry: selectedEvent.value.id },
+	})
+}
+
 async function acceptQuotation(
 	quotation: Quotation,
 ) {
 	if (!token.value) {
-		window.alert(
-			'Your session has expired. Please log in again.',
-		)
+		quotationError.value = 'Your session has expired. Please log in again.'
+		confirmationQuotation.value = null
 
 		return
 	}
@@ -1303,9 +1330,7 @@ async function acceptQuotation(
 			}
 		}
 
-		window.alert(
-			'Quotation accepted successfully. This organizer has been selected for your event.',
-		)
+		quotationAccepted.value = true
 
 	} catch (error: unknown) {
 		console.error(
@@ -1342,33 +1367,29 @@ async function acceptQuotation(
 			apiError.response?._data?.message
 
 		if (statusCode === 401) {
-			window.alert(
-				'Your session has expired. Please log in again.',
-			)
+			quotationError.value = 'Your session has expired. Please log in again.'
+			confirmationQuotation.value = null
 
 			return
 		}
 
 		if (statusCode === 403) {
-			window.alert(
-				backendMessage ??
-				'You are not authorized to accept this quotation.',
-			)
+			quotationError.value = backendMessage ??
+				'You are not authorized to accept this quotation.'
+			confirmationQuotation.value = null
 
 			return
 		}
 
 		if (backendMessage) {
-			window.alert(
-				backendMessage,
-			)
+			quotationError.value = backendMessage
+			confirmationQuotation.value = null
 
 			return
 		}
 
-		window.alert(
-			'Unable to accept quotation. Please try again.',
-		)
+		quotationError.value = 'Unable to accept quotation. Please try again.'
+		confirmationQuotation.value = null
 
 	} finally {
 		acceptingQuotationId.value =
