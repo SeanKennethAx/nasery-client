@@ -240,7 +240,10 @@
 								class="shrink-0 text-xs font-bold text-primary-700 hover:text-primary-900"
 								@click="resetLocation">Change</button>
 						</div>
-						<div ref="mapContainer" class="h-[280px] w-full border-t border-primary-100 bg-gray-100" />
+						<img v-if="showStaticMap" :src="staticMapUrl" :alt="`Map showing ${form.venueName || 'the selected venue'}`"
+							class="h-[280px] w-full border-t border-primary-100 bg-gray-100 object-cover"
+							@load="locationError = ''" @error="handleStaticMapError">
+						<div v-else ref="mapContainer" class="h-[280px] w-full border-t border-primary-100 bg-gray-100" />
 						<div
 							class="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-primary-100 bg-white px-4 py-3 text-xs text-gray-500">
 							<span class="flex items-center gap-2"><span
@@ -476,6 +479,8 @@ const config = useRuntimeConfig()
 const mapContainer =
 	ref<HTMLElement | null>(null)
 
+const showStaticMap = ref(false)
+
 const isSubmitting =
 	ref(false)
 
@@ -527,6 +532,8 @@ let leafletModule:
 let leafletMap:
 	any = null
 
+let leafletMapContainer:
+	HTMLElement | null = null
 
 let leafletMarkers:
 	any[] = []
@@ -626,6 +633,23 @@ const hasSelectedLocation =
 		)
 	})
 
+const staticMapUrl = computed(() => {
+	if (form.latitude === null || form.longitude === null || !locationIqApiKey.value) return ''
+
+	const coordinates = `${form.latitude},${form.longitude}`
+	const params = new URLSearchParams({
+		key: locationIqApiKey.value,
+		center: coordinates,
+		zoom: '14',
+		size: '1200x560',
+		format: 'png',
+		maptype: 'streets',
+		markers: `icon:large-blue-cutout|${coordinates}`,
+	})
+
+	return `https://maps.locationiq.com/v3/staticmap?${params.toString()}`
+})
+
 const isValid =
 	computed(() => {
 		return Boolean(
@@ -690,6 +714,7 @@ onBeforeUnmount(() => {
 	if (leafletMap) {
 		leafletMap.remove()
 		leafletMap = null
+		leafletMapContainer = null
 	}
 })
 
@@ -967,9 +992,9 @@ async function selectLocation(
 	locationError.value = ''
 	nearbyError.value = ''
 	nearbyOrganizers.value = []
+	showStaticMap.value = false
 
 	await nextTick()
-	await renderMap()
 	await fetchNearbyOrganizers()
 	await renderMap()
 }
@@ -990,6 +1015,7 @@ function clearSelectedLocation() {
 	if (leafletMap) {
 		leafletMap.remove()
 		leafletMap = null
+		leafletMapContainer = null
 	}
 }
 
@@ -1125,6 +1151,7 @@ async function renderMap() {
 	}
 
 	try {
+		locationError.value = ''
 		const L =
 			await loadLeaflet()
 
@@ -1134,7 +1161,19 @@ async function renderMap() {
 				Number(form.longitude),
 			]
 
+		if (
+			leafletMap &&
+			leafletMapContainer !== mapContainer.value
+		) {
+			leafletMap.remove()
+			leafletMap = null
+			leafletMapContainer = null
+		}
+
 		if (!leafletMap) {
+			// Leaflet stores its instance id on the element. Clear a stale id left
+			// behind by development hot reload before creating a new map instance.
+			delete (mapContainer.value as HTMLElement & { _leaflet_id?: number })._leaflet_id
 			leafletMap =
 				L.map(
 					mapContainer.value,
@@ -1147,6 +1186,7 @@ async function renderMap() {
 						center,
 						14
 					)
+			leafletMapContainer = mapContainer.value
 
 			L.tileLayer(
 				`https://{s}-tiles.locationiq.com/v3/streets/r/{z}/{x}/{y}.png?key=${encodeURIComponent(locationIqApiKey.value)}`,
@@ -1299,6 +1339,7 @@ async function renderMap() {
 			leafletMap
 				?.invalidateSize()
 		}, 0)
+		showStaticMap.value = false
 
 	} catch (error) {
 		console.error(
@@ -1306,9 +1347,15 @@ async function renderMap() {
 			error
 		)
 
-		locationError.value =
-			'Unable to display the LocationIQ map.'
+		// Keep the venue visible if Leaflet cannot initialize (for example after
+		// hot reload or a browser-specific canvas/container failure).
+		showStaticMap.value = true
+		locationError.value = ''
 	}
+}
+
+function handleStaticMapError() {
+	locationError.value = 'Unable to display the location map. Please try selecting the location again.'
 }
 
 function clearMarkers() {

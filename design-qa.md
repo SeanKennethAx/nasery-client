@@ -1,23 +1,23 @@
-# Design QA: Notification and Profile Overlay Stacking
+# Design QA: Post Event Inquiry Location Map
 
 ## Scope
 
-- Reference: `codex-clipboard-2a372f8b-d75b-4d33-a75e-3b953a0645d1.png`
-- Routes: authenticated client and organizer dashboard pages
-- Updated: client and organizer notification/profile overlay behavior
+- Reference: `codex-clipboard-e29bfbf4-fa84-4bf2-83f6-9b76a0ee47d9.png`
+- Route: `/client/post-event`
+- Updated: selected-location map rendering and fallback behavior
 
 ## Automated verification
 
 - Nuxt production build: passed
-- Opening either profile panel closes the notification dropdown first.
-- Both profile backdrops and slide-overs render above header popovers as a fallback.
-- Profile panels retain bounded horizontal content and internal scrolling.
+- A location selection initializes one Leaflet map after nearby organizers load.
+- Replaced map containers are detected and safely reinitialized.
+- A branded LocationIQ static map is shown if interactive-map initialization fails.
 
 ## Interaction checks
 
-- Client profile: notification dropdown closes before the slide-over appears.
-- Organizer profile: the same close and stacking behavior applies.
-- Reopening notifications after closing a profile continues to refresh the list normally.
+- Select a LocationIQ result and confirm the venue map becomes visible.
+- Change the venue and confirm the map recenters without an initialization error.
+- Confirm the selected venue remains visible through the static fallback if Leaflet cannot initialize.
 
 ## Visual review
 
