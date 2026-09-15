@@ -166,108 +166,6 @@
 		<!-- NORMAL MY EVENTS DASHBOARD -->
 		<!-- ===================================================== -->
 		<div v-else>
-			<!-- Notifications -->
-			<section v-if="notifications.length || unreadNotificationCount || isLoadingNotifications || notificationFilter === 'unread'"
-				class="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-				<div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-4 py-4 sm:px-5">
-					<div class="flex items-center gap-2">
-						<span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
-							<IconBase name="bell" class="h-4 w-4" />
-						</span>
-
-						<div>
-							<h2 class="text-sm font-bold text-gray-900">Notifications</h2>
-							<p class="text-xs text-gray-500">Updates about your events and quotations</p>
-						</div>
-					</div>
-
-					<div class="flex items-center gap-2">
-						<button v-for="filter in notificationFilters" :key="filter.value" type="button"
-							class="rounded-lg px-3 py-1.5 text-xs font-semibold transition"
-							:class="notificationFilter === filter.value
-								? 'bg-primary-700 text-white'
-								: 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-							@click="setNotificationFilter(filter.value)">
-							{{ filter.label }}
-							<span v-if="filter.value === 'unread'">{{ unreadNotificationCount }}</span>
-						</button>
-
-						<button v-if="unreadNotificationCount > 0" type="button"
-							class="rounded-lg px-2 py-1.5 text-xs font-semibold text-primary-700 hover:bg-primary-50"
-							@click="markAllNotificationsAsRead">
-							Mark all read
-						</button>
-					</div>
-				</div>
-
-				<div class="max-h-[28rem] overflow-y-auto overscroll-contain">
-					<article v-for="notification in notifications" :key="notification.id"
-						class="group flex items-start gap-3 border-b border-gray-100 px-4 py-3.5 last:border-b-0 hover:bg-gray-50 sm:px-5"
-						:class="{ 'bg-primary-50/40': !notification.read_at }">
-						<span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" :class="notification.read_at
-							? 'bg-gray-300'
-							: 'bg-primary-600'
-							"></span>
-
-						<button type="button" class="min-w-0 flex-1 text-left" @click="openNotification(notification)">
-							<p class="text-sm font-semibold text-gray-900">
-								{{
-									notification.data.message ||
-									'You received a new quotation.'
-								}}
-							</p>
-
-							<p class="mt-1 text-xs text-gray-500">
-								{{ notification.data.event_title || 'Event inquiry' }}
-
-								<span v-if="notification.data.quotation_amount">
-									·
-									{{
-										formatCurrency(
-											notification.data.quotation_amount,
-										)
-									}}
-								</span>
-							</p>
-						</button>
-
-						<div class="flex shrink-0 items-center gap-1">
-							<span class="mr-1 hidden text-xs text-gray-400 sm:inline">
-								{{ formatRelativeTime(notification.created_at) }}
-							</span>
-
-							<button type="button"
-								class="rounded-lg p-2 text-gray-400 hover:bg-white hover:text-primary-700"
-								:disabled="notificationActionId === notification.id"
-								:title="notification.read_at ? 'Mark as unread' : 'Mark as read'"
-								@click="toggleNotificationRead(notification)">
-								<IconBase :name="notification.read_at ? 'mail' : 'check'" class="h-4 w-4" />
-							</button>
-
-							<button type="button"
-								class="rounded-lg border border-transparent p-2 text-gray-500 transition hover:border-red-100 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-200"
-								:disabled="notificationActionId === notification.id" title="Remove notification"
-								aria-label="Delete notification"
-								@click="removeNotification(notification.id)">
-								<IconBase name="trash" class="h-4 w-4" />
-							</button>
-						</div>
-					</article>
-
-					<div v-if="!notifications.length && !isLoadingNotifications" class="px-6 py-10 text-center">
-						<p class="text-sm font-semibold text-gray-700">No unread notifications</p>
-						<p class="mt-1 text-xs text-gray-500">You are all caught up.</p>
-					</div>
-				</div>
-
-				<div v-if="notificationPage < notificationLastPage"
-					class="border-t border-gray-100 bg-gray-50/70 px-4 py-3 text-center">
-					<button type="button" class="text-xs font-bold text-primary-700 hover:text-primary-900"
-						:disabled="isLoadingNotifications" @click="loadMoreNotifications">
-						{{ isLoadingNotifications ? 'Loading…' : 'Load older notifications' }}
-					</button>
-				</div>
-			</section>
 
 			<header class="mb-6 overflow-hidden rounded-3xl border border-primary-100 bg-white shadow-sm">
 				<div class="flex flex-col gap-6 px-5 py-6 sm:px-7 lg:flex-row lg:items-center lg:justify-between">
@@ -1594,10 +1492,7 @@ const stats = computed(() => {
 	]
 })
 
-onMounted(async () => {
-	await Promise.all([
-		loadClientInquiries(),
-		loadNotifications(),
-	])
+onMounted(() => {
+	loadClientInquiries()
 })
 </script>

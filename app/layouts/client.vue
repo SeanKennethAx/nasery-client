@@ -61,9 +61,7 @@
 					</div>
 				</div>
 				<div class="flex items-center gap-2">
-					<span class="hidden items-center gap-1.5 rounded-full bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700 sm:inline-flex">
-						<span class="h-1.5 w-1.5 rounded-full bg-green-500" /> System Online
-					</span>
+					<NotificationsDropdown portal="client" />
 					<button type="button" class="flex max-w-52 items-center gap-2 rounded-xl border border-gray-200 bg-white p-1.5 pr-3 text-left transition hover:border-primary-200 hover:bg-primary-50" @click="openProfilePanel">
 						<span class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary-700 text-xs font-bold text-white">
 							<img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-full w-full object-cover" /><span v-else>{{ sidebarInitials }}</span>

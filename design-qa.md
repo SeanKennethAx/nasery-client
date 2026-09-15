@@ -1,29 +1,29 @@
-# Design QA: Dashboard Account and Organizer Notifications
+# Design QA: Client Header Notifications
 
 ## Scope
 
-- References: `codex-clipboard-60c69a37-6df7-447f-87e0-fb52956bd247.png` and `codex-clipboard-7768b9f9-28f5-496f-849c-67c9e1ba69cf.png`
-- Routes: authenticated client and organizer dashboard pages
-- Updated: account placement and organizer notification access
+- Reference: `codex-clipboard-f10551a7-f33a-4378-ae7b-96d455330e04.png`
+- Routes: authenticated client dashboard pages
+- Updated: header status area and client notification placement
 
 ## Automated verification
 
 - Nuxt production build: passed
-- Laravel tests: 7 passed with 28 assertions
-- Notification API routes are available to both authenticated client and organizer roles.
-- Profile actions use the same compact header control in the client and organizer layouts.
-- Organizer notifications use a reusable dropdown with unread count, scrolling, pagination, read/unread actions, and deletion.
+- The client System Online badge is removed.
+- The reusable notification dropdown now sits immediately beside the client profile control.
+- The old full-width notification section is removed from My Events.
+- Notifications retain unread counts, scrolling, pagination, read/unread actions, deletion, and navigation to My Events.
 
 ## Interaction checks
 
-- A new inquiry notifies organizers whose service tags match its event type.
-- Accepting a quotation notifies the organizer who submitted it.
-- Opening a notification marks it read and routes to Matching Inquiries or My Offers.
-- Individual updates can be marked read/unread or deleted, and older entries can be loaded without expanding the header.
+- Opening the bell refreshes the latest notifications.
+- Opening a client notification marks it read and keeps the client in the My Events workflow.
+- Individual updates can be marked read/unread or deleted.
+- Older notifications remain accessible through the compact dropdown.
 
 ## Visual review
 
-These views require authenticated client and organizer sessions. The isolated Codex in-app browser does not share the authenticated Brave sessions shown in the references and redirects to `/login`, so same-state screenshot comparison is unavailable.
+These views require an authenticated client session. The isolated Codex in-app browser does not share the authenticated Brave session shown in the reference and redirects to `/login`, so same-state screenshot comparison is unavailable.
 
 ## Final result
 

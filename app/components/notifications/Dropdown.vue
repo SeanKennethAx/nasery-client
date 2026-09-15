@@ -25,7 +25,7 @@
 				<div v-else-if="!items.length" class="px-5 py-10 text-center">
 					<span class="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-50 text-primary-700"><IconBase name="bell" class="h-5 w-5" /></span>
 					<p class="mt-3 text-sm font-bold text-gray-800">No notifications yet</p>
-					<p class="mt-1 text-xs text-gray-500">New matching inquiries and accepted offers will appear here.</p>
+					<p class="mt-1 text-xs text-gray-500">{{ emptyMessage }}</p>
 				</div>
 
 				<article v-for="item in items" :key="item.id" class="group flex gap-3 border-b border-gray-100 px-4 py-3.5 last:border-b-0 hover:bg-gray-50" :class="{ 'bg-primary-50/50': !item.read_at }">
@@ -63,6 +63,12 @@ interface OrganizerNotification {
 	data: { type: string; message: string; event_title: string; inquiry_id?: number; quotation_id?: number }
 }
 
+const props = withDefaults(defineProps<{
+	portal?: 'client' | 'organizer'
+}>(), {
+	portal: 'organizer',
+})
+
 const { token } = useAuth()
 const config = useRuntimeConfig()
 const open = ref(false)
@@ -71,6 +77,10 @@ const items = ref<OrganizerNotification[]>([])
 const unreadCount = ref(0)
 const page = ref(1)
 const lastPage = ref(1)
+
+const emptyMessage = computed(() => props.portal === 'client'
+	? 'New quotations and event updates will appear here.'
+	: 'New matching inquiries and accepted offers will appear here.')
 
 const headers = computed(() => ({ Accept: 'application/json', Authorization: `Bearer ${token.value}` }))
 
@@ -95,7 +105,14 @@ async function markAllRead() { await mutate('/notifications/read-all') }
 async function openItem(item: OrganizerNotification) {
 	if (!item.read_at) await mutate(`/notifications/${item.id}/read`)
 	open.value = false
-	await navigateTo(item.data.type === 'quotation_accepted' ? '/organizer/inquiries/offers' : '/organizer/inquiries/match-inquiries')
+	if (props.portal === 'client') {
+		await navigateTo('/client/my-events')
+		return
+	}
+
+	await navigateTo(item.data.type === 'quotation_accepted'
+		? '/organizer/inquiries/offers'
+		: '/organizer/inquiries/match-inquiries')
 }
 
 function relativeTime(value: string) {
