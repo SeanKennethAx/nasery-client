@@ -387,7 +387,7 @@
 
 					<FormsButton class="flex-1" :disabled="isSubmittingOffer ||
 						!!offerSuccess
-						" @click="submitOffer">
+						" @click="requestOfferSubmission">
 						<IconBase :name="isSubmittingOffer
 							? 'refresh-cw'
 							: offerSuccess
@@ -409,6 +409,33 @@
 				</div>
 			</div>
 		</Transition>
+
+		<FormsConfirmationModal :open="showOfferConfirmation" eyebrow="Ready to send" title="Submit this offer?"
+			description="Review the key details below. The client will receive this quotation and can compare it with other offers before making a final selection."
+			icon="file-text" confirm-icon="send" confirm-label="Yes, submit offer" cancel-label="Review offer"
+			loading-label="Submitting offer..." :loading="isSubmittingOffer" @cancel="showOfferConfirmation = false"
+			@confirm="submitOffer">
+			<div class="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+				<div class="flex items-start justify-between gap-4">
+					<div class="min-w-0">
+						<p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Event inquiry</p>
+						<p class="mt-1 truncate text-base font-bold text-gray-900">{{ offerForm.title }}</p>
+					</div>
+					<p class="shrink-0 text-lg font-black text-primary-700">{{ formattedOfferAmount }}</p>
+				</div>
+
+				<div class="mt-4 grid grid-cols-2 gap-3 border-t border-gray-200 pt-4 text-sm">
+					<div>
+						<p class="text-xs text-gray-400">Package</p>
+						<p class="mt-1 font-semibold text-gray-700">{{ offerForm.packageName.trim() || 'Custom offer' }}</p>
+					</div>
+					<div>
+						<p class="text-xs text-gray-400">Timeline</p>
+						<p class="mt-1 font-semibold text-gray-700">{{ offerForm.timeline.trim() || 'Not specified' }}</p>
+					</div>
+				</div>
+			</div>
+		</FormsConfirmationModal>
 	</div>
 </template>
 
@@ -505,6 +532,9 @@ const errorMessage =
 const showOfferForm =
 	ref(false)
 
+const showOfferConfirmation =
+	ref(false)
+
 const selectedInquiryId =
 	ref<number | null>(null)
 
@@ -536,6 +566,25 @@ const offerForm =
 	reactive(
 		emptyOfferForm(),
 	)
+
+function parseOfferAmount() {
+	return Number(
+		offerForm.budget.replace(/[₱,\s]/g, ''),
+	)
+}
+
+const formattedOfferAmount = computed(() => {
+	const amount = parseOfferAmount()
+
+	if (Number.isNaN(amount) || amount <= 0) return 'Not set'
+
+	return new Intl.NumberFormat('en-PH', {
+		style: 'currency',
+		currency: 'PHP',
+		minimumFractionDigits: 2,
+	}).format(amount)
+})
+
 async function loadMatchingInquiries() {
 	if (!token.value) {
 		errorMessage.value =
@@ -763,6 +812,7 @@ function closeOfferForm() {
 	}
 
 	showOfferForm.value = false
+	showOfferConfirmation.value = false
 
 	selectedInquiryId.value = null
 
@@ -779,21 +829,21 @@ function addInclusion() {
 	offerForm.inclusions.push('')
 }
 
-async function submitOffer() {
+function validateOffer() {
 	if (
 		!selectedInquiryId.value
 	) {
 		offerError.value =
 			'No inquiry was selected.'
 
-		return
+		return null
 	}
 
 	if (!token.value) {
 		offerError.value =
 			'Your session has expired. Please log in again.'
 
-		return
+		return null
 	}
 
 	if (
@@ -802,17 +852,10 @@ async function submitOffer() {
 		offerError.value =
 			'Please enter your quotation amount.'
 
-		return
+		return null
 	}
 
-	const quotationAmount =
-		Number(
-			offerForm.budget
-				.replace(
-					/[₱,\s]/g,
-					'',
-				),
-		)
+	const quotationAmount = parseOfferAmount()
 
 	if (
 		Number.isNaN(
@@ -823,6 +866,24 @@ async function submitOffer() {
 		offerError.value =
 			'Please enter a valid quotation amount.'
 
+		return null
+	}
+
+	offerError.value = ''
+	return quotationAmount
+}
+
+function requestOfferSubmission() {
+	if (validateOffer() === null) return
+
+	showOfferConfirmation.value = true
+}
+
+async function submitOffer() {
+	const quotationAmount = validateOffer()
+
+	if (quotationAmount === null) {
+		showOfferConfirmation.value = false
 		return
 	}
 
@@ -890,6 +951,8 @@ async function submitOffer() {
 			response.message ||
 			'Quotation submitted successfully.'
 
+		showOfferConfirmation.value = false
+
 		await loadMatchingInquiries()
 
 		window.setTimeout(
@@ -912,6 +975,8 @@ async function submitOffer() {
 		)
 
 	} catch (error: unknown) {
+		showOfferConfirmation.value = false
+
 		console.error(
 			'Failed to submit quotation:',
 			error,

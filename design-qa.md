@@ -1,29 +1,31 @@
-# Design QA: Client Confirmation Modals
+# Design QA: Organizer Offer Confirmation
 
 ## Scope
 
-- References: `codex-clipboard-ce4015e5-ce62-4505-80a3-7b29ec1389d1.png` and `codex-clipboard-ce780eed-46b3-4414-a053-bde87fc7bd2a.png`
-- Routes: `/client/post-event` and `/client/my-events`
-- Updated: inquiry submission and quotation acceptance feedback
+- Reference: `codex-clipboard-b6c3d16b-114f-4efc-8f87-90daadc17496.png`
+- Route: `/organizer/inquiries/match-inquiries`
+- Updated: final confirmation before an organizer submits an offer
 
 ## Automated verification
 
 - Nuxt production build: passed
-- Native browser alert calls in both updated flows: removed
-- Inquiry submission remains disabled until required data is valid.
-- Modal controls expose dialog semantics, labelled titles, close controls, loading states, and explicit primary/secondary choices.
-- Reusable implementation: `app/components/forms/ConfirmationModal.vue`
+- The slide-over validates the selected inquiry, session, and quotation amount before opening the confirmation.
+- The confirmation uses `app/components/forms/ConfirmationModal.vue` for the same structure, color palette, loading state, and explicit choices as other confirmation flows.
+- Confirming uses the existing quotation endpoint and error handling; API errors return the organizer to the slide-over.
+- The review summary includes the inquiry, formatted amount, package, and timeline.
 
 ## Interaction checks
 
-- Submit inquiry: review modal → keep editing or submit → branded success modal → My Events.
-- Accept quotation: existing confirmation → branded success modal → stay on My Events or open Event Details.
-- API failures appear in the existing in-page error region without browser-native dialogs.
+- Submit Offer with invalid amount: stay in the form and show the inline validation error.
+- Submit Offer with valid data: show the review confirmation.
+- Review offer: close the confirmation and preserve every entered field.
+- Yes, submit offer: lock the modal while submitting, then refresh matching inquiries and retain the existing success feedback.
+- API failure: close the confirmation and show the backend message in the slide-over.
 
 ## Visual review
 
-Both routes require an authenticated client session. The isolated Codex in-app browser does not share the authenticated Brave session shown in the references and redirects to `/login`, so same-state screenshot comparison is unavailable.
+The route requires an authenticated organizer session. The isolated Codex in-app browser does not share the authenticated Brave session shown in the reference and redirects to `/login`, so same-state screenshot comparison is unavailable.
 
 ## Final result
 
-Blocked: authenticated visual comparison is unavailable in the isolated browser. Production compilation and source-level interaction checks pass.
+Passed automated verification. Authenticated screenshot comparison remains blocked by the isolated browser session.
