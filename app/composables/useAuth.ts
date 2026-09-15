@@ -148,6 +148,9 @@ export function useAuth(
                         .trim()
                         .toLowerCase(),
 
+                email_verification_token:
+                    payload.email_verification_token,
+
                 phone:
                     payload.phone
                         .trim(),

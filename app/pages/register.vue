@@ -48,17 +48,7 @@
 				</FormsTextField>
 			</div>
 			<div class="mb-5">
-				<FormsLabel text="Email Address" required />
-
-				<FormsTextField v-model="form.email" type="email" placeholder="you@example.com" size="lg" required>
-					<template #icon>
-						<svg viewBox="0 0 20 20"
-							class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
-							<path fill="currentColor"
-								d="M2.5 4.5A1.5 1.5 0 0 1 4 3h12a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 16 17H4a1.5 1.5 0 0 1-1.5-1.5v-11Zm1.7.3 5.34 4.27a.9.9 0 0 0 1.12 0L16 4.8a.3.3 0 0 0-.19-.3H4.19a.3.3 0 0 0-.19.3Z" />
-						</svg>
-					</template>
-				</FormsTextField>
+				<FormsEmailVerificationField v-model="form.email" v-model:verification-token="emailVerificationToken" />
 			</div>
 			<div class="mb-5">
 				<FormsLabel text="Password" required />
@@ -349,6 +339,7 @@ const locationIqApiKey = computed(() =>
 
 const showSuccessModal = ref(false)
 const registeredContact = ref('')
+const emailVerificationToken = ref('')
 
 const {
 	register,
@@ -886,6 +877,11 @@ async function handleSubmit() {
 		return
 	}
 
+	if (!emailVerificationToken.value) {
+		errorMessage.value = 'Verify your email address before creating your account.'
+		return
+	}
+
 	const emailPattern =
 		/^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -1006,6 +1002,7 @@ async function handleSubmit() {
 		lastname,
 
 		email,
+		email_verification_token: emailVerificationToken.value,
 
 		password:
 			form.password,

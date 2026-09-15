@@ -12,7 +12,7 @@ const authQuery = computed(() => {
 		<!-- <div class="fixed inset-x-0 top-0 z-50 h-1 bg-gray-900" /> -->
 
 		<div
-			class="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-primary-600 to-primary-900 px-10 py-12 text-white lg:flex lg:w-1/2 lg:px-16 lg:py-14">
+			class="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-primary-600 to-primary-900 px-10 py-12 text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-1/2 lg:self-start lg:px-16 lg:py-14">
 			<div class="pointer-events-none absolute inset-0"
 				style="background-image: radial-gradient(rgba(255,255,255,0.12) 1.5px, transparent 1.5px); background-size: 22px 22px;" />
 

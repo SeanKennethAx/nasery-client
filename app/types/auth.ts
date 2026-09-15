@@ -41,6 +41,7 @@ export interface RegisterPayload {
     lastname: string
 
     email: string
+    email_verification_token: string
     phone: string
     address: string
 
