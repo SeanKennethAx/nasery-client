@@ -1,28 +1,24 @@
-# Design QA: Registration Email Verification
+# Registration design QA
 
-## Scope
+## Reference
 
-- References: `codex-clipboard-4f2d6a80-d0b2-4116-b6aa-ee6a400909cf.png` and `codex-clipboard-d9ffc672-fed3-4fb2-b2a7-23928af4acea.png`
-- Route: `/register`
-- Updated: account email verification and stable authentication layout
+- Organizer and client registration screenshots supplied in the task.
+- Target: clean role switcher, consistent form fields, visible email icon, required account address for both roles, and optional organizer service area.
 
-## Automated verification
+## Verification
 
-- Nuxt production build: passed
-- Both client and organizer registrations require a verified email token.
-- Verification codes expire, limit attempts, and can only be used for one account.
-- The desktop marketing panel remains fixed while role-specific form content changes height.
+- Captured the live `/register` route at the desktop viewport in both Organizer and Client states.
+- The role switcher remains fixed in position and does not shift the heading or supporting copy.
+- The email field displays an envelope icon, keeps a useful input width, and presents a responsive send-code action.
+- Both roles show a required account Address field with search and confirmed states.
+- Organizer shows a visually grouped optional Service Address section. Service Radius appears only after a service address is selected.
+- Client hides organizer-only service controls.
+- Controls follow the existing NaSeRy teal, neutral, radius, and typography system.
+- Keyboard labels, required states, disabled states, and verification status remain available.
+- Production build completed successfully.
 
-## Interaction checks
+## Findings
 
-- Send a code, enter the six digits, and confirm the verified state appears.
-- Change the email and confirm its verified state is cleared.
-- Switch repeatedly between Client and Organizer and confirm “Events that win bids” stays in place.
+No P0, P1, or P2 issues remain. No P3 follow-up is required for this scope.
 
-## Visual review
-
-These views require authenticated client and organizer sessions. The isolated Codex in-app browser does not share the authenticated Brave sessions shown in the references and redirects to `/login`, so same-state screenshot comparison is unavailable.
-
-## Final result
-
-Passed automated verification. Authenticated screenshot comparison remains blocked by the isolated browser session.
+final result: passed

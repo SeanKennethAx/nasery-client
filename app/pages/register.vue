@@ -78,71 +78,31 @@
 			</div>
 
 
-			<div v-if="role === 'organizer'" class="mb-6 rounded-2xl border border-primary-200 bg-primary-50/30 p-4">
+			<div class="mb-5">
+				<FormsAddressSearchField v-model="form.clientAddress" v-model:selected="selectedClientLocation"
+					label="Address" placeholder="Search your home or business address" required
+					hint="This address is used for your account details." />
+			</div>
+
+			<div v-if="role === 'organizer'" class="mb-6 rounded-2xl border border-primary-100 bg-primary-50/40 p-4 sm:p-5">
 				<div class="mb-4">
 					<p class="text-sm font-bold text-gray-800">
 						Organizer Service Details
 					</p>
 
 					<p class="mt-1 text-xs leading-relaxed text-gray-500">
-						Select your real service address so clients can find you based on distance.
+						Add a service area if you want nearby clients to discover you automatically.
 					</p>
 				</div>
 
 				<div class="mb-4">
-					<FormsLabel text="Service Address" required />
-
-					<div class="relative">
-						<FormsTextField v-model="form.organizerLocation" type="text"
-							placeholder="Search your service address" size="lg" autocomplete="off" required>
-							<template #icon>
-								<svg viewBox="0 0 20 20"
-									class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-primary-600">
-									<path fill="currentColor"
-										d="M10 1.5a6 6 0 0 0-6 6c0 4.5 6 11 6 11s6-6.5 6-11a6 6 0 0 0-6-6Zm0 8.2a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Z" />
-								</svg>
-							</template>
-						</FormsTextField>
-
-						<div v-if="isSearchingAddress"
-							class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
-							Searching...
-						</div>
-
-						<div v-if="showAddressSuggestions"
-							class="absolute z-50 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-xl">
-							<button v-for="place in addressSuggestions" :key="placeKey(place)" type="button"
-								class="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-gray-50"
-								@click="selectAddress(place)">
-								<svg viewBox="0 0 20 20" class="mt-0.5 h-4 w-4 shrink-0 text-primary-600">
-									<path fill="currentColor"
-										d="M10 1.5a6 6 0 0 0-6 6c0 4.5 6 11 6 11s6-6.5 6-11a6 6 0 0 0-6-6Zm0 8.2a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Z" />
-								</svg>
-
-								<span class="min-w-0">
-									<span class="block text-sm font-semibold text-gray-800">
-										{{ place.display_place || place.display_name }}
-									</span>
-
-									<span class="mt-0.5 block text-xs leading-relaxed text-gray-500">
-										{{ place.display_name }}
-									</span>
-								</span>
-							</button>
-						</div>
-					</div>
-
-					<p v-if="addressSearchError" class="mt-2 text-xs text-red-600">
-						{{ addressSearchError }}
-					</p>
-
-					<p v-else-if="hasSelectedOrganizerLocation" class="mt-2 text-xs font-medium text-green-600">
-						Location selected successfully.
-					</p>
+						<FormsAddressSearchField v-model="form.organizerLocation" v-model:selected="selectedOrganizerLocation"
+							label="Service Address" placeholder="Search your service address (optional)"
+							hint="Optional — you can add or change this later in your profile." />
 				</div>
 
-				<div>
-					<FormsLabel text="Service Radius" required />
+				<div v-if="selectedOrganizerLocation">
+					<FormsLabel text="Service Radius" />
 
 					<FormsSelect v-model="form.serviceRadiusKm" :options="serviceRadiusSelectOptions" :can-clear="false"
 						:searchable="false" />
@@ -151,58 +111,6 @@
 						Clients whose event is inside this distance can discover you as a nearby organizer.
 					</p>
 				</div>
-			</div>
-
-			<div v-else class="mb-6">
-				<FormsLabel text="Address" required />
-
-				<div class="relative">
-					<FormsTextField v-model="form.clientAddress" type="text" placeholder="Search your address" size="lg"
-						autocomplete="off" required>
-						<template #icon>
-							<svg viewBox="0 0 20 20"
-								class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-primary-600">
-								<path fill="currentColor"
-									d="M10 1.5a6 6 0 0 0-6 6c0 4.5 6 11 6 11s6-6.5 6-11a6 6 0 0 0-6-6Zm0 8.2a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Z" />
-							</svg>
-						</template>
-					</FormsTextField>
-
-					<div v-if="isSearchingAddress"
-						class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
-						Searching...
-					</div>
-
-					<div v-if="showAddressSuggestions"
-						class="absolute z-50 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-xl">
-						<button v-for="place in addressSuggestions" :key="placeKey(place)" type="button"
-							class="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-gray-50"
-							@click="selectAddress(place)">
-							<svg viewBox="0 0 20 20" class="mt-0.5 h-4 w-4 shrink-0 text-primary-600">
-								<path fill="currentColor"
-									d="M10 1.5a6 6 0 0 0-6 6c0 4.5 6 11 6 11s6-6.5 6-11a6 6 0 0 0-6-6Zm0 8.2a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Z" />
-							</svg>
-
-							<span class="min-w-0">
-								<span class="block text-sm font-semibold text-gray-800">
-									{{ place.display_place || place.display_name }}
-								</span>
-
-								<span class="mt-0.5 block text-xs leading-relaxed text-gray-500">
-									{{ place.display_name }}
-								</span>
-							</span>
-						</button>
-					</div>
-				</div>
-
-				<p v-if="addressSearchError" class="mt-2 text-xs text-red-600">
-					{{ addressSearchError }}
-				</p>
-
-				<p v-else-if="hasSelectedClientLocation" class="mt-2 text-xs font-medium text-green-600">
-					Location selected successfully.
-				</p>
 			</div>
 
 
@@ -313,16 +221,6 @@ definePageMeta({
 	layout: 'auth',
 })
 
-interface LocationIqPlace {
-	place_id?: string | number | null
-	osm_id?: string | number | null
-	osm_type?: string | null
-	display_name: string
-	display_place?: string
-	lat: string
-	lon: string
-}
-
 interface SelectedLocation {
 	address: string
 	providerId: string
@@ -331,21 +229,11 @@ interface SelectedLocation {
 }
 
 const role = ref<UserRole>(inquiryRedirect(authRoute.query.redirect) ? 'client' : 'organizer')
-const config = useRuntimeConfig()
-
-const locationIqApiKey = computed(() =>
-	String(config.public.locationIqApiKey || '')
-)
-
 const showSuccessModal = ref(false)
 const registeredContact = ref('')
 const emailVerificationToken = ref('')
 
-const {
-	register,
-	isLoading,
-	errorMessage,
-} = useAuth()
+const { register, isLoading, errorMessage } = useAuth()
 
 const form = reactive({
 	fullName: '',
@@ -357,386 +245,23 @@ const form = reactive({
 	serviceRadiusKm: 25,
 })
 
-const serviceRadiusOptions = [
-	5,
-	10,
-	15,
-	25,
-	50,
-	75,
-	100,
-	150,
-	200,
-]
-
+const serviceRadiusOptions = [5, 10, 15, 25, 50, 75, 100, 150, 200]
 const serviceRadiusSelectOptions = serviceRadiusOptions.map(radius => ({
 	value: radius,
 	label: `${radius} km`,
 }))
 
-const selectedOrganizerLocation =
-	ref<SelectedLocation | null>(null)
-
-const selectedClientLocation =
-	ref<SelectedLocation | null>(null)
-
-const addressSuggestions =
-	ref<LocationIqPlace[]>([])
-
-const isSearchingAddress = ref(false)
-const addressSearchError = ref('')
-
-let addressSearchTimer:
-	ReturnType<typeof setTimeout> | null = null
-
-let addressSearchRequestId = 0
-let isApplyingSelectedAddress = false
-
-const hasSelectedOrganizerLocation = computed(() => {
-	const selected = selectedOrganizerLocation.value
-
-	return Boolean(
-		selected &&
-		selected.address &&
-		selected.providerId &&
-		Number.isFinite(selected.latitude) &&
-		Number.isFinite(selected.longitude)
-	)
-})
+const selectedOrganizerLocation = ref<SelectedLocation | null>(null)
+const selectedClientLocation = ref<SelectedLocation | null>(null)
 
 const hasSelectedClientLocation = computed(() => {
 	const selected = selectedClientLocation.value
-
-	return Boolean(
-		selected &&
-		selected.address &&
-		selected.providerId &&
-		Number.isFinite(selected.latitude) &&
-		Number.isFinite(selected.longitude)
-	)
+	return Boolean(selected?.address && selected.providerId && Number.isFinite(selected.latitude) && Number.isFinite(selected.longitude))
 })
 
-const hasSelectedAddressForRole = computed(() =>
-	role.value === 'organizer'
-		? hasSelectedOrganizerLocation.value
-		: hasSelectedClientLocation.value
-)
-
-const showAddressSuggestions = computed(() =>
-	addressSuggestions.value.length > 0 &&
-	!hasSelectedAddressForRole.value
-)
-
-watch(
-	role,
-	() => {
-		errorMessage.value = ''
-		addressSearchError.value = ''
-		addressSuggestions.value = []
-
-		if (addressSearchTimer) {
-			clearTimeout(addressSearchTimer)
-			addressSearchTimer = null
-		}
-	}
-)
-
-watch(
-	() => form.organizerLocation,
-	(value) => {
-		if (role.value !== 'organizer') {
-			return
-		}
-
-		if (isApplyingSelectedAddress) {
-			return
-		}
-
-		const selected =
-			selectedOrganizerLocation.value
-
-		if (
-			selected &&
-			value.trim() === selected.address
-		) {
-			return
-		}
-
-		selectedOrganizerLocation.value = null
-		addressSearchError.value = ''
-		errorMessage.value = ''
-
-		if (addressSearchTimer) {
-			clearTimeout(addressSearchTimer)
-			addressSearchTimer = null
-		}
-
-		const query = value.trim()
-
-		if (query.length < 3) {
-			addressSuggestions.value = []
-			isSearchingAddress.value = false
-			return
-		}
-
-		addressSearchTimer = setTimeout(() => {
-			searchAddress(query)
-		}, 400)
-	}
-)
-
-watch(
-	() => form.clientAddress,
-	(value) => {
-		if (role.value !== 'client') {
-			return
-		}
-
-		if (isApplyingSelectedAddress) {
-			return
-		}
-
-		const selected =
-			selectedClientLocation.value
-
-		if (
-			selected &&
-			value.trim() === selected.address
-		) {
-			return
-		}
-
-		selectedClientLocation.value = null
-		addressSearchError.value = ''
-		errorMessage.value = ''
-
-		if (addressSearchTimer) {
-			clearTimeout(addressSearchTimer)
-			addressSearchTimer = null
-		}
-
-		const query = value.trim()
-
-		if (query.length < 3) {
-			addressSuggestions.value = []
-			isSearchingAddress.value = false
-			return
-		}
-
-		addressSearchTimer = setTimeout(() => {
-			searchAddress(query)
-		}, 400)
-	}
-)
-
-onBeforeUnmount(() => {
-	if (addressSearchTimer) {
-		clearTimeout(addressSearchTimer)
-	}
-})
-
-function placeKey(
-	place: LocationIqPlace
-): string {
-	if (
-		place.place_id !== undefined &&
-		place.place_id !== null &&
-		String(place.place_id).trim()
-	) {
-		return `place:${String(place.place_id)}`
-	}
-
-	if (
-		place.osm_type &&
-		place.osm_id !== undefined &&
-		place.osm_id !== null
-	) {
-		return `osm:${place.osm_type}:${String(place.osm_id)}`
-	}
-
-	return `${place.lat}:${place.lon}:${place.display_name}`
-}
-
-function getProviderId(
-	place: LocationIqPlace
-): string {
-	if (
-		place.place_id !== undefined &&
-		place.place_id !== null &&
-		String(place.place_id).trim()
-	) {
-		return String(place.place_id)
-	}
-
-	if (
-		place.osm_type &&
-		place.osm_id !== undefined &&
-		place.osm_id !== null
-	) {
-		return `${place.osm_type}:${String(place.osm_id)}`
-	}
-
-	return `locationiq:${place.lat}:${place.lon}`
-}
-
-async function searchAddress(
-	query: string
-) {
-	if (!locationIqApiKey.value) {
-		addressSearchError.value =
-			'LocationIQ API key is not configured.'
-
-		return
-	}
-
-	const requestId =
-		++addressSearchRequestId
-
-	isSearchingAddress.value = true
-	addressSearchError.value = ''
-
-	try {
-		const results =
-			await $fetch<LocationIqPlace[]>(
-				'https://api.locationiq.com/v1/autocomplete',
-				{
-					query: {
-						key:
-							locationIqApiKey.value,
-
-						q:
-							query,
-
-						limit:
-							6,
-
-						countrycodes:
-							'ph',
-
-						normalizecity:
-							1,
-					},
-				}
-			)
-
-		if (
-			requestId !==
-			addressSearchRequestId
-		) {
-			return
-		}
-
-		addressSuggestions.value =
-			Array.isArray(results)
-				? results
-				: []
-
-		if (
-			addressSuggestions.value.length === 0
-		) {
-			addressSearchError.value =
-				'No matching locations found.'
-		}
-	} catch (error) {
-		console.error(
-			'LocationIQ address search failed:',
-			error
-		)
-
-		if (
-			requestId ===
-			addressSearchRequestId
-		) {
-			addressSuggestions.value = []
-
-			addressSearchError.value =
-				'Unable to search addresses. Please try again.'
-		}
-	} finally {
-		if (
-			requestId ===
-			addressSearchRequestId
-		) {
-			isSearchingAddress.value = false
-		}
-	}
-}
-
-function selectAddress(
-	place: LocationIqPlace
-) {
-	const latitude =
-		Number(place.lat)
-
-	const longitude =
-		Number(place.lon)
-
-	if (
-		!Number.isFinite(latitude) ||
-		!Number.isFinite(longitude)
-	) {
-		addressSearchError.value =
-			'The selected address does not contain valid coordinates.'
-
-		return
-	}
-
-	const address =
-		String(place.display_name || '').trim()
-
-	const providerId =
-		getProviderId(place)
-
-	if (
-		!address ||
-		!providerId
-	) {
-		addressSearchError.value =
-			'The selected location is incomplete. Please choose another suggestion.'
-
-		return
-	}
-
-	addressSearchRequestId++
-
-	if (addressSearchTimer) {
-		clearTimeout(addressSearchTimer)
-		addressSearchTimer = null
-	}
-
-	isApplyingSelectedAddress = true
-
-	if (role.value === 'organizer') {
-		form.organizerLocation =
-			address
-
-		selectedOrganizerLocation.value = {
-			address,
-			providerId,
-			latitude,
-			longitude,
-		}
-	} else {
-		form.clientAddress =
-			address
-
-		selectedClientLocation.value = {
-			address,
-			providerId,
-			latitude,
-			longitude,
-		}
-	}
-
-	nextTick(() => {
-		isApplyingSelectedAddress = false
-	})
-
-	addressSuggestions.value = []
-	addressSearchError.value = ''
+watch(role, () => {
 	errorMessage.value = ''
-	isSearchingAddress.value = false
-}
+})
 
 const successContactLabel = computed(() =>
 	'Registered email'
@@ -932,29 +457,24 @@ async function handleSubmit() {
 		return
 	}
 
-	let address = ''
+	const accountLocation = selectedClientLocation.value
+
+	if (!accountLocation || !hasSelectedClientLocation.value) {
+		errorMessage.value = 'Please select your address from the location suggestions.'
+		return
+	}
+
+	const address = accountLocation.address
 	let organizerFields:
 		Partial<RegisterPayload> = {}
 
-	if (
-		role.value === 'organizer'
-	) {
-		const selected =
-			selectedOrganizerLocation.value
+	if (role.value === 'organizer' && form.organizerLocation.trim() && !selectedOrganizerLocation.value) {
+		errorMessage.value = 'Choose a service address from the suggestions, or leave it blank.'
+		return
+	}
 
-		if (
-			!selected ||
-			!hasSelectedOrganizerLocation.value
-		) {
-			errorMessage.value =
-				'Please select your organizer service address from the location suggestions.'
-
-			return
-		}
-
-		address =
-			selected.address
-
+	if (role.value === 'organizer' && selectedOrganizerLocation.value) {
+		const selected = selectedOrganizerLocation.value
 		organizerFields = {
 			location:
 				selected.address,
@@ -973,22 +493,6 @@ async function handleSubmit() {
 					form.serviceRadiusKm
 				),
 		}
-	} else {
-		const selected =
-			selectedClientLocation.value
-
-		if (
-			!selected ||
-			!hasSelectedClientLocation.value
-		) {
-			errorMessage.value =
-				'Please select your address from the location suggestions.'
-
-			return
-		}
-
-		address =
-			selected.address
 	}
 
 	const registrationPayload:
