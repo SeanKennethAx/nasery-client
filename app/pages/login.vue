@@ -22,9 +22,10 @@
 			<!-- Email Login -->
 			<template v-if="loginMethod === 'email'">
 				<div class="mb-5">
-					<FormsLabel text="Email Address" required />
+					<FormsLabel text="Email Address" field-for="login-email" required />
 
-					<FormsTextField v-model="state.email" type="email" placeholder="you@example.com" size="lg" required>
+					<FormsTextField id="login-email" v-model="state.email" type="email" autocomplete="email"
+						placeholder="you@example.com" size="lg" required>
 						<template #icon>
 							<svg viewBox="0 0 20 20"
 								class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
@@ -39,9 +40,10 @@
 			<!-- Phone Login -->
 			<template v-else>
 				<div class="mb-5">
-					<FormsLabel text="Phone Number" required />
+					<FormsLabel text="Phone Number" field-for="login-phone" required />
 
-					<FormsTextField v-model="state.phone" type="tel" placeholder="+63 912 345 6789" size="lg" required>
+					<FormsTextField id="login-phone" v-model="state.phone" type="tel" autocomplete="tel"
+						placeholder="+63 912 345 6789" size="lg" required>
 						<template #icon>
 							<svg viewBox="0 0 20 20"
 								class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
@@ -55,7 +57,7 @@
 
 			<!-- Password -->
 			<div class="mb-2 flex items-center justify-between">
-				<label class="text-sm font-semibold text-gray-700">
+				<label for="login-password" class="text-sm font-semibold text-gray-700">
 					Password
 				</label>
 
@@ -65,7 +67,8 @@
 			</div>
 
 			<div class="mb-6">
-				<FormsPasswordField v-model="state.password" placeholder="Enter password" size="lg" required>
+				<FormsPasswordField id="login-password" v-model="state.password" autocomplete="current-password"
+					placeholder="Enter password" size="lg" required>
 					<template #icon>
 						<svg viewBox="0 0 20 20"
 							class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400">
