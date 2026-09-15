@@ -1,25 +1,23 @@
-# Design QA: Client and Organizer Header Notifications
+# Design QA: Notification and Profile Overlay Stacking
 
 ## Scope
 
-- References: `codex-clipboard-f10551a7-f33a-4378-ae7b-96d455330e04.png` and `codex-clipboard-e00549f8-31ae-4ae3-9c11-395acab179ef.png`
+- Reference: `codex-clipboard-2a372f8b-d75b-4d33-a75e-3b953a0645d1.png`
 - Routes: authenticated client and organizer dashboard pages
-- Updated: shared header status area and notification placement
+- Updated: client and organizer notification/profile overlay behavior
 
 ## Automated verification
 
 - Nuxt production build: passed
-- The System Online badge is removed from both portal headers.
-- The reusable notification dropdown now sits immediately beside each profile control.
-- The old full-width notification section is removed from My Events.
-- Notifications retain unread counts, scrolling, pagination, read/unread actions, deletion, and navigation to My Events.
+- Opening either profile panel closes the notification dropdown first.
+- Both profile backdrops and slide-overs render above header popovers as a fallback.
+- Profile panels retain bounded horizontal content and internal scrolling.
 
 ## Interaction checks
 
-- Opening the bell refreshes the latest notifications.
-- Opening a client notification marks it read and keeps the client in the My Events workflow.
-- Individual updates can be marked read/unread or deleted.
-- Older notifications remain accessible through the compact dropdown.
+- Client profile: notification dropdown closes before the slide-over appears.
+- Organizer profile: the same close and stacking behavior applies.
+- Reopening notifications after closing a profile continues to refresh the list normally.
 
 ## Visual review
 

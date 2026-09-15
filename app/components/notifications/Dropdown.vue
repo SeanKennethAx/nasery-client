@@ -123,5 +123,16 @@ function relativeTime(value: string) {
 	return `${Math.floor(seconds / 86400)}d ago`
 }
 
-onMounted(() => load())
+function closePanel() {
+	open.value = false
+}
+
+onMounted(() => {
+	window.addEventListener('dashboard:close-notifications', closePanel)
+	load()
+})
+
+onBeforeUnmount(() => {
+	window.removeEventListener('dashboard:close-notifications', closePanel)
+})
 </script>

@@ -104,13 +104,13 @@
 
 		<!-- Organizer profile overlay -->
 		<Transition name="fade">
-			<div v-if="showProfilePanel" class="fixed inset-0 z-40 bg-gray-900/40" @click="closeProfilePanel" />
+			<div v-if="showProfilePanel" class="fixed inset-0 z-[90] bg-gray-900/40" @click="closeProfilePanel" />
 		</Transition>
 
 		<!-- Organizer profile customization panel -->
 		<Transition name="slide">
 			<div v-if="showProfilePanel"
-				class="fixed inset-y-0 right-0 z-50 flex w-full max-w-xl flex-col bg-white shadow-2xl">
+				class="fixed inset-y-0 right-0 z-[100] flex w-full max-w-xl flex-col overflow-hidden bg-white shadow-2xl">
 				<div class="flex min-h-0 flex-1 flex-col overflow-hidden">
 					<!-- Banner -->
 					<div class="relative shrink-0 pb-10">
@@ -1073,6 +1073,8 @@ const panelInitials = computed(() => {
 })
 
 async function openProfilePanel() {
+	window.dispatchEvent(new CustomEvent('dashboard:close-notifications'))
+
 	profileSaveError.value = ''
 
 	syncDraftProfile()

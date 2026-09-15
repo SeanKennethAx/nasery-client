@@ -77,12 +77,12 @@
 		</div>
 
 		<Transition name="fade">
-			<div v-if="showProfilePanel" class="fixed inset-0 z-40 bg-gray-900/40" @click="closeProfilePanel" />
+			<div v-if="showProfilePanel" class="fixed inset-0 z-[90] bg-gray-900/40" @click="closeProfilePanel" />
 		</Transition>
 
 		<Transition name="slide">
 			<div v-if="showProfilePanel"
-				class="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col overflow-hidden bg-white shadow-2xl"
+				class="fixed inset-y-0 right-0 z-[100] flex w-full max-w-2xl flex-col overflow-hidden bg-white shadow-2xl"
 				role="dialog" aria-modal="true" aria-labelledby="client-profile-title">
 				<div class="relative shrink-0 pb-11">
 					<div class="h-28 bg-gradient-to-br from-primary-700 to-primary-900" :style="{ backgroundColor: draftProfile.bannerColor }"><img v-if="user?.cover_url" :src="user.cover_url" alt="" class="h-full w-full object-cover" /></div>
@@ -515,6 +515,8 @@ const panelInitials = computed(() => {
 })
 
 function openProfilePanel() {
+	window.dispatchEvent(new CustomEvent('dashboard:close-notifications'))
+
 	Object.assign(
 		draftProfile,
 		profile
