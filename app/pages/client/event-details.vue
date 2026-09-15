@@ -1,17 +1,25 @@
 <template>
 	<div>
-		<div class="mb-6">
-			<p class="text-sm font-semibold text-primary-700">
-				Client Portal
-			</p>
+		<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+			<div>
+				<NuxtLink to="/client/my-events"
+					class="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 transition hover:text-[#285F6b]">
+					<IconBase name="arrow-left" class="h-4 w-4" />
+					My Events
+				</NuxtLink>
 
-			<h1 class="mt-1 text-2xl font-extrabold text-gray-900">
-				Event Details
-			</h1>
+				<p class="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-[#285F6b]">
+					Client Portal
+				</p>
 
-			<p class="mt-1 text-gray-500">
-				View your awarded event, share the public registration form, and manage generated tickets.
-			</p>
+				<h1 class="mt-1 text-3xl font-black tracking-tight text-gray-900">
+					Event details
+				</h1>
+
+				<p class="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
+					Review your confirmed plan, organizer, attendee registration, and issued tickets in one place.
+				</p>
+			</div>
 		</div>
 
 		<div v-if="isLoading" class="rounded-2xl border border-gray-200 bg-white p-10 text-center">
@@ -26,156 +34,130 @@
 			{{ errorMessage }}
 		</div>
 
-		<div v-else-if="eventData" class="space-y-5">
-			<div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
-				<div class="flex flex-wrap items-start justify-between gap-4">
-					<div>
-						<h2 class="text-xl font-extrabold text-gray-900">
-							{{ eventData.event.name }}
-						</h2>
+		<div v-else-if="eventData" class="space-y-6">
+			<section class="overflow-hidden rounded-3xl border border-[#285F6b]/15 bg-white shadow-sm">
+				<div class="bg-[#285F6b] px-5 py-6 text-white sm:px-7 sm:py-7">
+					<div class="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+						<div class="min-w-0">
+							<div class="flex flex-wrap items-center gap-2">
+								<span class="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-white/90">
+									{{ eventData.event.event_type }}
+								</span>
+								<span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-300 px-3 py-1 text-[11px] font-bold text-emerald-950">
+									<IconBase name="check-circle" class="h-3.5 w-3.5" />
+									Awarded
+								</span>
+							</div>
 
-						<p class="mt-1 text-sm text-gray-500">
-							{{ eventData.event.event_type }}
-							&bull;
-							{{ formatDate(eventData.event.event_date) }}
-						</p>
-					</div>
+							<h2 class="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
+								{{ eventData.event.name }}
+							</h2>
 
-					<span
-						class="rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
-						Awarded
-					</span>
-				</div>
+							<p class="mt-2 max-w-2xl text-sm leading-6 text-white/70">
+								Your organizer and package are confirmed. Registration tools are ready below.
+							</p>
+						</div>
 
-				<div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-					<div class="rounded-xl bg-gray-50 p-4">
-						<p class="text-xs text-gray-500">
-							Location
-						</p>
-
-						<p class="mt-1 font-semibold text-gray-900">
-							{{
-								eventData.event.location ||
-								'Not specified'
-							}}
-						</p>
-					</div>
-
-					<div class="rounded-xl bg-gray-50 p-4">
-						<p class="text-xs text-gray-500">
-							Expected Guests
-						</p>
-
-						<p class="mt-1 font-semibold text-gray-900">
-							{{
-								eventData.event.expected_guests ??
-								'Not specified'
-							}}
-						</p>
-					</div>
-
-					<div class="rounded-xl bg-gray-50 p-4">
-						<p class="text-xs text-gray-500">
-							Start Time
-						</p>
-
-						<p class="mt-1 font-semibold text-gray-900">
-							{{
-								eventData.event.start_time ||
-								'Not set'
-							}}
-						</p>
-					</div>
-
-					<div class="rounded-xl bg-gray-50 p-4">
-						<p class="text-xs text-gray-500">
-							End Time
-						</p>
-
-						<p class="mt-1 font-semibold text-gray-900">
-							{{
-								eventData.event.end_time ||
-								'Not set'
-							}}
-						</p>
-					</div>
-				</div>
-
-				<div v-if="eventData.event.description" class="mt-5 rounded-xl bg-gray-50 p-4">
-					<p class="text-xs text-gray-500">
-						Description
-					</p>
-
-					<p class="mt-2 text-sm leading-6 text-gray-700">
-						{{ eventData.event.description }}
-					</p>
-				</div>
-			</div>
-
-			<div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
-				<h3 class="text-lg font-bold text-gray-900">
-					Selected Organizer
-				</h3>
-
-				<div class="mt-4 flex items-center gap-3">
-					<div
-						class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 font-bold text-primary-700">
-						{{ organizerInitials }}
-					</div>
-
-					<div>
-						<p class="font-bold text-gray-900">
-							{{ organizerName }}
-						</p>
-
-						<p class="text-sm text-gray-500">
-							Organizer
-						</p>
-					</div>
-				</div>
-			</div>
-
-			<div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
-				<div class="flex flex-wrap items-start justify-between gap-4">
-					<div>
-						<p class="text-xs text-gray-500">
-							Accepted Package
-						</p>
-
-						<h3 class="mt-1 text-lg font-bold text-gray-900">
-							{{
-								eventData.quotation.package_name ||
-								'Custom Package'
-							}}
-						</h3>
-					</div>
-
-					<p class="text-2xl font-extrabold text-gray-900">
-						{{
-							formatCurrency(
-								eventData.quotation
-									.quotation_amount,
-							)
-						}}
-					</p>
-				</div>
-
-				<div v-if="
-					eventData.quotation.inclusions?.length
-				" class="mt-5">
-					<p class="text-sm font-bold text-gray-900">
-						Inclusions
-					</p>
-
-					<div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-						<div v-for="item in eventData.quotation.inclusions" :key="item.id"
-							class="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-700">
-							<IconBase name="check-circle" class="h-4 w-4 text-green-600" />
-
-							{{ item.description }}
+						<div class="flex shrink-0 items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3">
+							<IconBase name="calendar" class="h-5 w-5 text-white/80" />
+							<div>
+								<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-white/60">Event date</p>
+								<p class="mt-0.5 text-sm font-bold">{{ formatDate(eventData.event.event_date) }}</p>
+							</div>
 						</div>
 					</div>
 				</div>
+
+				<div class="grid gap-4 p-5 sm:p-7 lg:grid-cols-[1.35fr_0.65fr]">
+					<div class="rounded-2xl border border-gray-100 bg-gray-50/70 p-5">
+						<div class="flex items-start gap-4">
+							<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#285F6b]/10 text-[#285F6b]">
+								<IconBase name="map-pin" class="h-5 w-5" />
+							</div>
+							<div class="min-w-0">
+								<p class="text-xs font-bold uppercase tracking-[0.12em] text-gray-400">Venue</p>
+								<p class="mt-2 text-sm font-semibold leading-6 text-gray-800">
+									{{ eventData.event.location || 'Venue not specified' }}
+								</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="grid grid-cols-2 gap-3">
+						<div class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
+							<IconBase name="users" class="h-5 w-5 text-[#285F6b]" />
+							<p class="mt-4 text-[11px] font-bold uppercase tracking-[0.1em] text-gray-400">Guests</p>
+							<p class="mt-1 text-xl font-black text-gray-900">{{ eventData.event.expected_guests ?? '—' }}</p>
+						</div>
+						<div class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
+							<IconBase name="clock" class="h-5 w-5 text-[#285F6b]" />
+							<p class="mt-4 text-[11px] font-bold uppercase tracking-[0.1em] text-gray-400">Schedule</p>
+							<p class="mt-1 text-sm font-black text-gray-900">
+								{{ formatTime(eventData.event.start_time) }}–{{ formatTime(eventData.event.end_time) }}
+							</p>
+						</div>
+					</div>
+
+					<div v-if="eventData.event.description" class="lg:col-span-2 border-t border-gray-100 pt-4">
+						<p class="text-xs font-bold uppercase tracking-[0.12em] text-gray-400">Event notes</p>
+						<p class="mt-2 text-sm leading-6 text-gray-600">{{ eventData.event.description }}</p>
+					</div>
+				</div>
+			</section>
+
+			<div class="grid gap-5 lg:grid-cols-5">
+				<section class="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6 lg:col-span-2">
+					<div class="flex items-center gap-3">
+						<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#285F6b]/10 text-[#285F6b]">
+							<IconBase name="user" class="h-5 w-5" />
+						</div>
+						<div>
+							<p class="text-[11px] font-bold uppercase tracking-[0.12em] text-gray-400">Your event partner</p>
+							<h3 class="text-lg font-extrabold text-gray-900">Selected organizer</h3>
+						</div>
+					</div>
+
+					<div class="mt-6 flex items-center gap-4 rounded-2xl bg-gray-50 p-4">
+						<div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#285F6b] text-base font-black text-white">
+							{{ organizerInitials }}
+						</div>
+						<div class="min-w-0">
+							<p class="truncate font-extrabold text-gray-900">{{ organizerName }}</p>
+							<p class="mt-1 flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+								<IconBase name="check-circle" class="h-3.5 w-3.5" /> Confirmed organizer
+							</p>
+						</div>
+					</div>
+				</section>
+
+				<section class="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6 lg:col-span-3">
+					<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+						<div class="flex items-center gap-3">
+							<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#285F6b]/10 text-[#285F6b]">
+								<IconBase name="briefcase" class="h-5 w-5" />
+							</div>
+							<div>
+								<p class="text-[11px] font-bold uppercase tracking-[0.12em] text-gray-400">Accepted package</p>
+								<h3 class="text-lg font-extrabold text-gray-900">{{ eventData.quotation.package_name || 'Custom Package' }}</h3>
+							</div>
+						</div>
+						<div class="rounded-2xl bg-[#285F6b]/8 px-4 py-3 text-left sm:text-right">
+							<p class="text-[10px] font-bold uppercase tracking-[0.12em] text-[#285F6b]/70">Agreed amount</p>
+							<p class="mt-1 text-xl font-black text-[#285F6b]">{{ formatCurrency(eventData.quotation.quotation_amount) }}</p>
+						</div>
+					</div>
+
+					<div v-if="eventData.quotation.inclusions?.length" class="mt-5 border-t border-gray-100 pt-5">
+						<p class="text-xs font-bold uppercase tracking-[0.12em] text-gray-400">What's included</p>
+						<div class="mt-3 grid gap-2 sm:grid-cols-2">
+							<div v-for="item in eventData.quotation.inclusions" :key="item.id"
+								class="flex items-start gap-2 rounded-xl bg-gray-50 px-3 py-2.5 text-sm font-medium text-gray-700">
+								<IconBase name="check-circle" class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+								{{ item.description }}
+							</div>
+						</div>
+					</div>
+				</section>
 			</div>
 
 			<div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
@@ -1825,6 +1807,27 @@ function formatDate(
 				'numeric',
 		},
 	)
+}
+
+function formatTime(
+	timeString: string | null,
+): string {
+	if (!timeString) {
+		return 'Not set'
+	}
+
+	const [hours = '0', minutes = '0'] =
+		timeString.split(':')
+	const hour = Number(hours)
+
+	if (Number.isNaN(hour)) {
+		return timeString
+	}
+
+	const period = hour >= 12 ? 'PM' : 'AM'
+	const displayHour = hour % 12 || 12
+
+	return `${displayHour}:${minutes} ${period}`
 }
 
 function formatCurrency(
