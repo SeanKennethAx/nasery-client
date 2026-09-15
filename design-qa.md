@@ -1,16 +1,16 @@
-# Design QA: Client Header Notifications
+# Design QA: Client and Organizer Header Notifications
 
 ## Scope
 
-- Reference: `codex-clipboard-f10551a7-f33a-4378-ae7b-96d455330e04.png`
-- Routes: authenticated client dashboard pages
-- Updated: header status area and client notification placement
+- References: `codex-clipboard-f10551a7-f33a-4378-ae7b-96d455330e04.png` and `codex-clipboard-e00549f8-31ae-4ae3-9c11-395acab179ef.png`
+- Routes: authenticated client and organizer dashboard pages
+- Updated: shared header status area and notification placement
 
 ## Automated verification
 
 - Nuxt production build: passed
-- The client System Online badge is removed.
-- The reusable notification dropdown now sits immediately beside the client profile control.
+- The System Online badge is removed from both portal headers.
+- The reusable notification dropdown now sits immediately beside each profile control.
 - The old full-width notification section is removed from My Events.
 - Notifications retain unread counts, scrolling, pagination, read/unread actions, deletion, and navigation to My Events.
 
@@ -23,7 +23,7 @@
 
 ## Visual review
 
-These views require an authenticated client session. The isolated Codex in-app browser does not share the authenticated Brave session shown in the reference and redirects to `/login`, so same-state screenshot comparison is unavailable.
+These views require authenticated client and organizer sessions. The isolated Codex in-app browser does not share the authenticated Brave sessions shown in the references and redirects to `/login`, so same-state screenshot comparison is unavailable.
 
 ## Final result
 
