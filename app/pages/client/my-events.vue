@@ -269,47 +269,72 @@
 				</div>
 			</section>
 
-			<!-- Header -->
-			<div class="mb-6 flex flex-wrap items-start justify-between gap-3">
-				<div>
-					<p class="text-sm font-semibold text-primary-700">
-						Client Portal
-					</p>
+			<header class="mb-6 overflow-hidden rounded-3xl border border-primary-100 bg-white shadow-sm">
+				<div class="flex flex-col gap-6 px-5 py-6 sm:px-7 lg:flex-row lg:items-center lg:justify-between">
+					<div class="max-w-2xl">
+						<div class="mb-3 inline-flex items-center gap-2 rounded-full bg-primary-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-primary-700">
+							<span class="h-1.5 w-1.5 rounded-full bg-primary-600"></span>
+							Your event workspace
+						</div>
+						<h1 class="text-2xl font-extrabold tracking-tight text-gray-950 sm:text-3xl">
+							Welcome back, {{ clientName }}
+						</h1>
+						<p class="mt-2 max-w-xl text-sm leading-6 text-gray-500 sm:text-base">
+							Track every inquiry, compare organizer offers, and move your event forward from one place.
+						</p>
+					</div>
 
-					<h1 class="mt-1 text-2xl font-extrabold text-gray-900">
-						Hi there, {{ clientName }} &#128075;
-					</h1>
-
-					<p class="mt-1 text-gray-500">
-						Post an event inquiry and let organizers come to you.
-					</p>
+					<button type="button"
+						class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#285F6b] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#1f4a54] focus:outline-none focus:ring-4 focus:ring-primary-100 sm:w-auto"
+						@click="navigateTo('/client/post-event')">
+						<IconBase name="plus" class="h-4 w-4" />
+						Post a new inquiry
+					</button>
 				</div>
 
-				<button type="button"
-					class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#285F6b] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f4a54] sm:w-auto sm:shrink-0"
-					@click="navigateTo('/client/post-event')">
-					<IconBase name="plus" class="h-4 w-4 shrink-0" />
-					Post New Event
-				</button>
-			</div>
-
-			<!-- Dashboard Stats -->
-			<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4">
-				<div v-for="stat in stats" :key="stat.label"
-					class="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
-					<div class="flex items-start justify-between">
-						<span class="text-sm text-gray-500">
-							{{ stat.label }}
+				<div class="grid border-t border-gray-100 bg-gray-50/70 sm:grid-cols-3">
+					<div v-for="(step, index) in eventJourneySteps" :key="step.title"
+						class="flex items-center gap-3 border-b border-gray-100 px-5 py-4 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0 sm:px-7">
+						<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-xs font-extrabold text-primary-700 shadow-sm ring-1 ring-gray-200">
+							{{ index + 1 }}
 						</span>
-
-						<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" :class="stat.iconBg">
-							<IconBase :name="stat.icon" class="h-4 w-4" :class="stat.iconColor" />
+						<div>
+							<p class="text-sm font-bold text-gray-900">{{ step.title }}</p>
+							<p class="mt-0.5 text-xs text-gray-500">{{ step.description }}</p>
 						</div>
 					</div>
+				</div>
+			</header>
 
-					<div class="mt-2 text-3xl font-extrabold text-gray-900">
-						{{ stat.value }}
+			<div class="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-4">
+				<div v-for="stat in stats" :key="stat.label"
+					class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-5">
+					<div class="flex items-center justify-between gap-3">
+						<div>
+							<p class="text-xs font-semibold text-gray-500 sm:text-sm">{{ stat.label }}</p>
+							<p class="mt-2 text-2xl font-extrabold tracking-tight text-gray-950 sm:text-3xl">{{ stat.value }}</p>
+						</div>
+						<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" :class="stat.iconBg">
+							<IconBase :name="stat.icon" class="h-5 w-5" :class="stat.iconColor" />
+						</div>
 					</div>
+				</div>
+			</div>
+
+			<div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+				<div>
+					<h2 class="text-xl font-extrabold text-gray-950">Your events</h2>
+					<p class="mt-1 text-sm text-gray-500">Choose an event to review offers or continue planning.</p>
+				</div>
+
+				<div class="flex max-w-full gap-1 overflow-x-auto rounded-xl bg-gray-100 p-1">
+					<button v-for="filter in eventFilters" :key="filter.value" type="button"
+						class="whitespace-nowrap rounded-lg px-3 py-2 text-xs font-bold transition"
+						:class="eventFilter === filter.value ? 'bg-white text-gray-950 shadow-sm' : 'text-gray-500 hover:text-gray-800'"
+						@click="eventFilter = filter.value">
+						{{ filter.label }}
+						<span class="ml-1 text-[11px] text-gray-400">{{ eventFilterCount(filter.value) }}</span>
+					</button>
 				</div>
 			</div>
 
@@ -325,104 +350,62 @@
 			</div>
 
 			<!-- Events -->
-			<div v-else-if="clientEvents.length" class="space-y-4">
-				<article v-for="event in clientEvents" :key="event.id"
-					class="rounded-2xl border border-gray-200 bg-white p-4 transition hover:border-gray-300 sm:p-6">
-					<div class="flex flex-wrap items-start justify-between gap-3">
-						<div class="flex min-w-0 items-start gap-3">
-							<div
-								class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
-								<IconBase :name="eventTypeIcon(event.event_type)" class="h-5 w-5" />
-							</div>
-
-							<div class="min-w-0">
-								<h3 class="truncate text-base font-bold text-gray-900">
-									{{ event.event_title || `${event.event_type} Inquiry` }}
-								</h3>
-
-								<p class="mt-0.5 text-sm text-gray-500">
-									{{ event.event_type }}
-									&bull;
-									{{ formatDate(event.event_date) }}
-									&bull;
-									{{ event.location }}
-								</p>
-							</div>
+			<div v-else-if="filteredEvents.length" class="grid gap-4 xl:grid-cols-2">
+				<article v-for="event in filteredEvents" :key="event.id"
+					class="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-md">
+					<div class="flex items-stretch">
+						<div class="flex w-20 shrink-0 flex-col items-center justify-center border-r border-gray-100 bg-primary-50/70 px-2 py-5 text-center sm:w-24">
+							<span class="text-[11px] font-extrabold uppercase tracking-[0.15em] text-primary-700">{{ eventMonth(event.event_date) }}</span>
+							<span class="mt-1 text-3xl font-black leading-none text-gray-950">{{ eventDay(event.event_date) }}</span>
+							<span class="mt-2 text-[11px] font-semibold text-gray-500">{{ event.event_type }}</span>
 						</div>
 
-						<span v-if="event.status === 'awarded'"
-							class="shrink-0 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
-							Awarded
-						</span>
+						<div class="min-w-0 flex-1 p-4 sm:p-5">
+							<div class="flex items-start justify-between gap-3">
+								<div class="min-w-0">
+									<h3 class="truncate text-base font-extrabold text-gray-950 sm:text-lg">{{ event.event_title || `${event.event_type} Inquiry` }}</h3>
+									<p class="mt-1 flex items-start gap-1.5 text-xs leading-5 text-gray-500 sm:text-sm">
+										<IconBase name="map-pin" class="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary-600" />
+										<span class="line-clamp-2">{{ event.location }}</span>
+									</p>
+								</div>
 
-						<span v-else-if="event.quotations_count > 0"
-							class="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-							{{ event.quotations_count }}
-							{{
-								event.quotations_count === 1
-									? 'quotation'
-									: 'quotations'
-							}}
-							received
-						</span>
-
-						<span v-else
-							class="shrink-0 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-600">
-							Awaiting quotations
-						</span>
-					</div>
-
-					<div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-						<div class="rounded-lg bg-gray-50 p-3">
-							<div class="text-xs text-gray-500">
-								Guests
+								<span class="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-bold" :class="eventStatusClass(event)">
+									{{ eventStatusLabel(event) }}
+								</span>
 							</div>
 
-							<div class="mt-1 text-sm font-bold text-gray-900">
-								{{ event.expected_guests }}
+							<div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+								<div class="rounded-xl bg-gray-50 px-3 py-2.5">
+									<p class="text-[11px] font-semibold text-gray-400">Guests</p>
+									<p class="mt-0.5 text-sm font-bold text-gray-900">{{ event.expected_guests }}</p>
+								</div>
+								<div class="rounded-xl bg-gray-50 px-3 py-2.5">
+									<p class="text-[11px] font-semibold text-gray-400">Budget</p>
+									<p class="mt-0.5 truncate text-sm font-bold text-gray-900">{{ event.budget_range }}</p>
+								</div>
+								<div class="col-span-2 rounded-xl bg-gray-50 px-3 py-2.5 sm:col-span-1">
+									<p class="text-[11px] font-semibold text-gray-400">Offers</p>
+									<p class="mt-0.5 text-sm font-bold text-gray-900">{{ event.quotations_count }} received</p>
+								</div>
+							</div>
+
+							<div class="mt-4 flex flex-col gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+								<div class="flex min-w-0 items-center gap-2 text-xs text-gray-500">
+									<span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+										<IconBase :name="event.status === 'awarded' ? 'check-circle' : event.quotations_count ? 'file-text' : 'clock'" class="h-3.5 w-3.5" />
+									</span>
+									<span class="truncate">{{ eventProgressCopy(event) }}</span>
+								</div>
+
+								<button type="button"
+									class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#285F6b] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#1f4a54]"
+									@click="viewQuotations(event)">
+									{{ eventActionLabel(event) }}
+									<IconBase name="arrow-right" class="h-3.5 w-3.5" />
+								</button>
 							</div>
 						</div>
-
-						<div class="rounded-lg bg-gray-50 p-3">
-							<div class="text-xs text-gray-500">
-								Budget
-							</div>
-
-							<div class="mt-1 truncate text-sm font-bold text-gray-900">
-								{{ event.budget_range }}
-							</div>
-						</div>
-					</div>
-
-					<div v-if="event.additional_details" class="mt-4 rounded-lg bg-gray-50 p-3">
-						<div class="text-xs text-gray-500">
-							Additional Details
-						</div>
-
-						<p class="mt-1 text-sm leading-6 text-gray-700">
-							{{ event.additional_details }}
-						</p>
-					</div>
-
-					<div class="mt-4 flex justify-end">
-						<button type="button"
-							class="flex items-center gap-2 rounded-xl bg-[#285F6b] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f4a54]"
-							@click="viewQuotations(event)">
-							<IconBase :name="event.status === 'awarded'
-								? 'calendar'
-								: event.quotations_count > 0
-									? 'file-text'
-									: 'clock'
-								" class="h-4 w-4" />
-
-							{{
-								event.status === 'awarded'
-									? 'View Event Details'
-									: event.quotations_count > 0
-										? 'View Quotations'
-										: 'View Status'
-							}}
-						</button>
 					</div>
 				</article>
 			</div>
@@ -435,19 +418,25 @@
 				</div>
 
 				<h2 class="mt-4 text-lg font-bold text-gray-900">
-					No event inquiries yet
+					{{ clientEvents.length ? 'No events in this stage' : 'No event inquiries yet' }}
 				</h2>
 
 				<p class="mt-1 max-w-sm text-sm text-gray-500">
-					Post your first event inquiry and qualified organizers will
-					submit quotations for you to review.
+					{{ clientEvents.length
+						? 'Choose another filter to see the rest of your events.'
+						: 'Post your first event inquiry and qualified organizers will submit quotations for you to review.' }}
 				</p>
 
-				<button type="button"
+				<button v-if="!clientEvents.length" type="button"
 					class="mt-5 flex items-center gap-2 rounded-xl bg-[#285F6b] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f4a54]"
 					@click="navigateTo('/client/post-event')">
 					<IconBase name="plus" class="h-4 w-4" />
 					Post My First Event
+				</button>
+
+				<button v-else type="button" class="mt-5 text-sm font-bold text-primary-700 hover:text-primary-900"
+					@click="eventFilter = 'all'">
+					View all events
 				</button>
 			</div>
 		</div>
@@ -558,6 +547,7 @@ interface NotificationResponse {
 }
 
 type NotificationFilter = 'all' | 'unread'
+type EventFilter = 'all' | 'open' | 'offers' | 'awarded'
 
 interface QuotationInclusion {
 	id: number
@@ -633,6 +623,18 @@ const notificationFilters: Array<{ label: string; value: NotificationFilter }> =
 	{ label: 'All', value: 'all' },
 	{ label: 'Unread', value: 'unread' },
 ]
+const eventFilter = ref<EventFilter>('all')
+const eventFilters: Array<{ label: string; value: EventFilter }> = [
+	{ label: 'All', value: 'all' },
+	{ label: 'Awaiting', value: 'open' },
+	{ label: 'Offers ready', value: 'offers' },
+	{ label: 'Confirmed', value: 'awarded' },
+]
+const eventJourneySteps = [
+	{ title: 'Post an inquiry', description: 'Share your event details' },
+	{ title: 'Compare offers', description: 'Choose the right organizer' },
+	{ title: 'Plan with confidence', description: 'Track your confirmed event' },
+]
 
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -676,6 +678,68 @@ function formatDate(dateStr: string): string {
 		year: 'numeric',
 	})
 }
+
+function eventMonth(dateStr: string): string {
+	if (!dateStr) return 'TBD'
+
+	const date = dateStr.includes('T')
+		? new Date(dateStr)
+		: new Date(`${dateStr}T00:00:00`)
+
+	return date.toLocaleDateString('en-US', { month: 'short' })
+}
+
+function eventDay(dateStr: string): string {
+	if (!dateStr) return '—'
+
+	const date = dateStr.includes('T')
+		? new Date(dateStr)
+		: new Date(`${dateStr}T00:00:00`)
+
+	return date.toLocaleDateString('en-US', { day: '2-digit' })
+}
+
+function eventStatusLabel(event: ClientInquiry): string {
+	if (event.status === 'awarded') return 'Confirmed'
+	if (event.status === 'cancelled') return 'Cancelled'
+	if (event.quotations_count > 0) return 'Offers ready'
+	return 'Awaiting offers'
+}
+
+function eventStatusClass(event: ClientInquiry): string {
+	if (event.status === 'awarded') return 'border-green-200 bg-green-50 text-green-700'
+	if (event.status === 'cancelled') return 'border-red-200 bg-red-50 text-red-600'
+	if (event.quotations_count > 0) return 'border-blue-200 bg-blue-50 text-blue-700'
+	return 'border-amber-200 bg-amber-50 text-amber-700'
+}
+
+function eventProgressCopy(event: ClientInquiry): string {
+	if (event.status === 'awarded') return 'Organizer selected — continue planning'
+	if (event.status === 'cancelled') return 'This inquiry has been cancelled'
+	if (event.quotations_count > 0) return `${event.quotations_count} organizer offer${event.quotations_count === 1 ? '' : 's'} ready to compare`
+	return 'Shared with matching organizers'
+}
+
+function eventActionLabel(event: ClientInquiry): string {
+	if (event.status === 'awarded') return 'Open event'
+	if (event.quotations_count > 0) return 'Review offers'
+	return 'View status'
+}
+
+function matchesEventFilter(event: ClientInquiry, filter: EventFilter): boolean {
+	if (filter === 'awarded') return event.status === 'awarded'
+	if (filter === 'offers') return event.status !== 'awarded' && event.quotations_count > 0
+	if (filter === 'open') return event.status !== 'awarded' && event.status !== 'cancelled' && event.quotations_count === 0
+	return true
+}
+
+function eventFilterCount(filter: EventFilter): number {
+	return clientEvents.value.filter(event => matchesEventFilter(event, filter)).length
+}
+
+const filteredEvents = computed(() =>
+	clientEvents.value.filter(event => matchesEventFilter(event, eventFilter.value)),
+)
 
 function formatCurrency(
 	value: string | number,
