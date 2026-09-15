@@ -14,7 +14,7 @@
 			}}
 		</p>
 
-		<AuthSocialButtons mode="login" @continue="handleSocialContinue" />
+		<AuthSocialButtons mode="login" />
 
 		<AuthContactMethodToggle v-model="loginMethod" />
 
@@ -59,9 +59,9 @@
 					Password
 				</label>
 
-				<span class="cursor-pointer text-[13px] font-semibold text-primary-600">
+				<NuxtLink to="/forgot-password" class="text-[13px] font-semibold text-primary-600 hover:underline">
 					Forgot password?
-				</span>
+				</NuxtLink>
 			</div>
 
 			<div class="mb-6">
@@ -115,6 +115,9 @@ definePageMeta({
 const route = useRoute()
 useSeoMeta({ title: 'Sign in | NaSeRy' })
 const nextInquiry = computed(() => inquiryRedirect(route.query.redirect))
+onMounted(() => {
+	if (typeof route.query.social_error === 'string') errorMessage.value = route.query.social_error
+})
 async function finishLogin(user: User) {
 	if (user.role === 'client' && nextInquiry.value) {
 		return await navigateTo(nextInquiry.value)
@@ -188,11 +191,6 @@ async function handleSubmit() {
 			error
 		)
 	}
-}
-
-function handleSocialContinue() {
-	errorMessage.value =
-		'Social login is not available yet.'
 }
 
 watch(loginMethod, () => {

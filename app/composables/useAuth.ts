@@ -244,6 +244,19 @@ export function useAuth(
         }
     }
 
+    function setSession(response: { token: string; user: User }): User {
+        token.value = response.token
+        user.value = response.user
+        if (import.meta.client) {
+            localStorage.setItem('auth_session_changed', JSON.stringify({
+                role: response.user.role,
+                userId: response.user.id,
+                timestamp: Date.now(),
+            }))
+        }
+        return response.user
+    }
+
     async function redirectByRole(
         authenticatedUser: User
     ) {
@@ -370,6 +383,7 @@ export function useAuth(
 
         register,
         login,
+        setSession,
         logout,
         redirectByRole,
     }

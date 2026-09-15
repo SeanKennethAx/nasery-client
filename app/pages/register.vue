@@ -30,7 +30,7 @@
 			</button>
 		</div>
 
-		<AuthSocialButtons mode="register" @continue="handleSocialContinue" />
+		<AuthSocialButtons mode="register" :role="role" />
 
 		<form @submit.prevent="handleSubmit">
 			<div class="mb-5">
@@ -234,6 +234,10 @@ const registeredContact = ref('')
 const emailVerificationToken = ref('')
 
 const { register, isLoading, errorMessage } = useAuth()
+
+onMounted(() => {
+	if (typeof authRoute.query.social_error === 'string') errorMessage.value = authRoute.query.social_error
+})
 
 const form = reactive({
 	fullName: '',
@@ -544,8 +548,4 @@ async function goToLogin() {
 	await navigateTo(loginLocation.value)
 }
 
-function handleSocialContinue() {
-	errorMessage.value =
-		'Social registration is not available yet.'
-}
 </script>

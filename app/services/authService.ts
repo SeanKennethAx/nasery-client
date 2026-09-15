@@ -8,6 +8,14 @@ import type {
 
 
 export const authService = {
+    async exchangeSocialCode(code: string): Promise<LoginResponse> {
+        const config = useRuntimeConfig()
+        return await $fetch<LoginResponse>(`${config.public.apiBaseURL}/auth/social/exchange`, {
+            method: 'POST',
+            body: { code },
+        })
+    },
+
     async register(
         payload: RegisterPayload
     ): Promise<RegisterResponse> {
@@ -53,10 +61,7 @@ export const authService = {
 
             ...(payload.role === 'organizer'
                 ? {
-                    location:
-                        payload.location
-                            ?.trim()
-                        || payload.address.trim(),
+                    location: payload.location?.trim() || undefined,
 
                     google_place_id:
                         payload.google_place_id
@@ -68,9 +73,9 @@ export const authService = {
                     longitude:
                         payload.longitude,
 
-                    service_radius_km:
-                        payload.service_radius_km
-                        ?? 25,
+                    service_radius_km: payload.location
+                        ? (payload.service_radius_km ?? 25)
+                        : undefined,
                 }
                 : {}),
         }
