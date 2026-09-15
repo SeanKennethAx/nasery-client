@@ -39,29 +39,6 @@
 
 				<div class="border-t border-gray-100 px-4 py-4">
 					<button type="button"
-						class="mb-1 flex w-full items-center gap-3 rounded-lg p-1.5 text-left hover:bg-gray-50"
-						@click="openProfilePanel">
-						<div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-700 text-sm font-bold text-white">
-							<img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-full w-full object-cover" />
-							<span v-else>{{ sidebarInitials }}</span>
-						</div>
-
-						<div class="min-w-0">
-							<div class="truncate text-sm font-semibold text-gray-900">
-								{{ sidebarName }}
-							</div>
-
-							<div class="text-xs text-gray-400">
-								{{ roleLabel }}
-							</div>
-						</div>
-					</button>
-
-					<p class="mb-3 px-1.5 text-[11px] text-gray-400">
-						Click profile to customise
-					</p>
-
-					<button type="button"
 						class="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700"
 						@click="handleLogout">
 						<IconBase name="log-out" class="h-4 w-4" />
@@ -83,11 +60,17 @@
 						<div class="text-sm font-bold text-gray-900">{{ activeItem.label }}</div>
 					</div>
 				</div>
-				<span
-					class="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700">
-					<span class="h-1.5 w-1.5 rounded-full bg-green-500" />
-					System Online
-				</span>
+				<div class="flex items-center gap-2">
+					<span class="hidden items-center gap-1.5 rounded-full bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700 sm:inline-flex">
+						<span class="h-1.5 w-1.5 rounded-full bg-green-500" /> System Online
+					</span>
+					<button type="button" class="flex max-w-52 items-center gap-2 rounded-xl border border-gray-200 bg-white p-1.5 pr-3 text-left transition hover:border-primary-200 hover:bg-primary-50" @click="openProfilePanel">
+						<span class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary-700 text-xs font-bold text-white">
+							<img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-full w-full object-cover" /><span v-else>{{ sidebarInitials }}</span>
+						</span>
+						<span class="hidden min-w-0 sm:block"><span class="block truncate text-xs font-bold text-gray-900">{{ sidebarName }}</span><span class="block text-[10px] text-gray-400">Edit profile</span></span>
+					</button>
+				</div>
 			</header>
 
 			<main class="flex-1 overflow-y-auto p-6">
@@ -293,7 +276,6 @@ const {
 	firstName,
 	fullName,
 	initials,
-	roleLabel,
 	logout,
 } = useAuth()
 
