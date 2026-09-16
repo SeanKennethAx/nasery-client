@@ -11,10 +11,12 @@
 					<path fill="#fff"
 						d="M13.7 20v-7h2.35l.35-2.73h-2.7V8.53c0-.79.22-1.33 1.36-1.33h1.45V4.77a19.5 19.5 0 0 0-2.11-.11c-2.09 0-3.52 1.27-3.52 3.62v1.99H8.52V13h2.36v7h2.82Z" />
 				</svg>
-				<svg v-else-if="provider.id === 'apple'" aria-hidden="true" viewBox="0 0 24 24"
-					class="h-5 w-5 shrink-0 fill-current text-black">
-					<path
-						d="M17.05 12.54c-.03-2.96 2.42-4.4 2.53-4.47a5.43 5.43 0 0 0-4.28-2.32c-1.8-.19-3.55 1.08-4.47 1.08-.94 0-2.36-1.06-3.89-1.03a5.66 5.66 0 0 0-4.76 2.9c-2.07 3.58-.53 8.85 1.46 11.75.99 1.42 2.14 3 3.67 2.94 1.5-.06 2.06-.94 3.87-.94 1.79 0 2.32.94 3.88.9 1.61-.02 2.63-1.42 3.58-2.85a11.75 11.75 0 0 0 1.64-3.34 5.13 5.13 0 0 1-3.23-4.62ZM14.12 3.84A5.18 5.18 0 0 0 15.3.12a5.27 5.27 0 0 0-3.4 1.77 4.93 4.93 0 0 0-1.21 3.58 4.35 4.35 0 0 0 3.43-1.63Z" />
+				<svg v-else-if="provider.id === 'microsoft'" aria-hidden="true" viewBox="0 0 24 24"
+					class="h-5 w-5 shrink-0">
+					<path fill="#F25022" d="M2 2h9.5v9.5H2z" />
+					<path fill="#7FBA00" d="M12.5 2H22v9.5h-9.5z" />
+					<path fill="#00A4EF" d="M2 12.5h9.5V22H2z" />
+					<path fill="#FFB900" d="M12.5 12.5H22V22h-9.5z" />
 				</svg>
 				<img v-else :src="provider.icon" alt="" class="h-5 w-5 shrink-0" />
 				<span class="hidden sm:inline">{{ loading === provider.id ? 'Opening…' : provider.label }}</span>
@@ -33,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-type SocialProvider = 'google' | 'facebook' | 'apple'
+type SocialProvider = 'google' | 'facebook' | 'microsoft'
 
 const props = withDefaults(defineProps<{
 	mode?: 'login' | 'register'
@@ -46,7 +48,7 @@ const error = ref('')
 const providers = [
 	{ id: 'google' as const, label: 'Google', icon: 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg' },
 	{ id: 'facebook' as const, label: 'Facebook', icon: '' },
-	{ id: 'apple' as const, label: 'Apple', icon: '' },
+	{ id: 'microsoft' as const, label: 'Microsoft', icon: '' },
 ]
 
 function continueWith(provider: SocialProvider) {
