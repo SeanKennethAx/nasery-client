@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<div class="mb-5 grid grid-cols-3 gap-2 sm:gap-2.5">
+		<div class="mb-5 grid grid-cols-2 gap-2.5">
 			<button v-for="provider in providers" :key="provider.id" type="button"
 				:disabled="loading === provider.id"
 				class="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-1 py-2.5 text-[13px] font-semibold text-gray-700 transition hover:-translate-y-px hover:border-primary-200 hover:bg-primary-50/40 disabled:cursor-wait disabled:opacity-60"
@@ -10,13 +10,6 @@
 					<circle cx="12" cy="12" r="11" fill="#1877F2" />
 					<path fill="#fff"
 						d="M13.7 20v-7h2.35l.35-2.73h-2.7V8.53c0-.79.22-1.33 1.36-1.33h1.45V4.77a19.5 19.5 0 0 0-2.11-.11c-2.09 0-3.52 1.27-3.52 3.62v1.99H8.52V13h2.36v7h2.82Z" />
-				</svg>
-				<svg v-else-if="provider.id === 'microsoft'" aria-hidden="true" viewBox="0 0 24 24"
-					class="h-5 w-5 shrink-0">
-					<path fill="#F25022" d="M2 2h9.5v9.5H2z" />
-					<path fill="#7FBA00" d="M12.5 2H22v9.5h-9.5z" />
-					<path fill="#00A4EF" d="M2 12.5h9.5V22H2z" />
-					<path fill="#FFB900" d="M12.5 12.5H22V22h-9.5z" />
 				</svg>
 				<img v-else :src="provider.icon" alt="" class="h-5 w-5 shrink-0" />
 				<span class="hidden sm:inline">{{ loading === provider.id ? 'Opening…' : provider.label }}</span>
@@ -35,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-type SocialProvider = 'google' | 'facebook' | 'microsoft'
+type SocialProvider = 'google' | 'facebook'
 
 const props = withDefaults(defineProps<{
 	mode?: 'login' | 'register'
@@ -48,7 +41,6 @@ const error = ref('')
 const providers = [
 	{ id: 'google' as const, label: 'Google', icon: 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg' },
 	{ id: 'facebook' as const, label: 'Facebook', icon: '' },
-	{ id: 'microsoft' as const, label: 'Microsoft', icon: '' },
 ]
 
 function continueWith(provider: SocialProvider) {
