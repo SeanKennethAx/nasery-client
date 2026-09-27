@@ -22,17 +22,22 @@
 		</div>
 
 		<div v-else class="flex gap-6">
-			<div class="w-72 shrink-0 space-y-2">
-				<div class="mb-1 text-xs font-semibold tracking-wide text-gray-400">
+			<div class="flex w-72 shrink-0 flex-col">
+				<div class="mb-2 shrink-0 text-xs font-semibold tracking-wide text-gray-400">
 					EVENTS
 				</div>
 
 				<button type="button"
-					class="flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold" :class="selectedEventKey === null
-						? 'bg-[#285F6b] text-white'
-						: 'border border-gray-200 text-gray-700 hover:bg-gray-50'
+					class="mb-2 flex w-full shrink-0 items-center justify-between gap-3 rounded-2xl border px-4 py-3.5 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+					:class="selectedEventKey === null
+						? 'border-primary-700 bg-primary-700 text-white'
+						: 'border-gray-200 bg-white text-gray-700 hover:border-primary-200'
 						" @click="selectAllEvents">
-					<span>
+					<span class="flex items-center gap-2.5">
+						<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
+							:class="selectedEventKey === null ? 'bg-white/15' : 'bg-primary-50 text-primary-700'">
+							<IconBase name="calendar" class="h-4 w-4" />
+						</span>
 						All Events
 					</span>
 
@@ -44,51 +49,62 @@
 					</span>
 				</button>
 
-				<button v-for="ev in timelineEvents" :key="ev.key" type="button"
-					class="w-full rounded-xl border px-4 py-3 text-left hover:bg-gray-50" :class="selectedEventKey === ev.key
-						? 'border-[#285F6b] bg-[#285F6b]/5'
-						: 'border-gray-200'
-						" @click="selectEvent(ev)">
-					<div class="flex items-center justify-between gap-2">
-						<span class="truncate text-sm font-bold text-gray-900">
-							{{ ev.name }}
-						</span>
+				<div class="flex-1 space-y-2 overflow-y-auto pr-1">
+					<button v-for="ev in timelineEvents" :key="ev.key" type="button"
+						class="w-full rounded-2xl border bg-white px-4 py-3.5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-md"
+						:class="selectedEventKey === ev.key
+							? 'border-primary-700 ring-1 ring-primary-700/20'
+							: 'border-gray-200'
+							" @click="selectEvent(ev)">
+						<div class="flex items-start gap-3">
+							<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
+								<IconBase name="calendar" class="h-4 w-4" />
+							</span>
 
-						<span class="shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold" :class="eventBadgeClass(
-							ev.status,
-						)
-							">
-							{{
-								formatEventStatus(
-									ev.status,
-								)
-							}}
-						</span>
+							<div class="min-w-0 flex-1">
+								<div class="flex items-center justify-between gap-2">
+									<span class="truncate text-sm font-bold text-gray-900">
+										{{ ev.name }}
+									</span>
+
+									<span class="shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold" :class="eventBadgeClass(
+										ev.status,
+									)
+										">
+										{{
+											formatEventStatus(
+												ev.status,
+											)
+										}}
+									</span>
+								</div>
+
+								<div class="mt-1.5 flex items-center gap-1.5 text-xs text-gray-500">
+									<IconBase name="calendar" class="h-3.5 w-3.5" />
+
+									{{
+										formatDate(
+											ev.eventDate,
+										)
+									}}
+								</div>
+
+								<div class="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
+									<IconBase name="map-pin" class="h-3.5 w-3.5" />
+
+									{{
+										ev.location ||
+										'Location not set'
+									}}
+								</div>
+							</div>
+						</div>
+					</button>
+
+					<div v-if="!timelineEvents.length"
+						class="rounded-2xl border border-dashed border-gray-300 p-5 text-center text-xs text-gray-500">
+						No events found.
 					</div>
-
-					<div class="mt-1.5 flex items-center gap-1.5 text-xs text-gray-500">
-						<IconBase name="calendar" class="h-3.5 w-3.5" />
-
-						{{
-							formatDate(
-								ev.eventDate,
-							)
-						}}
-					</div>
-
-					<div class="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
-						<IconBase name="map-pin" class="h-3.5 w-3.5" />
-
-						{{
-							ev.location ||
-							'Location not set'
-						}}
-					</div>
-				</button>
-
-				<div v-if="!timelineEvents.length"
-					class="rounded-xl border border-dashed border-gray-300 p-5 text-center text-xs text-gray-500">
-					No events found.
 				</div>
 			</div>
 

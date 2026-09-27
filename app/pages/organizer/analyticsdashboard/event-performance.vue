@@ -1,121 +1,176 @@
 <template>
 	<div>
-		<div class="rounded-2xl border border-gray-200 bg-white p-6">
-			<h2 class="text-base font-bold text-gray-900">
-				Event Attendance Trends
-			</h2>
-			<p class="mb-8 text-sm text-gray-500">
-				Monthly attendance vs no-show rates
-			</p>
+		<div v-if="isLoading" class="rounded-2xl border border-gray-200 bg-white p-10 text-center text-sm text-gray-500">
+			Loading your event performance...
+		</div>
 
-			<div class="flex">
-				<div class="mr-3 flex flex-col justify-between text-xs text-gray-400"
-					:style="{ height: chartHeight + 'px' }">
-					<span v-for="tick in yTicks" :key="tick">{{ tick }}</span>
-				</div>
+		<div v-else-if="errorMessage" class="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+			{{ errorMessage }}
+		</div>
 
-				<div class="relative flex-1">
-					<div class="absolute inset-0 flex flex-col justify-between">
-						<div v-for="tick in yTicks" :key="tick" class="border-t border-dashed border-gray-200" />
+		<template v-else>
+			<div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+				<h2 class="text-base font-bold text-gray-900">
+					Event Attendance Trends
+				</h2>
+				<p class="mb-4 text-sm text-gray-500">
+					Monthly attendance vs no-show rates, last 6 months
+				</p>
+
+				<template v-if="hasMonthlyActivity">
+					<ClientOnly>
+						<apexchart type="line" height="320" :options="chartOptions" :series="chartSeries" />
+					</ClientOnly>
+				</template>
+				<p v-else class="py-16 text-center text-sm text-gray-400">
+					No ticketed events in the last 6 months yet.
+				</p>
+			</div>
+
+			<div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+				<div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+					<div class="flex items-start justify-between gap-3">
+						<div>
+							<div class="text-sm font-semibold text-gray-900">Avg Capacity Fill</div>
+							<div class="text-xs text-gray-400">Per event</div>
+						</div>
+						<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50">
+							<IconBase name="users" class="h-5 w-5 text-primary-700" />
+						</span>
 					</div>
+					<div class="mt-3 text-3xl font-extrabold tracking-tight text-gray-950">
+						{{ avgCapacityFill !== null ? `${avgCapacityFill}%` : '—' }}
+					</div>
+				</div>
 
-					<svg class="relative block w-full" :style="{ height: chartHeight + 'px' }" viewBox="0 0 1000 300"
-						preserveAspectRatio="none">
-						<polyline :points="attendancePoints" fill="none" stroke="#0ca30c" stroke-width="2"
-							vector-effect="non-scaling-stroke" />
-						<polyline :points="noShowPoints" fill="none" stroke="#d03b3b" stroke-width="2"
-							vector-effect="non-scaling-stroke" />
-						<circle v-for="(v, i) in attendance" :key="'a' + i" :cx="xFor(i)" :cy="yFor(v)" r="5"
-							fill="#0ca30c" />
-						<circle v-for="(v, i) in noShow" :key="'n' + i" :cx="xFor(i)" :cy="yFor(v)" r="5"
-							fill="#d03b3b" />
-					</svg>
+				<div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+					<div class="flex items-start justify-between gap-3">
+						<div>
+							<div class="text-sm font-semibold text-gray-900">Avg No-Show Rate</div>
+							<div class="text-xs text-gray-400">Per event</div>
+						</div>
+						<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50">
+							<IconBase name="x-circle" class="h-5 w-5 text-amber-600" />
+						</span>
+					</div>
+					<div class="mt-3 text-3xl font-extrabold tracking-tight text-amber-600">
+						{{ avgNoShowRate !== null ? `${avgNoShowRate}%` : '—' }}
+					</div>
 				</div>
-			</div>
 
-			<div class="mt-2 flex pl-8">
-				<div v-for="month in months" :key="month" class="flex-1 text-center text-sm text-gray-600">{{ month }}
+				<div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+					<div class="flex items-start justify-between gap-3">
+						<div>
+							<div class="text-sm font-semibold text-gray-900">Total Events</div>
+							<div class="text-xs text-gray-400">Organized</div>
+						</div>
+						<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
+							<IconBase name="calendar" class="h-5 w-5 text-blue-600" />
+						</span>
+					</div>
+					<div class="mt-3 text-3xl font-extrabold tracking-tight text-gray-950">
+						{{ totalEvents }}
+					</div>
 				</div>
 			</div>
-
-			<div class="mt-4 flex items-center justify-center gap-6 text-sm text-gray-700">
-				<span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-[#0ca30c]" />
-					Attendance %
-				</span>
-				<span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-[#d03b3b]" />
-					No-Show %
-				</span>
-			</div>
-		</div>
-
-		<div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-			<div class="rounded-2xl border border-gray-200 bg-white p-5">
-				<div class="text-sm font-semibold text-gray-900">
-					Avg Capacity Fill
-				</div>
-				<div class="text-sm text-gray-400">
-					Per event
-				</div>
-				<div class="mt-3 text-3xl font-extrabold text-gray-900">
-					{{ avgAttendance }}%
-				</div>
-			</div>
-			<div class="rounded-2xl border border-gray-200 bg-white p-5">
-				<div class="text-sm font-semibold text-gray-900">
-					Avg No-Show Rate
-				</div>
-				<div class="text-sm text-gray-400">
-					Per event
-				</div>
-				<div class="mt-3 text-3xl font-extrabold text-gray-900">
-					{{ avgNoShow }}%
-				</div>
-			</div>
-			<div class="rounded-2xl border border-gray-200 bg-white p-5">
-				<div class="text-sm font-semibold text-gray-900">
-					Total Events
-				</div>
-				<div class="text-sm text-gray-400">
-					Organized
-				</div>
-				<div class="mt-3 text-3xl font-extrabold text-gray-900">
-					{{ totalEvents }}
-				</div>
-			</div>
-		</div>
+		</template>
 	</div>
 </template>
 
 <script setup lang="ts">
+import type { ApexOptions } from 'apexcharts'
+
 definePageMeta({ layout: 'dashboard' })
 
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May']
-const attendance = [88, 90, 93, 90, 95]
-const noShow = [12, 10, 8, 11, 10]
-const totalEvents = 24
+const { token } = useAuth('organizer')
+const config = useRuntimeConfig()
 
-const chartHeight = 300
-const yTicks = [100, 75, 50, 25, 0]
-
-function xFor(i: number) {
-	return (i / (months.length - 1)) * 1000
+interface MonthlyEventRow {
+	label: string
+	attendance_rate: number
+	no_show_rate: number
 }
 
-function yFor(value: number) {
-	return 300 - (value / 100) * 300
+interface EventPerformanceResponse {
+	data: {
+		monthly: MonthlyEventRow[]
+		avg_capacity_fill: number | null
+		avg_no_show_rate: number | null
+		total_events: number
+	}
 }
 
-function toPoints(values: number[]) {
-	return values.map((v, i) => `${xFor(i)},${yFor(v)}`).join(' ')
+const isLoading = ref(false)
+const errorMessage = ref('')
+const monthly = ref<MonthlyEventRow[]>([])
+const avgCapacityFill = ref<number | null>(null)
+const avgNoShowRate = ref<number | null>(null)
+const totalEvents = ref(0)
+
+const hasMonthlyActivity = computed(() => monthly.value.some(row => row.attendance_rate > 0 || row.no_show_rate > 0))
+
+const chartSeries = computed(() => [
+	{ name: 'Attendance %', data: monthly.value.map(row => row.attendance_rate) },
+	{ name: 'No-Show %', data: monthly.value.map(row => row.no_show_rate) },
+])
+
+const chartOptions = computed<ApexOptions>(() => ({
+	chart: { type: 'line', toolbar: { show: false }, fontFamily: 'inherit' },
+	colors: ['#285F6b', '#d97706'],
+	stroke: { curve: 'smooth', width: 2.5 },
+	markers: { size: 4, strokeWidth: 2, strokeColors: '#fff', hover: { size: 6 } },
+	dataLabels: { enabled: false },
+	grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+	legend: { position: 'bottom', fontSize: '13px', fontWeight: 600, markers: { size: 8 } },
+	xaxis: {
+		categories: monthly.value.map(row => row.label),
+		axisBorder: { show: false },
+		axisTicks: { show: false },
+		labels: { style: { colors: '#6b7280', fontSize: '13px', fontWeight: 600 } },
+	},
+	yaxis: {
+		min: 0,
+		max: 100,
+		labels: { style: { colors: '#9ca3af', fontSize: '11px' }, formatter: (value: number) => `${Math.round(value)}%` },
+	},
+	tooltip: { shared: true, intersect: false, y: { formatter: (value: number) => `${value}%` } },
+}))
+
+function getApiErrorMessage(error: unknown, fallback: string): string {
+	const apiError = error as { data?: { message?: string } }
+	return apiError?.data?.message || fallback
 }
 
-const attendancePoints = toPoints(attendance)
-const noShowPoints = toPoints(noShow)
+async function loadEventPerformance() {
+	if (!token.value) return
 
-function average(values: number[]) {
-	return Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10
+	isLoading.value = true
+	errorMessage.value = ''
+
+	try {
+		const response = await $fetch<EventPerformanceResponse>(
+			`${config.public.apiBaseURL}/organizer/event-performance`,
+			{
+				method: 'GET',
+				headers: {
+					Accept: 'application/json',
+					Authorization: `Bearer ${token.value}`,
+				},
+			},
+		)
+
+		monthly.value = response.data.monthly
+		avgCapacityFill.value = response.data.avg_capacity_fill
+		avgNoShowRate.value = response.data.avg_no_show_rate
+		totalEvents.value = response.data.total_events
+	} catch (error: unknown) {
+		errorMessage.value = getApiErrorMessage(error, 'Unable to load your event performance.')
+	} finally {
+		isLoading.value = false
+	}
 }
 
-const avgAttendance = average(attendance)
-const avgNoShow = average(noShow)
+onMounted(() => {
+	loadEventPerformance()
+})
 </script>

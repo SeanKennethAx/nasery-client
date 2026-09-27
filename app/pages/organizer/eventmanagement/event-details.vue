@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="space-y-6">
 		<div v-if="isLoading"
 			class="rounded-2xl border border-gray-200 bg-white p-10 text-center text-sm text-gray-500">
 			Loading event details...
@@ -8,7 +8,21 @@
 		<div v-else-if="errorMessage" class="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
 			{{ errorMessage }}
 		</div>
-		<div v-else-if="event && isEditMode" class="rounded-2xl border border-gray-200 bg-white">
+
+		<template v-else>
+			<section v-if="event" class="relative overflow-hidden rounded-3xl bg-primary-700 px-6 py-7 text-white shadow-sm sm:px-8">
+				<div class="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+				<div class="relative">
+					<p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-white/60">
+						<span class="h-1.5 w-1.5 rounded-full bg-white/60" />
+						Event details
+					</p>
+					<h2 class="mt-2 text-2xl font-black tracking-tight sm:text-3xl">{{ event.name }}</h2>
+					<p class="mt-1 text-sm text-white/70">Manage the core details, venue, and settings for this event.</p>
+				</div>
+			</section>
+
+			<div v-if="event && isEditMode" class="rounded-2xl border border-gray-200 bg-white">
 			<div class="flex flex-wrap items-start justify-between gap-4 border-b border-gray-200 px-6 py-5">
 				<div>
 					<h2 class="text-xl font-bold text-gray-900">
@@ -178,21 +192,6 @@
 
 						<input v-model="editForm.publicRegistration" type="checkbox"
 							class="h-4 w-4 accent-primary-700" />
-					</label>
-
-					<label class="mt-3 flex items-center justify-between rounded-xl border border-gray-200 px-4 py-4">
-						<div>
-							<p class="text-sm font-semibold text-gray-900">
-								Require Approval
-							</p>
-
-							<p class="mt-1 text-xs text-gray-500">
-								Require organizer approval before
-								confirming registration.
-							</p>
-						</div>
-
-						<input v-model="editForm.requireApproval" type="checkbox" class="h-4 w-4 accent-primary-700" />
 					</label>
 
 					<label class="mt-3 flex items-center justify-between rounded-xl border border-gray-200 px-4 py-4">
@@ -557,6 +556,7 @@
 				</button>
 			</div>
 		</div>
+		</template>
 	</div>
 </template>
 
@@ -588,7 +588,6 @@ interface OrganizerEvent {
 	status: string
 
 	public_registration: boolean
-	require_approval: boolean
 	waitlist_enabled: boolean
 
 	contact_name: string | null
@@ -810,7 +809,6 @@ const editForm =
 		] as TicketTypeForm[],
 
 		publicRegistration: true,
-		requireApproval: false,
 		waitlistEnabled: false,
 
 		contactName: '',
@@ -946,9 +944,6 @@ function fillEditForm() {
 
 	editForm.publicRegistration =
 		Boolean(event.value.public_registration)
-
-	editForm.requireApproval =
-		Boolean(event.value.require_approval)
 
 	editForm.waitlistEnabled =
 		Boolean(event.value.waitlist_enabled)
@@ -1368,9 +1363,6 @@ async function saveEvent() {
 
 						public_registration:
 							editForm.publicRegistration,
-
-						require_approval:
-							editForm.requireApproval,
 
 						waitlist_enabled:
 							editForm.waitlistEnabled,

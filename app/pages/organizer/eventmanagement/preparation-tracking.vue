@@ -1,14 +1,27 @@
 <template>
-	<div class="rounded-2xl border border-gray-200 bg-white p-6">
-		<div v-if="isLoading" class="py-10 text-center text-sm text-gray-500">
+	<div class="space-y-6">
+		<div v-if="isLoading" class="rounded-2xl border border-gray-200 bg-white p-10 text-center text-sm text-gray-500">
 			Loading preparation checklist...
 		</div>
 
-		<div v-else-if="errorMessage" class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+		<div v-else-if="errorMessage" class="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
 			{{ errorMessage }}
 		</div>
 
 		<template v-else-if="event">
+			<section class="relative overflow-hidden rounded-3xl bg-primary-700 px-6 py-7 text-white shadow-sm sm:px-8">
+				<div class="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+				<div class="relative">
+					<p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-white/60">
+						<span class="h-1.5 w-1.5 rounded-full bg-white/60" />
+						Preparation tracking
+					</p>
+					<h2 class="mt-2 text-2xl font-black tracking-tight sm:text-3xl">{{ event.name }}</h2>
+					<p class="mt-1 text-sm text-white/70">Track tasks, assignments, and readiness before the big day.</p>
+				</div>
+			</section>
+
+			<div class="rounded-2xl border border-gray-200 bg-white p-6">
 			<div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#285F6b]/5 p-4">
 				<div>
 					<p class="text-sm font-bold text-[#285F6b]">Event Team</p>
@@ -45,19 +58,6 @@
 					}}
 				</button>
 			</div>
-			<div class="mb-6">
-				<h2 class="text-lg font-bold text-gray-900">
-					Dynamic Preparation Tracking
-				</h2>
-
-				<p class="text-sm text-gray-500">
-					Track preparation progress for
-					<span class="font-semibold text-gray-700">
-						{{ event.name }}
-					</span>
-				</p>
-			</div>
-
 			<div class="mb-1 flex items-center justify-between">
 				<span class="text-base font-bold text-gray-900">
 					Overall Event Readiness
@@ -212,6 +212,7 @@
 						</button>
 					</div>
 				</div>
+			</div>
 			</div>
 		</template>
 	</div>

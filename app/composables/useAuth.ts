@@ -10,6 +10,7 @@ type AuthRole =
     | 'client'
     | 'organizer'
     | 'team_member'
+    | 'superadmin'
 
 export function useAuth(
     role?: AuthRole
@@ -103,6 +104,10 @@ export function useAuth(
 
         if (user.value?.role === 'team_member') {
             return 'Team Member'
+        }
+
+        if (user.value?.role === 'superadmin') {
+            return 'Super Admin'
         }
 
         return ''
@@ -280,6 +285,10 @@ export function useAuth(
 
         if (authenticatedUser.role === 'team_member') {
             return await navigateTo('/team/dashboard')
+        }
+
+        if (authenticatedUser.role === 'superadmin') {
+            return await navigateTo('/superadmin/overview')
         }
 
         throw new Error(

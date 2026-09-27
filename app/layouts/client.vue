@@ -291,11 +291,6 @@ const navItems = [
 		icon: 'send',
 	},
 	{
-		label: 'Event Details',
-		to: '/client/event-details',
-		icon: 'calendar',
-	},
-	{
 		label: 'Preparation Tracking',
 		to: '/client/preparation-tracking',
 		icon: 'clipboard-list',

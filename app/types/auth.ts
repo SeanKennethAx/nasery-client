@@ -2,6 +2,7 @@ export type UserRole =
     | 'organizer'
     | 'client'
     | 'team_member'
+    | 'superadmin'
 
 export interface OrganizerAuthProfile {
     id: number

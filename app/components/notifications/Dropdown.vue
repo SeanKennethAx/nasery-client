@@ -64,7 +64,7 @@ interface OrganizerNotification {
 }
 
 const props = withDefaults(defineProps<{
-	portal?: 'client' | 'organizer'
+	portal?: 'client' | 'organizer' | 'superadmin'
 }>(), {
 	portal: 'organizer',
 })
@@ -78,9 +78,11 @@ const unreadCount = ref(0)
 const page = ref(1)
 const lastPage = ref(1)
 
-const emptyMessage = computed(() => props.portal === 'client'
-	? 'New quotations and event updates will appear here.'
-	: 'New matching inquiries and accepted offers will appear here.')
+const emptyMessage = computed(() => {
+	if (props.portal === 'client') return 'New quotations and event updates will appear here.'
+	if (props.portal === 'superadmin') return 'Platform-wide alerts will appear here.'
+	return 'New matching inquiries and accepted offers will appear here.'
+})
 
 const headers = computed(() => ({ Accept: 'application/json', Authorization: `Bearer ${token.value}` }))
 
@@ -105,8 +107,14 @@ async function markAllRead() { await mutate('/notifications/read-all') }
 async function openItem(item: OrganizerNotification) {
 	if (!item.read_at) await mutate(`/notifications/${item.id}/read`)
 	open.value = false
+
 	if (props.portal === 'client') {
 		await navigateTo('/client/my-events')
+		return
+	}
+
+	if (props.portal === 'superadmin') {
+		await navigateTo('/superadmin/activity-log')
 		return
 	}
 

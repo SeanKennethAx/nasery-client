@@ -2,6 +2,11 @@
 	<div>
 		<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 			<div>
+				<NuxtLink v-if="hasSelectedEvent" to="/organizer/eventmanagement/all-events"
+					class="mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 transition hover:text-[#285F6b]">
+					<IconBase name="arrow-left" class="h-3.5 w-3.5" />
+					Back to All Events
+				</NuxtLink>
 				<p class="text-xs font-bold uppercase tracking-[0.16em] text-[#285F6b]">Organizer workspace</p>
 				<h1 class="mt-1 text-3xl font-black tracking-tight text-gray-900">Event management</h1>
 				<p class="mt-2 max-w-2xl text-sm leading-6 text-gray-500">Plan event details, control ticket inventory, and keep your team on schedule.</p>
@@ -13,9 +18,9 @@
 			</button>
 		</div>
 
-		<nav class="mb-6 flex w-full gap-1 overflow-x-auto rounded-2xl border border-gray-200 bg-white p-1.5 shadow-sm sm:w-fit" aria-label="Event management sections">
+		<nav v-if="hasSelectedEvent" class="mb-6 flex w-full gap-1 overflow-x-auto rounded-2xl border border-gray-200 bg-white p-1.5 shadow-sm sm:w-fit" aria-label="Event management sections">
 			<template v-for="tab in tabs" :key="tab.label">
-				<NuxtLink v-if="!tab.disabled" :to="tab.to"
+				<NuxtLink :to="tab.to"
 					class="inline-flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition" :class="route.path === tab.path
 						? 'bg-[#285F6b] text-white shadow-sm'
 						: 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
@@ -23,12 +28,6 @@
 					<IconBase :name="tab.icon" class="h-4 w-4" />
 					{{ tab.label }}
 				</NuxtLink>
-
-				<button v-else type="button" disabled
-					class="inline-flex shrink-0 cursor-not-allowed items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-300">
-					<IconBase :name="tab.icon" class="h-4 w-4" />
-					{{ tab.label }}
-				</button>
 			</template>
 		</nav>
 
@@ -169,12 +168,6 @@
 						</label>
 						<label
 							class="mt-3 flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3.5">
-							<span class="text-sm font-medium text-gray-700">Require approval before confirming</span>
-							<input v-model="eventForm.requireApproval" type="checkbox"
-								class="h-4 w-4 accent-primary-700" />
-						</label>
-						<label
-							class="mt-3 flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3.5">
 							<span class="text-sm font-medium text-gray-700">Enable waitlist when sold out</span>
 							<input v-model="eventForm.waitlistEnabled" type="checkbox"
 								class="h-4 w-4 accent-primary-700" />
@@ -305,24 +298,6 @@ const tabs =
 	computed(() => [
 		{
 			label:
-				'All Events',
-
-			icon: 'calendar',
-
-			path:
-				'/organizer/eventmanagement/all-events',
-
-			to: {
-				path:
-					'/organizer/eventmanagement/all-events',
-			},
-
-			disabled:
-				false,
-		},
-
-		{
-			label:
 				'Event Details',
 
 			icon: 'file-text',
@@ -337,9 +312,6 @@ const tabs =
 				query:
 					selectedQuery(),
 			},
-
-			disabled:
-				!hasSelectedEvent.value,
 		},
 
 		{
@@ -358,9 +330,6 @@ const tabs =
 				query:
 					selectedQuery(),
 			},
-
-			disabled:
-				!hasSelectedEvent.value,
 		},
 
 		{
@@ -379,9 +348,6 @@ const tabs =
 				query:
 					selectedQuery(),
 			},
-
-			disabled:
-				!hasSelectedEvent.value,
 		},
 	])
 const createTabs = [
@@ -541,9 +507,6 @@ function emptyEventForm() {
 		publicRegistration:
 			true,
 
-		requireApproval:
-			false,
-
 		waitlistEnabled:
 			false,
 
@@ -690,9 +653,6 @@ async function createEvent() {
 
 						public_registration:
 							eventForm.publicRegistration,
-
-						require_approval:
-							eventForm.requireApproval,
 
 						waitlist_enabled:
 							eventForm.waitlistEnabled,

@@ -218,6 +218,26 @@
 			<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
 			<circle cx="12" cy="13" r="4" />
 		</template>
+		<template v-else-if="name === 'ticket'">
+			<path
+				d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8Z" />
+			<line x1="10" y1="6" x2="10" y2="18" stroke-dasharray="1.8 2.2" />
+		</template>
+		<template v-else-if="name === 'shield-check'">
+			<path d="M12 2 4 5v6c0 5 3.4 8.6 8 11 4.6-2.4 8-6 8-11V5l-8-3Z" />
+			<polyline points="9 12 11 14 15 10" />
+		</template>
+		<template v-else-if="name === 'grid'">
+			<rect x="3" y="3" width="7" height="7" rx="1.5" />
+			<rect x="14" y="3" width="7" height="7" rx="1.5" />
+			<rect x="3" y="14" width="7" height="7" rx="1.5" />
+			<rect x="14" y="14" width="7" height="7" rx="1.5" />
+		</template>
+		<template v-else-if="name === 'refresh-cw'">
+			<polyline points="23 4 23 10 17 10" />
+			<polyline points="1 20 1 14 7 14" />
+			<path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+		</template>
 		<template v-else-if="name === 'truck'">
 			<rect x="1" y="3" width="15" height="13" />
 			<polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />

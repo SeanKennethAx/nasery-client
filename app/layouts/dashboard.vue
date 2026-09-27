@@ -657,16 +657,30 @@ const experienceRanges = [
 	'5–10 years',
 	'10+ years',
 ]
-const eventTypeOptions = [
-	'Wedding',
-	'Corporate',
-	'Birthday',
-	'Debut',
-	'Concert',
-	'Conference',
-	'Reunion',
-	'Seminar',
-]
+const eventTypeOptions = ref<string[]>([])
+
+async function loadEventTagOptions() {
+	try {
+		const response = await $fetch<{ data: Array<{ id: number, name: string }> }>(
+			`${config.public.apiBaseURL}/event-tags`,
+			{
+				method: 'GET',
+				headers: {
+					Accept: 'application/json',
+					Authorization: `Bearer ${token.value}`,
+				},
+			},
+		)
+
+		eventTypeOptions.value = response.data.map(tag => tag.name)
+	} catch (error: unknown) {
+		console.error('Failed to load event tag options:', error)
+	}
+}
+
+onMounted(() => {
+	loadEventTagOptions()
+})
 
 const specialtyOptions = [
 	'Full Event Coordination',

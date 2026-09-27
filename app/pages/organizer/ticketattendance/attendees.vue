@@ -20,18 +20,17 @@
 				</p>
 			</div>
 
-			<div class="flex shrink-0 flex-wrap gap-3">
+			<div v-if="selectedEventId" class="flex shrink-0 flex-wrap gap-3">
 				<button type="button"
-					class="flex items-center gap-2 rounded-xl bg-[#285F6b] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1f4a54] disabled:cursor-not-allowed disabled:opacity-50"
-					:disabled="!selectedEventId" @click="openRegisterAttendee">
+					class="flex items-center gap-2 rounded-xl bg-[#285F6b] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1f4a54]"
+					@click="openRegisterAttendee">
 					<IconBase name="user-plus" class="h-4 w-4" />
 
 					Register Attendee
 				</button>
 
 				<button type="button"
-					class="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-					:disabled="!selectedEventId">
+					class="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
 					<IconBase name="upload" class="h-4 w-4" />
 
 					Bulk Import
@@ -39,9 +38,7 @@
 
 				<button type="button"
 					class="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-					:disabled="!selectedEventId ||
-						!attendees.length
-						" @click="exportAttendees">
+					:disabled="!attendees.length" @click="exportAttendees">
 					<IconBase name="download" class="h-4 w-4" />
 
 					Export List
@@ -66,13 +63,6 @@
 		</div>
 
 		<template v-else>
-			<div v-if="pendingApprovalCount" class="mb-5 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-				<div class="flex items-start gap-3">
-					<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700"><IconBase name="clock" class="h-5 w-5" /></div>
-					<div><p class="text-sm font-bold text-amber-950">{{ pendingApprovalCount }} registration {{ pendingApprovalCount === 1 ? 'request needs' : 'requests need' }} review</p><p class="mt-0.5 text-xs text-amber-800">Approve a request to activate and email its QR ticket.</p></div>
-				</div>
-				<button type="button" class="rounded-xl bg-amber-900 px-4 py-2 text-xs font-bold text-white" @click="activeFilter = 'pending_approval'">Review requests</button>
-			</div>
 			<div v-if="successMessage" class="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
 				<div class="flex items-start justify-between gap-3">
 					<div class="flex items-start gap-3">
@@ -294,9 +284,19 @@
 							</td>
 
 							<td class="py-3.5 pl-4 text-right">
-								<div v-if="attendee.status === 'pending_approval'" class="flex justify-end gap-2">
-									<button type="button" class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-50" :disabled="processingApprovalId === attendee.id" @click="reviewRegistration(attendee, 'reject')">Reject</button>
-									<button type="button" class="rounded-lg bg-[#285F6b] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#1f4a54] disabled:opacity-50" :disabled="processingApprovalId === attendee.id" @click="reviewRegistration(attendee, 'approve')">{{ processingApprovalId === attendee.id ? 'Saving...' : 'Approve' }}</button>
+								<div v-if="attendee.qr_token" class="flex justify-end gap-2">
+									<button type="button" title="Download ticket"
+										class="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+										@click="downloadAttendeeTicket(attendee)">
+										<IconBase name="download" class="h-4 w-4" />
+									</button>
+									<button type="button" :title="attendee.email ? 'Email ticket' : 'No email on file'"
+										class="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
+										:disabled="!attendee.email || emailingAttendeeId === attendee.id"
+										@click="emailAttendeeTicket(attendee)">
+										<IconBase :name="emailingAttendeeId === attendee.id ? 'refresh-cw' : (emailedAttendeeIds.has(attendee.id) ? 'check-circle' : 'send')"
+											class="h-4 w-4" :class="{ 'animate-spin': emailingAttendeeId === attendee.id, 'text-green-600': emailedAttendeeIds.has(attendee.id) }" />
+									</button>
 								</div>
 								<span v-else class="text-xs text-gray-300">—</span>
 							</td>
@@ -396,19 +396,14 @@
 						required />
 
 					<div class="mt-4">
-						<FormsLabel text="Email Address" />
-
-						<FormsTextField v-model="registerForm.attendeeEmail" type="email"
-							placeholder="e.g. juan@example.com" />
+						<FormsEmailVerificationField v-model="registerForm.attendeeEmail"
+							v-model:verification-token="registerForm.emailVerificationToken" optional
+							:send-url="emailVerificationSendUrl" :verify-url="emailVerificationVerifyUrl"
+							:auth-token="token" />
 					</div>
 
 					<div class="mt-4">
-						<label class="mb-1.5 block text-sm font-semibold text-gray-700">
-							Ticket Type
-							<span class="text-red-500">
-								*
-							</span>
-						</label>
+						<FormsLabel text="Ticket Type" required />
 
 						<FormsSelect v-model="registerForm.ticketTypeId"
 							:options="ticketTypes.map(ticketType => ({ value: ticketType.id, label: ticketType.price !== undefined ? `${ticketType.name} — ${formatCurrency(ticketType.price)}` : ticketType.name }))"
@@ -425,9 +420,7 @@
 					</div>
 
 					<div class="mt-4">
-						<label class="mb-1.5 block text-sm font-semibold text-gray-700">
-							Attendee Category <span class="text-red-500">*</span>
-						</label>
+						<FormsLabel text="Attendee Category" required />
 
 						<FormsSelect v-model="registerForm.attendeeCategory"
 							:options="[{ value: 'invited', label: 'Invited' }, { value: 'free', label: 'Free' }, { value: 'paid', label: 'Paid' }]"
@@ -437,9 +430,7 @@
 					</div>
 
 					<div v-if="registerForm.attendeeCategory === 'paid'" class="mt-4">
-						<label class="mb-1.5 block text-sm font-semibold text-gray-700">
-							Payment Status
-						</label>
+						<FormsLabel text="Payment Status" />
 
 						<FormsSelect v-model="registerForm.paymentStatus"
 							:options="[{ value: 'paid', label: 'Paid' }, { value: 'pending', label: 'Pending' }]"
@@ -495,16 +486,16 @@
 						</div>
 					</div>
 
-					<div class="mt-5 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+					<div class="mt-5 rounded-xl border border-primary-100 bg-primary-50/50 px-4 py-3">
 						<div class="flex items-start gap-3">
-							<IconBase name="qr-code" class="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
+							<IconBase name="qr-code" class="mt-0.5 h-5 w-5 shrink-0 text-primary-700" />
 
 							<div>
-								<p class="text-sm font-semibold text-blue-900">
+								<p class="text-sm font-semibold text-primary-900">
 									QR ticket will be generated
 								</p>
 
-								<p class="mt-1 text-xs leading-5 text-blue-700">
+								<p class="mt-1 text-xs leading-5 text-primary-700">
 									After registration, the attendee receives a unique ticket ID and QR token that can
 									be
 									scanned during event check-in.
@@ -522,7 +513,8 @@
 
 					<FormsButton class="flex-1" :disabled="isRegistering ||
 						!registerForm.attendeeName.trim() ||
-						!registerForm.ticketTypeId
+						!registerForm.ticketTypeId ||
+						registerEmailUnverified
 						" @click="submitRegisterAttendee">
 						<IconBase v-if="isRegistering" name="refresh-cw" class="h-4 w-4 animate-spin" />
 
@@ -602,66 +594,51 @@
 
 						<div class="my-5 border-t border-gray-100" />
 
-						<div class="space-y-4">
-							<div class="flex items-center justify-between gap-3">
-								<span class="text-sm text-gray-500">Category</span>
-								<span class="rounded-full px-2.5 py-1 text-xs font-semibold"
+						<div class="grid grid-cols-2 gap-2.5">
+							<div class="rounded-xl bg-gray-50 px-3.5 py-3">
+								<p class="text-[10px] font-bold uppercase tracking-wide text-gray-400">Category</p>
+								<span class="mt-1.5 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
 									:class="categoryClass(registeredTicket.attendee_category)">{{
 										formatCategory(registeredTicket.attendee_category) }}</span>
 							</div>
 
-							<div class="flex items-center justify-between gap-3">
-								<span class="text-sm text-gray-500">
-									Ticket ID
-								</span>
-
-								<span class="font-mono text-sm font-bold text-gray-900">
+							<div class="rounded-xl bg-gray-50 px-3.5 py-3">
+								<p class="text-[10px] font-bold uppercase tracking-wide text-gray-400">Ticket ID</p>
+								<p class="mt-1.5 font-mono text-sm font-bold text-gray-900">
 									{{ registeredTicket.ticket_id }}
-								</span>
+								</p>
 							</div>
 
-							<div class="flex items-center justify-between gap-3">
-								<span class="text-sm text-gray-500">
-									Ticket Type
-								</span>
-
-								<span class="text-sm font-semibold text-gray-900">
+							<div class="col-span-2 rounded-xl bg-gray-50 px-3.5 py-3">
+								<p class="text-[10px] font-bold uppercase tracking-wide text-gray-400">Ticket Type</p>
+								<p class="mt-1.5 text-sm font-semibold text-gray-900">
 									{{
 										registeredTicket.ticket_type
 											?.name ||
 										'General Admission'
 									}}
-								</span>
+								</p>
 							</div>
 
-							<div class="flex items-center justify-between gap-3">
-								<span class="text-sm text-gray-500">
-									Source
-								</span>
-
+							<div class="rounded-xl bg-gray-50 px-3.5 py-3">
+								<p class="text-[10px] font-bold uppercase tracking-wide text-gray-400">Source</p>
 								<span
-									class="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700">
+									class="mt-1.5 inline-flex rounded-full bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700">
 									Organizer
 								</span>
 							</div>
 
-							<div class="flex items-center justify-between gap-3">
-								<span class="text-sm text-gray-500">
-									Status
-								</span>
-
+							<div class="rounded-xl bg-gray-50 px-3.5 py-3">
+								<p class="text-[10px] font-bold uppercase tracking-wide text-gray-400">Status</p>
 								<span
-									class="rounded-full border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-600">
+									class="mt-1.5 inline-flex rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-600">
 									Registered
 								</span>
 							</div>
 
-							<div class="flex items-center justify-between gap-3">
-								<span class="text-sm text-gray-500">
-									Payment
-								</span>
-
-								<span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="paymentClass(
+							<div class="col-span-2 rounded-xl bg-gray-50 px-3.5 py-3">
+								<p class="text-[10px] font-bold uppercase tracking-wide text-gray-400">Payment</p>
+								<span class="mt-1.5 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold" :class="paymentClass(
 									registeredTicket.payment_status,
 								)
 									">
@@ -761,6 +738,8 @@ interface Attendee {
 	| null
 
 	ticket_id: string
+
+	qr_token: string | null
 
 	attendee_category:
 	| 'invited'
@@ -887,6 +866,14 @@ const selectedEventId =
 		() => null,
 	)
 
+const emailVerificationSendUrl = computed(
+	() => `${config.public.apiBaseURL}/organizer/events/${selectedEventId.value}/attendees/email-verification/send`,
+)
+
+const emailVerificationVerifyUrl = computed(
+	() => `${config.public.apiBaseURL}/organizer/events/${selectedEventId.value}/attendees/email-verification/verify`,
+)
+
 const ticketingSummary =
 	useState<AttendeeSummary>(
 		'ticketingAttendeeSummary',
@@ -964,8 +951,8 @@ const registeredTicket =
 const registeredTicketQrDataUrl = ref('')
 const isGeneratingTicketQr = ref(false)
 const isEmailingTicket = ref(false)
-const processingApprovalId = ref<number | null>(null)
-const pendingApprovalCount = computed(() => attendees.value.filter(attendee => attendee.status === 'pending_approval').length)
+const emailingAttendeeId = ref<number | null>(null)
+const emailedAttendeeIds = ref<Set<number>>(new Set())
 
 const filters: {
 	label: string
@@ -978,10 +965,6 @@ const filters: {
 	{
 		label: 'Registered',
 		value: 'registered',
-	},
-	{
-		label: 'Needs approval',
-		value: 'pending_approval',
 	},
 		{
 			label: 'Checked-in',
@@ -1019,6 +1002,8 @@ function emptyRegisterForm() {
 
 		attendeeEmail: '',
 
+		emailVerificationToken: '',
+
 		ticketTypeId:
 			null as number | null,
 
@@ -1034,6 +1019,10 @@ const registerForm =
 	reactive(
 		emptyRegisterForm(),
 	)
+
+const registerEmailUnverified = computed(
+	() => Boolean(registerForm.attendeeEmail.trim()) && !registerForm.emailVerificationToken,
+)
 
 const selectedTicketType =
 	computed<TicketType | null>(
@@ -1279,31 +1268,32 @@ async function loadAttendees() {
 	}
 }
 
-async function reviewRegistration(attendee: Attendee, action: 'approve' | 'reject') {
-	if (!token.value || !selectedEventId.value || processingApprovalId.value !== null) return
+function downloadAttendeeTicket(attendee: Attendee) {
+	if (!attendee.qr_token) return
 
-	processingApprovalId.value = attendee.id
+	window.open(
+		`${config.public.apiBaseURL}/tickets/${encodeURIComponent(attendee.qr_token)}/download`,
+		'_blank',
+	)
+}
+
+async function emailAttendeeTicket(attendee: Attendee) {
+	if (!attendee.qr_token || !attendee.email || emailingAttendeeId.value !== null) return
+
+	emailingAttendeeId.value = attendee.id
 	errorMessage.value = ''
-	successMessage.value = ''
 
 	try {
-		const response = await $fetch<{ message?: string }>(
-			`${config.public.apiBaseURL}/organizer/events/${selectedEventId.value}/attendees/${attendee.id}/${action}`,
-			{
-				method: 'POST',
-				headers: { Accept: 'application/json', Authorization: `Bearer ${token.value}` },
-			},
+		await $fetch(
+			`${config.public.apiBaseURL}/tickets/${encodeURIComponent(attendee.qr_token)}/email`,
+			{ method: 'POST', body: { email: attendee.email } },
 		)
-
-		successMessage.value = response.message || (action === 'approve' ? 'Registration approved.' : 'Registration rejected.')
-		await Promise.all([
-			loadAttendees(),
-			refreshTopSummary(),
-		])
+		emailedAttendeeIds.value.add(attendee.id)
+		successMessage.value = `Ticket sent to ${attendee.email}.`
 	} catch (error: unknown) {
-		errorMessage.value = getApiErrorMessage(error, `Unable to ${action} this registration.`)
+		errorMessage.value = getApiErrorMessage(error, 'Unable to email this ticket.')
 	} finally {
-		processingApprovalId.value = null
+		emailingAttendeeId.value = null
 	}
 }
 
@@ -1473,10 +1463,22 @@ async function submitRegisterAttendee() {
 		return
 	}
 
+	if (
+		registerEmailUnverified.value
+	) {
+		registerError.value =
+			'Please verify the attendee email address before registering.'
+
+		return
+	}
+
 	isRegistering.value =
 		true
 
 	registerError.value =
+		''
+
+	errorMessage.value =
 		''
 
 	try {
@@ -1501,6 +1503,11 @@ async function submitRegisterAttendee() {
 						attendee_email:
 							registerForm.attendeeEmail.trim() ||
 							null,
+
+						email_verification_token:
+							registerForm.attendeeEmail.trim()
+								? registerForm.emailVerificationToken
+								: null,
 
 						event_ticket_type_id:
 							registerForm.ticketTypeId,
@@ -1602,6 +1609,7 @@ async function emailRegisteredTicket() {
 	}
 
 	isEmailingTicket.value = true
+	errorMessage.value = ''
 
 	try {
 		await $fetch(

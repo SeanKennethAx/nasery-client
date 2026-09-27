@@ -1,9 +1,9 @@
 <template>
 	<div>
-		<FormsLabel text="Email Address" required />
+		<FormsLabel text="Email Address" :required="!optional" :hint="optional ? '(optional)' : ''" />
 
 		<div class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
-			<FormsTextField v-model="email" type="email" placeholder="you@example.com" size="lg" required
+			<FormsTextField v-model="email" type="email" placeholder="you@example.com" size="lg" :required="!optional"
 				:disabled="verified">
 				<template #icon>
 					<svg viewBox="0 0 20 20" aria-hidden="true"
@@ -48,13 +48,29 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ modelValue: string; verificationToken: string }>()
+const props = withDefaults(defineProps<{
+	modelValue: string
+	verificationToken: string
+	sendUrl?: string
+	verifyUrl?: string
+	authToken?: string | null
+	optional?: boolean
+}>(), {
+	sendUrl: '',
+	verifyUrl: '',
+	authToken: null,
+	optional: false,
+})
 const emit = defineEmits<{
 	'update:modelValue': [value: string]
 	'update:verificationToken': [value: string]
 }>()
 
 const config = useRuntimeConfig()
+
+const resolvedSendUrl = computed(() => props.sendUrl || `${config.public.apiBaseURL}/auth/email-verification/send`)
+const resolvedVerifyUrl = computed(() => props.verifyUrl || `${config.public.apiBaseURL}/auth/email-verification/verify`)
+const authHeaders = computed(() => props.authToken ? { Authorization: `Bearer ${props.authToken}` } : {})
 const code = ref('')
 const codeSent = ref(false)
 const sending = ref(false)
@@ -96,8 +112,8 @@ async function sendCode() {
 	message.value = ''
 	error.value = false
 	try {
-		const response = await $fetch<{ message: string; data: { resend_in: number } }>(`${config.public.apiBaseURL}/auth/email-verification/send`, {
-			method: 'POST', body: { email: normalizedEmail.value },
+		const response = await $fetch<{ message: string; data: { resend_in: number } }>(resolvedSendUrl.value, {
+			method: 'POST', body: { email: normalizedEmail.value }, headers: authHeaders.value,
 		})
 		codeSent.value = true
 		message.value = response.message
@@ -115,8 +131,8 @@ async function verifyCode() {
 	message.value = ''
 	error.value = false
 	try {
-		const response = await $fetch<{ message: string; data: { verification_token: string } }>(`${config.public.apiBaseURL}/auth/email-verification/verify`, {
-			method: 'POST', body: { email: normalizedEmail.value, code: code.value },
+		const response = await $fetch<{ message: string; data: { verification_token: string } }>(resolvedVerifyUrl.value, {
+			method: 'POST', body: { email: normalizedEmail.value, code: code.value }, headers: authHeaders.value,
 		})
 		emit('update:verificationToken', response.data.verification_token)
 		message.value = response.message
